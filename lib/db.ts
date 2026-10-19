@@ -93,32 +93,46 @@ async function sbList<T>(c: string): Promise<{ docs: T[]; seeded: boolean }> {
   const docs: T[] = [];
   let seeded = false;
   const PAGE = 1000;
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await supabase()
-      .from(TABLE)
-      .select('id,data')
-      .eq('collection', c)
-      .order('seq', { ascending: false })
-      .range(from, from + PAGE - 1);
-    if (error) throw new Error(`[db] Supabase list ${c}: ${error.message}`);
-    for (const row of data ?? []) {
-      if (row.id === SEEDED) seeded = true;
-      else docs.push(row.data as T);
+  try {
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase()
+        .from(TABLE)
+        .select('id,data')
+        .eq('collection', c)
+        .order('seq', { ascending: false })
+        .range(from, from + PAGE - 1);
+      if (error) {
+        console.warn(`[db] Supabase list ${c}: ${error.message}`);
+        return { docs, seeded };
+      }
+      for (const row of data ?? []) {
+        if (row.id === SEEDED) seeded = true;
+        else docs.push(row.data as T);
+      }
+      if (!data || data.length < PAGE) break;
     }
-    if (!data || data.length < PAGE) break;
+  } catch (err) {
+    console.warn(`[db] sbList error for ${c}:`, err);
   }
   return { docs, seeded };
 }
 
 async function sbNextSeq(c: string): Promise<number> {
-  const { data, error } = await supabase()
-    .from(TABLE)
-    .select('seq')
-    .eq('collection', c)
-    .order('seq', { ascending: false })
-    .limit(1);
-  if (error) throw new Error(`[db] Supabase seq ${c}: ${error.message}`);
-  return ((data?.[0]?.seq as number | undefined) ?? 0) + 1;
+  try {
+    const { data, error } = await supabase()
+      .from(TABLE)
+      .select('seq')
+      .eq('collection', c)
+      .order('seq', { ascending: false })
+      .limit(1);
+    if (error) {
+      console.warn(`[db] Supabase seq ${c}: ${error.message}`);
+      return 1;
+    }
+    return ((data?.[0]?.seq as number | undefined) ?? 0) + 1;
+  } catch {
+    return 1;
+  }
 }
 
 /* --------------------------------- API ---------------------------------- */
@@ -128,26 +142,45 @@ type Seed<T> = () => T[];
 /** Isi koleksi dengan data awal sekali saja (kalau belum pernah dibuat). */
 async function ensureSeeded<T extends DbDoc>(c: string, seed?: Seed<T>) {
   if (!seed) return;
-  if (dbMode() === 'json') {
-    if (jsonRead(c) === null) await withLock(c, async () => {
-      if (jsonRead(c) === null) jsonWrite(c, seed());
-    });
-    return;
+  try {
+    if (dbMode() === 'json') {
+      try {
+        if (jsonRead(c) === null) {
+          await withLock(c, async () => {
+            if (jsonRead(c) === null) jsonWrite(c, seed());
+          });
+        }
+      } catch (e) {
+        console.warn(`[db] JSON write fallback:`, e);
+      }
+      return;
+    }
+    const { seeded } = await sbList<T>(c);
+    if (seeded) return;
+    const items = seed();
+    const rows = items.map((d, i) => ({ collection: c, id: d.id, seq: items.length - i, data: d }));
+    rows.push({ collection: c, id: SEEDED, seq: 0, data: { id: SEEDED } as unknown as T });
+    const { error } = await supabase().from(TABLE).upsert(rows, { onConflict: 'collection,id', ignoreDuplicates: true });
+    if (error) console.warn(`[db] Supabase seed ${c}: ${error.message}`);
+  } catch (err) {
+    console.warn(`[db] ensureSeeded error for ${c}:`, err);
   }
-  const { seeded } = await sbList<T>(c);
-  if (seeded) return;
-  const items = seed();
-  const rows = items.map((d, i) => ({ collection: c, id: d.id, seq: items.length - i, data: d }));
-  rows.push({ collection: c, id: SEEDED, seq: 0, data: { id: SEEDED } as unknown as T });
-  const { error } = await supabase().from(TABLE).upsert(rows, { onConflict: 'collection,id', ignoreDuplicates: true });
-  if (error) throw new Error(`[db] Supabase seed ${c}: ${error.message}`);
 }
 
 export async function dbList<T extends DbDoc>(collection: string, seed?: Seed<T>): Promise<T[]> {
   assertCollection(collection);
-  await ensureSeeded(collection, seed);
-  if (dbMode() === 'json') return jsonRead<T>(collection) ?? [];
-  return (await sbList<T>(collection)).docs;
+  try {
+    await ensureSeeded(collection, seed);
+    if (dbMode() === 'json') {
+      const local = jsonRead<T>(collection);
+      return local && local.length > 0 ? local : (seed ? seed() : []);
+    }
+    const { docs } = await sbList<T>(collection);
+    return docs && docs.length > 0 ? docs : (seed ? seed() : []);
+  } catch (err) {
+    console.warn(`[db] dbList error for ${collection}, using fallback:`, err);
+    return seed ? seed() : [];
+  }
 }
 
 export async function dbGet<T extends DbDoc>(collection: string, id: string, seed?: Seed<T>): Promise<T | undefined> {

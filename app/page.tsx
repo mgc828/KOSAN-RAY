@@ -12,11 +12,26 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const kosts = await getPublicKosts();
+  let kosts = [];
+  try {
+    kosts = await getPublicKosts();
+  } catch (err) {
+    console.error('getPublicKosts error, loading fallback:', err);
+    const { INITIAL_KOSTS } = await import('@/lib/mock-data');
+    kosts = INITIAL_KOSTS;
+  }
+
   const site = baseUrl();
+  let schemaGraph: unknown[] = [];
+  try {
+    schemaGraph = [...organizationLd(site), faqLd(SITE_FAQS), itemListLd(site, 'Kost pilihan di Jakarta', kosts)];
+  } catch {
+    schemaGraph = [];
+  }
+
   return (
     <>
-      <JsonLd graph={[...organizationLd(site), faqLd(SITE_FAQS), itemListLd(site, 'Kost pilihan di Jakarta', kosts)]} />
+      {schemaGraph.length > 0 && <JsonLd graph={schemaGraph} />}
       <HomeClient kosts={kosts} />
     </>
   );

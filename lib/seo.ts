@@ -22,7 +22,10 @@ export function jsonLdString(data: unknown): string {
 }
 
 export function kostPath(k: Pick<Kost, 'kota' | 'area' | 'slug'>): string {
-  return `/kost/${(k.kota || 'jakarta').toLowerCase()}/${k.area.toLowerCase()}/${k.slug}`;
+  const city = String(k?.kota || 'jakarta').toLowerCase();
+  const area = String(k?.area || 'jakarta').toLowerCase();
+  const slug = String(k?.slug || '');
+  return `/kost/${city}/${area}/${slug}`;
 }
 
 export function breadcrumbLd(site: string, items: { name: string; path: string }[]) {
