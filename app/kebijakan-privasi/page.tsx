@@ -2,8 +2,8 @@ import React from 'react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Kebijakan Privasi - KostHunt Surabaya',
-  description: 'Kebijakan privasi data pengguna dan keamanan nomor kontak di platform KostHunt Surabaya.',
+  title: 'Kebijakan Privasi - kost-kostan',
+  description: 'Kebijakan privasi data pengguna dan keamanan nomor kontak di platform kost-kostan.',
 };
 
 export default function KebijakanPrivasiPage() {
@@ -32,7 +32,7 @@ export default function KebijakanPrivasiPage() {
 
         <h2 className="text-base font-bold text-neutral-900">4. Hubungi Kami</h2>
         <p>
-          Jika Anda memiliki pertanyaan seputar kebijakan privasi atau permohonan penghapusan data akun, silakan hubungi kami melalui email: <span className="font-semibold text-emerald-700">support@kosthunt.id</span>.
+          Jika Anda memiliki pertanyaan seputar kebijakan privasi atau permohonan penghapusan data akun, silakan hubungi kami melalui email: <span className="font-semibold text-emerald-700">support@kost-kostan.id</span>.
         </p>
       </div>
     </div>

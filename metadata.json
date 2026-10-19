@@ -1,6 +1,6 @@
 {
-  "name": "KostHunt Surabaya - Akses Kost Rp10.000 / 30 Hari",
-  "description": "Platform pencarian kost Surabaya dengan akses nomor WhatsApp pemilik dan media eksklusif Rp10.000 per 30 hari.",
+  "name": "kost-kostan - Akses Kost Rp15.000 / 30 Hari",
+  "description": "Platform pencarian kost Jakarta dengan akses nomor WhatsApp pemilik dan media eksklusif Rp15.000 per 30 hari.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -1,63 +1,37 @@
 import { MetadataRoute } from 'next';
-import { INITIAL_KOSTS } from '@/lib/mock-data';
+import { getAllKosts } from '@/lib/data-store';
+import { baseUrl } from '@/lib/config';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.APP_URL || 'https://kosthunt.id';
+// Dibuat saat diminta (bukan saat build) supaya kost yang baru ditambahkan langsung masuk sitemap.
+export const dynamic = 'force-dynamic';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const site = baseUrl();
   const now = new Date();
+  const kosts = await getAllKosts();
 
-  // Static routes
   const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}`,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/kost/jakarta`,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/tentang`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/kebijakan-privasi`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/syarat-ketentuan`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/kontak`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.4,
-    },
+    { url: site, lastModified: now, changeFrequency: 'daily', priority: 1 },
+    { url: `${site}/cari-kost`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${site}/maps`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    { url: `${site}/kost/jakarta`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${site}/tentang`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${site}/kontak`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${site}/kebijakan-privasi`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${site}/syarat-ketentuan`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
-  // Dynamic area routes
-  const areas = Array.from(new Set(INITIAL_KOSTS.map(k => `${k.kota.toLowerCase()}/${k.area.toLowerCase()}`)));
-  const areaRoutes: MetadataRoute.Sitemap = areas.map(path => ({
-    url: `${baseUrl}/kost/${path}`,
+  const areas = Array.from(new Set(kosts.map((k) => `${k.kota.toLowerCase()}/${k.area.toLowerCase()}`)));
+  const areaRoutes: MetadataRoute.Sitemap = areas.map((path) => ({
+    url: `${site}/kost/${path}`,
     lastModified: now,
     changeFrequency: 'daily',
     priority: 0.8,
   }));
 
-  // Dynamic kost routes (Hanya kost yang tersedia/aktif)
-  const kostRoutes: MetadataRoute.Sitemap = INITIAL_KOSTS.map(kost => ({
-    url: `${baseUrl}/kost/${kost.kota.toLowerCase()}/${kost.area.toLowerCase()}/${kost.slug}`,
-    lastModified: new Date(kost.updated_at),
+  const kostRoutes: MetadataRoute.Sitemap = kosts.map((k) => ({
+    url: `${site}/kost/${k.kota.toLowerCase()}/${k.area.toLowerCase()}/${k.slug}`,
+    lastModified: new Date(k.updated_at),
     changeFrequency: 'weekly',
     priority: 0.7,
   }));

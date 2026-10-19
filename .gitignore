@@ -5,3 +5,10 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# data lokal (akun, transaksi, dll.) jangan ikut ter-commit
+/data/*.json
+logs/
+.element-inspect.json
+tsconfig.tsbuildinfo
+.vercel/

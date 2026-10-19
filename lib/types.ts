@@ -18,10 +18,17 @@ export interface Kost {
   slug: string;
   nama: string;
   alamat: string;
-  area: string;
+  alamat_jalan?: string;
+  kelurahan?: string;
+  kecamatan?: string;
   kota: string;
+  provinsi?: string;
+  kodepos?: string;
+  area: string;
   harga: number; // Harga per bulan (IDR)
   tipe: KostType;
+  latitude?: number;
+  longitude?: number;
   fasilitas: string[];
   deskripsi: string;
   peraturan: string[];
@@ -31,6 +38,9 @@ export interface Kost {
   updated_at: string;
   media?: KostMedia[];
   
+  /** Ringkasan ulasan (diisi server untuk daftar publik). */
+  rating?: { avg: number; count: number };
+
   // Statistik locked untuk preview
   locked_media_summary?: {
     locked_photos_count: number;

@@ -1,10 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { INITIAL_KOSTS } from '@/lib/mock-data';
+import { getPublicKosts } from '@/lib/public-kosts';
 import KostCard from '@/components/KostCard';
 import { MapPin, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
+import { baseUrl } from '@/lib/config';
+import { breadcrumbLd, faqLd, itemListLd, listingFaqs } from '@/lib/seo';
+import JsonLd, { FaqSection } from '@/components/JsonLd';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -15,8 +20,9 @@ export async function generateMetadata({
   const cityName = kota.charAt(0).toUpperCase() + kota.slice(1);
 
   return {
-    title: `Daftar Kost di ${cityName} - Info & Kontak Pemilik Rp10.000 / 30 Hari`,
+    title: `Daftar Kost di ${cityName} - Info & Kontak Pemilik Rp15.000 / 30 Hari`,
     description: `Temukan pilihan kost putri, putra, dan campur di ${cityName}. Preview foto gratis dan akses nomor WhatsApp pemilik langsung.`,
+    alternates: { canonical: `/kost/${kota.toLowerCase()}` },
   };
 }
 
@@ -30,10 +36,23 @@ export default async function KotaKostPage({
     notFound();
   }
 
-  const kostList = INITIAL_KOSTS.filter(k => k.kota.toLowerCase() === kota.toLowerCase());
+  const kostList = (await getPublicKosts()).filter(k => k.kota.toLowerCase() === kota.toLowerCase());
   const areas = Array.from(new Set(kostList.map(k => k.area)));
 
+  const cityLabel = kota.charAt(0).toUpperCase() + kota.slice(1);
+  const site = baseUrl();
+  const faqs = listingFaqs(cityLabel, kostList);
+
   return (
+    <>
+      <JsonLd graph={[
+          breadcrumbLd(site, [
+            { name: 'Beranda', path: '/' },
+            { name: `Kost ${cityLabel}`, path: `/kost/${kota.toLowerCase()}` },
+          ]),
+          itemListLd(site, `Kost di ${cityLabel}`, kostList),
+          faqLd(faqs),
+        ]} />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-neutral-500">
@@ -59,7 +78,7 @@ export default async function KotaKostPage({
               href={`/kost/${kota}/${area.toLowerCase()}`}
               className="inline-flex items-center gap-1 bg-white border border-neutral-200 hover:border-emerald-600 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-700 hover:text-emerald-700 transition-colors shadow-2xs"
             >
-              <MapPin className="w-3 h-3 text-neutral-400" />
+              <MapPin className="w-3 h-3 text-neutral-500" />
               <span>Kost {area}</span>
             </Link>
           ))}
@@ -67,11 +86,13 @@ export default async function KotaKostPage({
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-1.5 pt-2 pb-4">
         {kostList.map(kost => (
           <KostCard key={kost.id} kost={kost} />
         ))}
       </div>
     </div>
+      <FaqSection title={`Pertanyaan seputar kost di ${cityLabel}`} faqs={faqs} />
+    </>
   );
 }

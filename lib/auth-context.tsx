@@ -1,7 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase, isSupabaseConfigured } from './supabase/client';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export interface UserSubscription {
   status: 'active' | 'expired' | 'none';
@@ -9,161 +8,165 @@ export interface UserSubscription {
   daysRemaining: number;
 }
 
-interface AuthContextType {
-  user: { id: string; email: string } | null;
-  subscription: UserSubscription;
-  isLoading: boolean;
-  login: (email: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => Promise<void>;
-  activateSubscription: (days?: number) => void;
-  resetSubscription: () => void;
+export interface AuthUser {
+  id: string;
+  email: string;
+  fullName?: string;
 }
 
+type Result = { success: boolean; error?: string };
+
+interface AuthContextType {
+  user: AuthUser | null;
+  subscription: UserSubscription;
+  /** true setelah status login dari server selesai dimuat (supaya tampilan tidak berkedip). */
+  ready: boolean;
+  isLoading: boolean;
+  settings: { remindersOff: boolean };
+  unreadNotifications: number;
+  login: (email: string, password?: string) => Promise<Result>;
+  register: (email: string, password?: string, fullName?: string) => Promise<Result>;
+  loginWithGoogle: (credential: string) => Promise<Result>;
+  logout: () => Promise<void>;
+  /** Muat ulang status login & langganan dari server (mis. setelah membayar). */
+  refresh: () => Promise<void>;
+  setRemindersOff: (off: boolean) => Promise<boolean>;
+}
+
+const NONE: UserSubscription = { status: 'none', expiresAt: null, daysRemaining: 0 };
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+async function postAuth(body: Record<string, unknown>): Promise<{ ok: boolean; data: Record<string, unknown> }> {
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(body),
+    });
+    return { ok: res.ok, data: await res.json().catch(() => ({})) };
+  } catch {
+    return { ok: false, data: { error: 'Tidak bisa terhubung ke server. Periksa koneksi internet Anda.' } };
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<{ id: string; email: string } | null>(() => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const stored = localStorage.getItem('kosthunt_user');
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [subscription, setSubscription] = useState<UserSubscription>(() => {
-    if (typeof window === 'undefined') {
-      return { status: 'none', expiresAt: null, daysRemaining: 0 };
-    }
-    try {
-      const stored = localStorage.getItem('kosthunt_sub');
-      if (stored) {
-        const subData = JSON.parse(stored);
-        if (subData.expiresAt) {
-          const expiresDate = new Date(subData.expiresAt).getTime();
-          const now = Date.now();
-          if (now < expiresDate) {
-            const diffDays = Math.ceil((expiresDate - now) / (1000 * 60 * 60 * 24));
-            return {
-              status: 'active',
-              expiresAt: subData.expiresAt,
-              daysRemaining: diffDays,
-            };
-          } else {
-            return {
-              status: 'expired',
-              expiresAt: subData.expiresAt,
-              daysRemaining: 0,
-            };
-          }
-        }
-      }
-    } catch {
-      // ignore
-    }
-    return { status: 'none', expiresAt: null, daysRemaining: 0 };
-  });
-
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [subscription, setSubscription] = useState<UserSubscription>(NONE);
+  const [settings, setSettings] = useState({ remindersOff: false });
+  const [unreadNotifications, setUnread] = useState(0);
+  const [ready, setReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sync with Supabase session if configured
-  useEffect(() => {
-
-    // Check if Supabase has an active session
-    if (isSupabaseConfigured) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUser({ id: session.user.id, email: session.user.email || '' });
-        }
-      });
-
-      const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) {
-          setUser({ id: session.user.id, email: session.user.email || '' });
-        } else {
-          // Keep local if not supabase
-        }
-      });
-
-      return () => {
-        authSub.unsubscribe();
-      };
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
+      if (res.ok) {
+        const d = await res.json();
+        setUser(d.user ?? null);
+        setSubscription(d.subscription ?? NONE);
+        setSettings(d.settings ?? { remindersOff: false });
+        setUnread(d.unreadNotifications ?? 0);
+      } else if (res.status === 401) {
+        setUser(null);
+        setSubscription(NONE);
+        setUnread(0);
+      }
+    } catch {
+      /* offline: biarkan status terakhir */
+    } finally {
+      setReady(true);
     }
   }, []);
 
-  const login = async (email: string) => {
+  // Muat status dari server saat dibuka, dan setiap tab kembali aktif (mis. setelah bayar di aplikasi lain).
+  useEffect(() => {
+    // Sisa data login versi lama (hanya disimpan di browser) tidak dipakai lagi.
+    try {
+      localStorage.removeItem('kosthunt_user');
+      localStorage.removeItem('kosthunt_sub');
+    } catch {
+      /* diabaikan */
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refresh();
+    const onVisible = () => document.visibilityState === 'visible' && refresh();
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [refresh]);
+
+  const afterAuth = async (r: { ok: boolean; data: Record<string, unknown> }, fallback: string): Promise<Result> => {
+    if (r.ok && r.data.success) {
+      await refresh();
+      return { success: true };
+    }
+    return { success: false, error: (r.data.error as string) || fallback };
+  };
+
+  const login = async (email: string, password = '') => {
     setIsLoading(true);
     try {
-      if (isSupabaseConfigured) {
-        const { error } = await supabase.auth.signInWithOtp({ email });
-        if (error) return { success: false, error: error.message };
-      }
-      
-      const dummyUser = { id: `usr-${Date.now()}`, email };
-      setUser(dummyUser);
-      localStorage.setItem('kosthunt_user', JSON.stringify(dummyUser));
-      return { success: true };
-    } catch (e: unknown) {
-      return { success: false, error: (e as Error).message || 'Gagal login' };
+      return await afterAuth(await postAuth({ action: 'login', email, password }), 'Email atau kata sandi salah');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (email: string) => {
-    return login(email);
+  const register = async (email: string, password = '', fullName?: string) => {
+    setIsLoading(true);
+    try {
+      return await afterAuth(await postAuth({ action: 'register', email, password, fullName }), 'Gagal mendaftar');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async (credential: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ credential }),
+      });
+      return await afterAuth({ ok: res.ok, data: await res.json().catch(() => ({})) }, 'Login Google gagal');
+    } catch {
+      return { success: false, error: 'Terjadi gangguan jaringan saat login Google' };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = async () => {
-    if (isSupabaseConfigured) {
-      await supabase.auth.signOut();
-    }
+    await postAuth({ action: 'logout' });
     setUser(null);
-    localStorage.removeItem('kosthunt_user');
+    setSubscription(NONE);
+    setUnread(0);
+    try {
+      sessionStorage.clear();
+    } catch {
+      /* diabaikan */
+    }
+    window.location.href = '/login';
   };
 
-  const activateSubscription = (days = 30) => {
-    const now = new Date();
-    let newExpires: Date;
-
-    // Perpanjangan: Jika masih aktif, tambahkan ke expires_at lama. Jika baru/kadaluarsa, dari now.
-    if (subscription.status === 'active' && subscription.expiresAt) {
-      const oldExpires = new Date(subscription.expiresAt);
-      newExpires = new Date(oldExpires.getTime() + days * 24 * 60 * 60 * 1000);
-    } else {
-      newExpires = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+  const setRemindersOff = async (off: boolean) => {
+    try {
+      const res = await fetch('/api/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ remindersOff: off }),
+      });
+      if (res.ok) {
+        setSettings({ remindersOff: off });
+        return true;
+      }
+    } catch {
+      /* gagal: kembalikan false */
     }
-
-    const isoStr = newExpires.toISOString();
-    const diffDays = Math.ceil((newExpires.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    
-    const newSub: UserSubscription = {
-      status: 'active',
-      expiresAt: isoStr,
-      daysRemaining: diffDays,
-    };
-
-    setSubscription(newSub);
-    localStorage.setItem('kosthunt_sub', JSON.stringify(newSub));
-
-    // Pastikan user dummy ada jika belum login
-    if (!user) {
-      const defaultUser = { id: `usr-demo-${Date.now()}`, email: 'pencari.kost@example.com' };
-      setUser(defaultUser);
-      localStorage.setItem('kosthunt_user', JSON.stringify(defaultUser));
-    }
-  };
-
-  const resetSubscription = () => {
-    const expiredSub: UserSubscription = {
-      status: 'none',
-      expiresAt: null,
-      daysRemaining: 0,
-    };
-    setSubscription(expiredSub);
-    localStorage.removeItem('kosthunt_sub');
+    return false;
   };
 
   return (
@@ -171,12 +174,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         subscription,
+        ready,
         isLoading,
+        settings,
+        unreadNotifications,
         login,
         register,
+        loginWithGoogle,
         logout,
-        activateSubscription,
-        resetSubscription,
+        refresh,
+        setRemindersOff,
       }}
     >
       {children}

@@ -1,0 +1,5 @@
+version: "3"
+agent:
+  authtoken: 3KiFjsILCSoBijsrO7wb4C7jEVX_VNxWY9kqx2Ep2W5j7APg
+  web_addr: 127.0.0.1:4045
+

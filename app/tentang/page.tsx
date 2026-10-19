@@ -4,8 +4,8 @@ import { ShieldCheck, QrCode, Home, CheckCircle2 } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Tentang KostHunt Jakarta - Validasi Kost Tanpa Calo',
-  description: 'Misi KostHunt Jakarta dalam mempermudah mahasiswa dan pekerja mencari tempat tinggal terverifikasi dengan akses WhatsApp pemilik langsung.',
+  title: 'Tentang kost-kostan - Validasi Kost Tanpa Calo',
+  description: 'Misi kost-kostan dalam mempermudah mahasiswa dan pekerja mencari tempat tinggal terverifikasi dengan akses WhatsApp pemilik langsung.',
 };
 
 export default function TentangPage() {
@@ -13,7 +13,7 @@ export default function TentangPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div className="space-y-3">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight">
-          Tentang KostHunt Jakarta
+          Tentang kost-kostan
         </h1>
         <p className="text-sm text-neutral-600 leading-relaxed">
           Platform kurasi kost pertama di Jakarta yang mengutamakan transparansi dan memutus perantara calo.
@@ -26,10 +26,10 @@ export default function TentangPage() {
           Banyak pencari kost di Jakarta—terutama mahasiswa baru BINUS, Trisakti, UNTAR, UI Salemba serta pekerja di kawasan Sudirman, SCBD, dan Kuningan—menghadapi kendala foto tidak sesuai realita, nomor kontak yang dipegang calo tidak bertanggung jawab, atau pungutan biaya survey yang tidak wajar.
         </p>
         <p>
-          KostHunt hadir dengan model sederhana: <strong>preview gratis 3 foto & 1 video untuk setiap kost</strong>, dan paket <strong>Rp10.000 untuk akses penuh 30 hari</strong> yang membuka seluruh foto beresolusi tinggi, video walkthrough 360°, dan nomor WhatsApp pemilik kost langsung.
+          kost-kostan hadir dengan model sederhana: <strong>preview gratis 3 foto & 1 video untuk setiap kost</strong>, dan paket <strong>Rp15.000 untuk akses penuh 30 hari</strong> yang membuka seluruh foto beresolusi tinggi, video walkthrough 360°, dan nomor WhatsApp pemilik kost langsung.
         </p>
 
-        <h2 className="text-lg font-bold text-neutral-900 pt-4">Kenapa Memilih KostHunt?</h2>
+        <h2 className="text-lg font-bold text-neutral-900 pt-4">Kenapa Memilih kost-kostan?</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
           <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-1.5">
             <h3 className="font-bold text-neutral-900 flex items-center gap-1.5">
@@ -43,7 +43,7 @@ export default function TentangPage() {
           <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-1.5">
             <h3 className="font-bold text-neutral-900 flex items-center gap-1.5">
               <QrCode className="w-4 h-4 text-amber-600" />
-              Harga Bersahabat Rp10.000
+              Harga Bersahabat Rp15.000
             </h3>
             <p className="text-xs text-neutral-600">
               Sekali bayar via QRIS tanpa langganan otomatis (non-recurring auto-debit). Anda tidak akan ditagih diam-diam.

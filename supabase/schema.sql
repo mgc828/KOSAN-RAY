@@ -1,6 +1,6 @@
 -- ==============================================================================
--- SCHEMA POSTGRESQL & ROW LEVEL SECURITY (RLS) UNTUK KOSTHUNT SURABAYA
--- Platform Pencarian Kost dengan Akses Berlangganan Rp10.000 / 30 Hari
+-- SCHEMA POSTGRESQL & ROW LEVEL SECURITY (RLS) UNTUK KOST-KOSTAN
+-- Platform Pencarian Kost dengan Akses Berlangganan Rp15.000 / 30 Hari
 -- ==============================================================================
 
 -- 1. Enable UUID Extension
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS public.payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     order_id TEXT UNIQUE NOT NULL,
-    amount INTEGER NOT NULL DEFAULT 10000, -- Rp10.000
+    amount INTEGER NOT NULL DEFAULT 15000, -- Rp15.000
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'settlement', 'expire', 'cancel')),
     payment_method TEXT NOT NULL DEFAULT 'qris' CHECK (payment_method IN ('qris', 'gopay', 'shopeepay', 'other')),
     paid_at TIMESTAMP WITH TIME ZONE,

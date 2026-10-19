@@ -24,6 +24,9 @@ export function sanitizeKostForPublic(kost: Kost): Kost {
     alamat: kost.alamat,
     area: kost.area,
     kota: kost.kota,
+    // Lokasi (peta) bersifat publik: alamat kost sudah tampil di halaman
+    latitude: kost.latitude,
+    longitude: kost.longitude,
     harga: kost.harga,
     tipe: kost.tipe,
     fasilitas: kost.fasilitas,

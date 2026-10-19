@@ -1,6 +1,7 @@
 import { Kost } from './types';
+import { JAKARTA_SAMPLE_KOSTS } from './mock-kosts-jakarta';
 
-export const INITIAL_KOSTS: Kost[] = [
+const BASE_KOSTS: Kost[] = [
   {
     id: 'kost-jkt-001',
     slug: 'kost-kuningan-executive-pedurenan-jakarta-selatan',
@@ -10,6 +11,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 2850000,
     tipe: 'campur',
+    latitude: -6.2215,
+    longitude: 106.829,
     fasilitas: ['AC Inverter', 'WiFi 100 Mbps', 'Kamar Mandi Dalam', 'Water Heater Ariston', 'Kasur Springbed Queen', 'Smart TV 32"', 'Kulkas Pribadi', 'Akses Card 24 Jam', 'Rooftop Lounge'],
     deskripsi: 'Kost eksklusif modern 7 menit jalan kaki ke Mega Kuningan, Lotte Shopping Avenue, dan Mall Ambasador. Lokasi emas bagi profesional perkantoran Sudirman-Kuningan. Bebas banjir dan keamanan 24 jam.',
     peraturan: ['Tidak boleh merokok di dalam kamar', 'Tamu menginap wajib konfirmasi pengelola', 'Jam tenang pukul 23:00 - 06:00', 'Hewan peliharaan tidak diizinkan'],
@@ -74,7 +77,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-001',
         tipe: 'foto_kamar',
         storage_key: 'kost-jkt-001/premium-lemari-detail.webp',
-        url: 'https://images.unsplash.com/photo-1558997519-83ea9252edf8?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
         urutan: 6,
         is_preview: false,
         alt_text: 'Lemari pakaian 3 pintu built-in dengan cermin full body',
@@ -130,6 +133,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 1750000,
     tipe: 'putri',
+    latitude: -6.2345,
+    longitude: 106.852,
     fasilitas: ['AC', 'WiFi Cepat', 'Kamar Mandi Dalam', 'Kasur Springbed', 'Meja Rias & Lemari', 'Dapur & Kulkas', 'Ruang Tamu', 'Penjaga 24 Jam', 'Dekat Stasiun Tebet'],
     deskripsi: 'Kost khusus putri di kawasan prestisius Tebet Barat. Akses sangat mudah ke Stasiun Tebet dan halte TransJakarta. Dikelilingi aneka kafe, minimarket, dan kuliner legendaris Tebet.',
     peraturan: ['Khusus putri mahasiswi/karyawati', 'Pria dilarang masuk area kamar (hanya di ruang tamu)', 'Akses gerbang kartu 24 jam', 'Dilarang merokok'],
@@ -143,7 +148,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-002',
         tipe: 'foto_gedung',
         storage_key: 'kost-jkt-002/gedung.webp',
-        url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80',
         urutan: 1,
         is_preview: true,
         alt_text: 'Fasad bangunan asri Kost Putri Tebet',
@@ -230,6 +235,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 2600000,
     tipe: 'campur',
+    latitude: -6.213,
+    longitude: 106.816,
     fasilitas: ['AC', 'WiFi 100 Mbps', 'Kamar Mandi Dalam', 'Water Heater', 'Kasur Springbed Queen', 'Meja Kerja & Kursi Ergonomis', 'Dapur Bersama', 'Parkir Motor & Mobil', 'Dekat MRT'],
     deskripsi: 'Pilihan utama karyawan SCBD & Sudirman. Cukup 5 menit jalan kaki ke Stasiun MRT Bendungan Hilir. Lingkungan tenang di pusat kota dengan akses instan ke Jl. Jendral Sudirman.',
     peraturan: ['Akses kunci digital 24 jam', 'Wajib menjaga kebersihan', 'Tamu menginap maksimal 2 malam dengan konfirmasi'],
@@ -243,7 +250,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-003',
         tipe: 'foto_gedung',
         storage_key: 'kost-jkt-003/gedung.webp',
-        url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80',
         urutan: 1,
         is_preview: true,
         alt_text: 'Tampak depan Kost Benhil Residence',
@@ -320,6 +327,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 1450000,
     tipe: 'putra',
+    latitude: -6.2008,
+    longitude: 106.7845,
     fasilitas: ['AC', 'WiFi 100 Mbps Dedicated', 'Kamar Mandi Dalam', 'Kasur Springbed', 'Meja Komputer Luas', 'Parkir Motor Luas', 'Bebas Jam Malam', 'Dekat Laundry Kiloan'],
     deskripsi: 'Kost favorit mahasiswa BINUS dan pekerja area Slipi-Palmerah. Internet kencang stabil untuk kuliah coding, gaming, dan tugas akhir. 2 menit jalan kaki ke Kampus Syahdan.',
     peraturan: ['Khusus putra mahasiswa/pekerja', 'Bebas jam malam dengan kunci gerbang masing-masing', 'Tertib dan menjaga kebersihan'],
@@ -333,7 +342,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-004',
         tipe: 'foto_gedung',
         storage_key: 'kost-jkt-004/gedung.webp',
-        url: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=1200&q=80',
         urutan: 1,
         is_preview: true,
         alt_text: 'Fasad bangunan kost Palmerah Binus',
@@ -410,6 +419,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 2100000,
     tipe: 'campur',
+    latitude: -6.1672,
+    longitude: 106.7895,
     fasilitas: ['AC', 'WiFi Cepat', 'Kamar Mandi Dalam', 'Water Heater', 'Kasur Springbed Queen', 'Smart TV', 'Kulkas', 'Housekeeping 1x/Minggu', 'Akses Card'],
     deskripsi: 'Hunian nyaman modern selangkah dari Universitas Trisakti dan UNTAR. Halte TransJakarta Grogol tepat di depan komplek. Dekat Mall Ciputra, Central Park, dan Rumah Sakit Sumber Waras.',
     peraturan: ['Akses gerbang kartu 24 jam', 'Dilarang membawa narkoba atau miras', 'Tamu menginap wajib lapor'],
@@ -423,7 +434,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-005',
         tipe: 'foto_gedung',
         storage_key: 'kost-jkt-005/gedung.webp',
-        url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=1200&q=80',
         urutan: 1,
         is_preview: true,
         alt_text: 'Tampak depan Kost Grogol Suite',
@@ -500,6 +511,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 1950000,
     tipe: 'putri',
+    latitude: -6.1955,
+    longitude: 106.851,
     fasilitas: ['AC', 'WiFi 50 Mbps', 'Kamar Mandi Dalam', 'Water Heater', 'Kasur Springbed', 'Dapur Bersama', 'Parkir Motor', 'CCTV 24 Jam', 'Dekat Halte Salemba'],
     deskripsi: 'Lokasi strategis bagi mahasiswi FK UI Salemba, staf RSCM, dan dokter residen. Lingkungan aman, tenang untuk istirahat malam setelah jaga shift di rumah sakit.',
     peraturan: ['Khusus putri mahasiswi/karyawati', 'Pria dilarang masuk kamar', 'Kunci gerbang masing-masing'],
@@ -513,7 +526,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-006',
         tipe: 'foto_gedung',
         storage_key: 'kost-jkt-006/gedung.webp',
-        url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
         urutan: 1,
         is_preview: true,
         alt_text: 'Tampak depan Kost Salemba Cendana',
@@ -590,6 +603,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 3200000,
     tipe: 'campur',
+    latitude: -6.2085,
+    longitude: 106.824,
     fasilitas: ['AC Daikin', 'WiFi Fiber 150 Mbps', 'Kamar Mandi Dalam', 'Water Heater', 'Kasur King Koil', 'Smart TV 43"', 'Balkon Pribadi', 'Gym Mini', 'Parkir Mobil & Motor'],
     deskripsi: 'Kost studio premium di jantung bisnis Jakarta. Hanya 4 menit jalan kaki ke Stasiun LRT Setiabudi dan Halte Busway Dukuh Atas. View gedung pencakar langit kota Jakarta.',
     peraturan: ['Akses biometric sidik jari & kartu 24 jam', 'Dilarang merokok di area tertutup', 'Hewan peliharaan tidak diizinkan'],
@@ -603,7 +618,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-007',
         tipe: 'foto_gedung',
         storage_key: 'kost-jkt-007/gedung.webp',
-        url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
         urutan: 1,
         is_preview: true,
         alt_text: 'Gedung modern 4 lantai Kost Setiabudi Skyline',
@@ -680,6 +695,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 1650000,
     tipe: 'campur',
+    latitude: -6.1755,
+    longitude: 106.782,
     fasilitas: ['AC', 'WiFi Cepat', 'Kamar Mandi Dalam', 'Kasur Springbed', 'Meja Kursi', 'Parkir Motor', 'Dapur Bersama', 'Banyak Kuliner Malam'],
     deskripsi: 'Lokasi kuliner terpadat di Jakarta Barat. 5 menit ke Mall Central Park, Neo Soho, dan Mall Taman Anggrek. Suasana aman, penjaga 24 jam, dan bebas banjir.',
     peraturan: ['Membawa KTP asli saat check-in', 'Tamu lawan jenis di ruang tamu', 'Pintu gerbang tertutup pukul 23:00 (diberi kunci cadangan)'],
@@ -693,7 +710,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-008',
         tipe: 'foto_gedung',
         storage_key: 'kost-jkt-008/gedung.webp',
-        url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=80',
         urutan: 1,
         is_preview: true,
         alt_text: 'Tampak depan Kost Tanjung Duren Asri',
@@ -770,6 +787,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 2200000,
     tipe: 'campur',
+    latitude: -6.155,
+    longitude: 106.901,
     fasilitas: ['AC', 'WiFi 100 Mbps', 'Kamar Mandi Dalam', 'Water Heater', 'Kasur Springbed Queen', 'Smart TV', 'Parkir Mobil & Motor', 'Dapur Bersama', 'Bebas Banjir'],
     deskripsi: 'Kost mewah di perumahan tenang Kelapa Gading. 5 menit ke Mall Kelapa Gading (MKG) dan Stasiun LRT Boulevard Utara. Komplek berportal dengan satpam 24 jam.',
     peraturan: ['Wajib menjaga ketenangan komplek', 'Tamu menginap wajib lapor satpam', 'Hewan peliharaan tidak diizinkan'],
@@ -783,7 +802,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-009',
         tipe: 'foto_gedung',
         storage_key: 'kost-jkt-009/gedung.webp',
-        url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=1200&q=80&crop=right',
         urutan: 1,
         is_preview: true,
         alt_text: 'Tampak depan Kost Kelapa Gading Boulevard',
@@ -860,6 +879,8 @@ export const INITIAL_KOSTS: Kost[] = [
     kota: 'Jakarta',
     harga: 2400000,
     tipe: 'campur',
+    latitude: -6.292,
+    longitude: 106.7975,
     fasilitas: ['AC', 'WiFi 100 Mbps', 'Kamar Mandi Dalam', 'Water Heater', 'Kasur Springbed Queen', 'Smart TV', 'Parkir Mobil & Motor Luas', 'Dapur Bersama', 'Dekat MRT'],
     deskripsi: 'Lokasi super strategis di Jakarta Selatan, hanya 3 menit jalan kaki ke Stasiun MRT Fatmawati dan Cilandak Town Square (Citos). Akses cepat tol TB Simatupang.',
     peraturan: ['Akses kartu digital 24 jam', 'Wajib menjaga ketertiban', 'Dilarang merokok di area tertutup'],
@@ -873,7 +894,7 @@ export const INITIAL_KOSTS: Kost[] = [
         kost_id: 'kost-jkt-010',
         tipe: 'foto_gedung',
         storage_key: 'kost-jkt-010/gedung.webp',
-        url: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80&crop=top',
         urutan: 1,
         is_preview: true,
         alt_text: 'Bangunan minimalis tropis Kost Cilandak Fatmawati',
@@ -942,3 +963,32 @@ export const INITIAL_KOSTS: Kost[] = [
     ],
   },
 ];
+
+export const INITIAL_KOSTS: Kost[] = [...BASE_KOSTS, ...JAKARTA_SAMPLE_KOSTS];
+
+export function getSavedKosts(): Kost[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('sekitar_custom_kosts');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse saved kosts:', e);
+    }
+  }
+  return INITIAL_KOSTS;
+}
+
+export function saveKostsToStorage(kosts: Kost[]) {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('sekitar_custom_kosts', JSON.stringify(kosts));
+    } catch (e) {
+      console.error('Failed to save kosts to localStorage:', e);
+    }
+  }
+}

@@ -1,9 +1,16 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { INITIAL_KOSTS } from '@/lib/mock-data';
+import { getKostBySlug } from '@/lib/data-store';
+import { getPublicKosts } from '@/lib/public-kosts';
+import { getReviews, summarize } from '@/lib/reviews';
 import { sanitizeKostForPublic } from '@/lib/security';
 import KostDetailClient from './KostDetailClient';
 import type { Metadata } from 'next';
+import { baseUrl } from '@/lib/config';
+import { breadcrumbLd, faqLd, kostFaqs, kostPath, lodgingLd } from '@/lib/seo';
+import JsonLd, { FaqSection } from '@/components/JsonLd';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -11,11 +18,11 @@ export async function generateMetadata({
   params: Promise<{ kota: string; area: string; slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const kost = INITIAL_KOSTS.find(k => k.slug === slug);
+  const kost = await getKostBySlug(slug);
 
   if (!kost) {
     return {
-      title: 'Kost Tidak Ditemukan - KostHunt',
+      title: 'Kost Tidak Ditemukan - kost-kostan',
     };
   }
 
@@ -24,14 +31,14 @@ export async function generateMetadata({
 
   return {
     title: `${kost.nama} di ${kost.area}, ${kost.kota} - Sewa Rp${kost.harga.toLocaleString('id-ID')}/bln`,
-    description: `${kost.deskripsi.slice(0, 150)}... Akses foto kamar lengkap, video 360, dan kontak WhatsApp pemilik langsung di KostHunt.`,
+    description: `${kost.deskripsi.slice(0, 150)}... Akses foto kamar lengkap, video 360, dan kontak WhatsApp pemilik langsung di kost-kostan.`,
     openGraph: {
       title: `${kost.nama} (${kost.area}, ${kost.kota})`,
-      description: `Kost ${kost.tipe} ${kost.kota}. Rp${kost.harga.toLocaleString('id-ID')}/bln. Buka nomor WhatsApp pemilik di KostHunt.`,
+      description: `Kost ${kost.tipe} ${kost.kota}. Rp${kost.harga.toLocaleString('id-ID')}/bln. Buka nomor WhatsApp pemilik di kost-kostan.`,
       images: [{ url: thumbUrl, width: 1200, height: 630, alt: kost.nama }],
     },
     alternates: {
-      canonical: `/kost/${kost.kota.toLowerCase()}/${kost.area.toLowerCase()}/${kost.slug}`,
+      canonical: `/kost/${(kost.kota || 'jakarta').toLowerCase()}/${kost.area.toLowerCase()}/${kost.slug}`,
     },
   };
 }
@@ -42,7 +49,7 @@ export default async function KostDetailPage({
   params: Promise<{ kota: string; area: string; slug: string }>;
 }) {
   const { slug } = await params;
-  const rawKost = INITIAL_KOSTS.find(k => k.slug === slug);
+  const rawKost = await getKostBySlug(slug);
 
   if (!rawKost) {
     notFound();
@@ -52,73 +59,42 @@ export default async function KostDetailPage({
   // Tidak ada URL media premium dan tidak ada owner_whatsapp di HTML awal atau initial data
   const initialPublicKost = sanitizeKostForPublic(rawKost);
 
-  // Schema JSON-LD untuk LodgingBusiness & BreadcrumbList dengan isAccessibleForFree: false pada paywalled parts
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'BreadcrumbList',
-        'itemListElement': [
-          {
-            '@type': 'ListItem',
-            'position': 1,
-            'name': 'Beranda',
-            'item': 'https://kosthunt.id',
-          },
-          {
-            '@type': 'ListItem',
-            'position': 2,
-            'name': `Kost ${rawKost.kota}`,
-            'item': `https://kosthunt.id/kost/${rawKost.kota.toLowerCase()}`,
-          },
-          {
-            '@type': 'ListItem',
-            'position': 3,
-            'name': rawKost.area,
-            'item': `https://kosthunt.id/kost/${rawKost.kota.toLowerCase()}/${rawKost.area.toLowerCase()}`,
-          },
-          {
-            '@type': 'ListItem',
-            'position': 4,
-            'name': rawKost.nama,
-            'item': `https://kosthunt.id/kost/${rawKost.kota.toLowerCase()}/${rawKost.area.toLowerCase()}/${rawKost.slug}`,
-          },
-        ],
-      },
-      {
-        '@type': 'LodgingBusiness',
-        'name': rawKost.nama,
-        'description': rawKost.deskripsi,
-        'address': {
-          '@type': 'PostalAddress',
-          'streetAddress': rawKost.alamat,
-          'addressLocality': rawKost.area,
-          'addressRegion': 'DKI Jakarta',
-          'addressCountry': 'ID',
-        },
-        'priceRange': `IDR ${rawKost.harga}`,
-        'amenityFeature': rawKost.fasilitas.map(f => ({
-          '@type': 'LocationFeatureSpecification',
-          'name': f,
-          'value': true,
-        })),
-        'hasPart': {
-          '@type': 'WebPageElement',
-          'isAccessibleForFree': false,
-          'cssSelector': '.premium-locked-section',
-          'description': 'Semua foto kamar resolusi tinggi, 2 video 360 walkthrough, dan nomor WhatsApp pemilik kost',
-        },
-      },
-    ],
-  };
+  // Kost serupa: area yang sama lebih dulu, lalu yang harganya paling dekat. Hanya data publik.
+  const similar = (await getPublicKosts())
+    .filter((k) => k.slug !== rawKost.slug)
+    .sort((a, b) => {
+      const areaA = a.area === rawKost.area ? 0 : 1;
+      const areaB = b.area === rawKost.area ? 0 : 1;
+      if (areaA !== areaB) return areaA - areaB;
+      return Math.abs(a.harga - rawKost.harga) - Math.abs(b.harga - rawKost.harga);
+    })
+    .slice(0, 4);
+
+  const ratingSummary = summarize(await getReviews(slug));
+
+  const site = baseUrl();
+  const kotaSlug = rawKost.kota.toLowerCase();
+  const faqs = kostFaqs(initialPublicKost);
+  const jsonLd = [
+    breadcrumbLd(site, [
+      { name: 'Beranda', path: '/' },
+      { name: `Kost ${rawKost.kota}`, path: `/kost/${kotaSlug}` },
+      { name: rawKost.area, path: `/kost/${kotaSlug}/${rawKost.area.toLowerCase()}` },
+      { name: rawKost.nama, path: kostPath(rawKost) },
+    ]),
+    lodgingLd(site, initialPublicKost, ratingSummary.count > 0 ? { avg: ratingSummary.avg, count: ratingSummary.count } : undefined),
+    faqLd(faqs),
+  ];
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd graph={jsonLd} />
+      <KostDetailClient
+        initialKost={{ ...initialPublicKost, rating: ratingSummary.count > 0 ? { avg: ratingSummary.avg, count: ratingSummary.count } : undefined }}
+        slug={slug}
+        similar={similar}
       />
-      <KostDetailClient initialKost={initialPublicKost} slug={slug} />
+      <FaqSection title={`Pertanyaan tentang ${rawKost.nama}`} faqs={faqs} />
     </>
   );
 }

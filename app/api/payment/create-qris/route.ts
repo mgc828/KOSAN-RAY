@@ -1,84 +1,109 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSessionUser, unauthorized } from '@/lib/api-auth';
+import { getTransactionsByUser, saveTransaction, getUser, saveUser } from '@/lib/payment-store';
+import { chargeQris, midtransConfigured } from '@/lib/midtrans';
+import { SUBSCRIPTION_PRICE } from '@/lib/config';
+import { rateLimit } from '@/lib/json-store';
+import { paymentSimulationAllowed } from '@/lib/payments';
 
+const DEMO_TTL_MS = 15 * 60 * 1000;
+
+/** Buat (atau pakai ulang) tagihan QRIS untuk pengguna yang sedang masuk. */
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json().catch(() => ({}));
-    const { userId, email } = body;
+  const me = await getSessionUser(req);
+  if (!me) return unauthorized('Masuk atau daftar dulu sebelum membayar.');
 
-    const orderId = `KH-10K-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-    const amount = 10000; // Rp10.000 flat (QRIS & E-Wallet only)
+  if (!midtransConfigured() && !paymentSimulationAllowed()) {
+    return NextResponse.json(
+      { error: 'Pembayaran belum tersedia. Hubungi kami lewat halaman Kontak.', code: 'payment_unavailable' },
+      { status: 503 }
+    );
+  }
+  if (!rateLimit(`qris:${me.id}`, 10, 60 * 60 * 1000)) {
+    return NextResponse.json({ error: 'Terlalu banyak percobaan. Coba lagi nanti.' }, { status: 429 });
+  }
 
-    // Jika server key Midtrans telah diisi, panggil Snap / Core API Midtrans Sandbox
-    const serverKey = process.env.MIDTRANS_SERVER_KEY;
-    const isMidtransConfigured = Boolean(serverKey && !serverKey.includes('your-key'));
+  const real = midtransConfigured();
+  const gateway = real ? 'midtrans' : 'demo';
+  const now = Date.now();
 
-    if (isMidtransConfigured) {
-      const authHeader = `Basic ${Buffer.from(`${serverKey}:`).toString('base64')}`;
-      
-      const midtransPayload = {
-        payment_type: 'qris',
-        transaction_details: {
-          order_id: orderId,
-          gross_amount: amount,
-        },
-        qris: {
-          acquirer: 'gopay',
-        },
-        customer_details: {
-          first_name: 'Pencari Kost',
-          email: email || 'user@kosthunt.id',
-        },
-        item_details: [
-          {
-            id: 'sub-kost-30d',
-            price: 10000,
-            quantity: 1,
-            name: 'Akses Penuh Kost 30 Hari',
-          },
-        ],
-      };
-
-      try {
-        const midtransRes = await fetch('https://api.sandbox.midtrans.com/v2/charge', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': authHeader,
-          },
-          body: JSON.stringify(midtransPayload),
-        });
-
-        const midtransData = await midtransRes.json();
-        if (midtransRes.ok && midtransData.actions) {
-          const qrAction = midtransData.actions.find((a: { name: string }) => a.name === 'generate-qr-code');
-          return NextResponse.json({
-            success: true,
-            orderId,
-            amount,
-            qrString: midtransData.qr_string || '',
-            qrImageUrl: qrAction ? qrAction.url : null,
-            expiryTime: midtransData.expiry_time,
-            isSandbox: true,
-          });
-        }
-      } catch {
-        // Fallback ke sandbox simulation jika sandbox midtrans tidak merespon
-      }
-    }
-
-    // Sandbox / Mock QRIS generator untuk validasi MVP langsung di iFrame
+  // Tagihan yang masih berlaku dipakai ulang, supaya tidak menumpuk tagihan menggantung.
+  const reusable = (await getTransactionsByUser(me.id)).find(
+    (t) => t.transaction_status === 'pending' && t.gateway === gateway && t.expires_at && new Date(t.expires_at).getTime() > now + 60_000 && t.qr_url
+  );
+  if (reusable) {
     return NextResponse.json({
       success: true,
-      orderId,
-      amount,
-      qrString: `00020101021226600016ID.CO.QRIS.WWW01189360001400000000000215${orderId}5204581253033605405100005802ID5917KOSTHUNT SURABAYA6008SURABAYA62070703A016304C4F2`,
-      qrImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=KOSTHUNT-QRIS-${orderId}`,
-      expiryTime: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-      isSandbox: true,
-      message: 'Mode Sandbox: Scan dengan GoPay, OVO, ShopeePay, DANA atau klik tombol simulasi bayar',
+      orderId: reusable.order_id,
+      amount: reusable.amount,
+      qrImageUrl: reusable.qr_url,
+      expiryTime: reusable.expires_at,
+      demo: !real,
+      isSandbox: !real || process.env.MIDTRANS_IS_PRODUCTION !== 'true',
     });
-  } catch {
-    return NextResponse.json({ error: 'Gagal membuat tagihan QRIS' }, { status: 500 });
   }
+
+  const orderId = `KK-15K-${now}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  const amount = SUBSCRIPTION_PRICE;
+
+  let qrUrl: string;
+  let expiresAt: string;
+  let midtransTransactionId: string | undefined;
+
+  if (real) {
+    try {
+      const charge = await chargeQris({ orderId, amount, email: me.email, name: me.fullName });
+      qrUrl = charge.qrUrl;
+      expiresAt = charge.expiresAt ?? new Date(now + DEMO_TTL_MS).toISOString();
+      midtransTransactionId = charge.transactionId;
+    } catch (e) {
+      console.error('[payment] Midtrans gagal membuat QRIS:', e);
+      return NextResponse.json({ error: 'Gagal membuat QRIS. Coba lagi sebentar lagi.' }, { status: 502 });
+    }
+  } else {
+    qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`DEMO-QRIS-${orderId}`)}`;
+    expiresAt = new Date(now + DEMO_TTL_MS).toISOString();
+  }
+
+  // Pastikan pengguna ada di daftar pengguna (sumber status langganan).
+  // (rekaman lama beremail sama dipindahkan ke id akun ini dengan status langganannya tetap utuh)
+  const existing = await getUser(me.id);
+  if (!existing || existing.id !== me.id) {
+    await saveUser({
+      subscription_status: 'none',
+      expires_at: null,
+      days_remaining: 0,
+      total_paid: 0,
+      created_at: new Date().toISOString(),
+      ...existing,
+      id: me.id,
+      email: me.email,
+      fullName: me.fullName,
+    });
+  }
+
+  await saveTransaction({
+    id: `tx-${now}-${Math.random().toString(36).slice(2, 6)}`,
+    order_id: orderId,
+    user_id: me.id,
+    user_email: me.email,
+    amount,
+    payment_method: 'QRIS',
+    transaction_status: 'pending',
+    created_at: new Date(now).toISOString(),
+    qr_url: qrUrl,
+    expires_at: expiresAt,
+    gateway,
+    midtrans_transaction_id: midtransTransactionId,
+  });
+
+  return NextResponse.json({
+    success: true,
+    orderId,
+    amount,
+    qrImageUrl: qrUrl,
+    expiryTime: expiresAt,
+    demo: !real,
+    isSandbox: !real || process.env.MIDTRANS_IS_PRODUCTION !== 'true',
+  });
 }

@@ -1,125 +1,81 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { Home, Shield, QrCode, Phone, CheckCircle2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Compass, Shield, QrCode, CheckCircle2 } from 'lucide-react';
+import '@/app/papi-home.css';
+import { CookieSettingsLink } from '@/components/CookieConsent';
 
 export default function Footer() {
+  const pathname = usePathname();
+  // Cari Kost, Maps, dan Admin tidak menampilkan footer utama.
+  if (pathname?.startsWith('/cari-kost') || pathname?.startsWith('/maps') || pathname?.startsWith('/admin')) return null;
   return (
-    <footer className="bg-neutral-900 text-neutral-300 pt-12 pb-8 border-t border-neutral-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-neutral-800">
-          {/* Brand Info */}
-          <div className="space-y-4 md:col-span-1">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center text-white">
-                <Home className="w-5 h-5" />
+    <div className="papi-home">
+      <footer className="site-footer" data-header-theme="dark">
+        <div className="container">
+          <div className="footer-content">
+            <div className="footer-brand">
+              <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                <Compass size={26} color="#0F2A43" />
+                <span style={{ fontSize: 26, fontWeight: 900, color: '#0F2A43', letterSpacing: '-0.02em' }}>
+                  kost-kostan
+                </span>
               </div>
-              <span className="text-xl font-bold tracking-tight text-white">KostHunt Jakarta</span>
+              <div className="footer-social">
+                <h4>TETAP TERHUBUNG</h4>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, maxWidth: 280 }}>
+                  Platform cari kost terpercaya di sekitarmu. Buka seluruh nomor kontak pemilik kost asli, foto kamar resolusi tinggi, dan video walkthrough 360° tanpa calo hanya Rp15.000 / 30 hari.
+                </p>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#F97316', fontWeight: 600, marginTop: 12 }}>
+                  <Shield size={16} /> Verifikasi Langsung ke Pemilik
+                </p>
+              </div>
+              <div className="footer-app">
+                <h4>SISTEM TRANSPARAN</h4>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#F97316', fontWeight: 800, fontSize: 14 }}>
+                  <QrCode size={16} /> Rp15.000 Flat / 30 Hari
+                </p>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, maxWidth: 280, marginTop: 6 }}>
+                  Pembayaran instan QRIS (GoPay, OVO, ShopeePay, DANA) langsung aktif otomatis. kost-kostan tidak memotong komisi sewa bulanan apapun dari pemilik maupun penghuni kost.
+                </p>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#34d399', fontWeight: 600, marginTop: 8 }}>
+                  <CheckCircle2 size={14} /> Tanpa batas kuota lihat nomor kontak
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              Platform validasi kost nomor satu di Jakarta. Buka seluruh foto kamar, video walkthrough, dan nomor WhatsApp pemilik langsung tanpa perantara calo hanya Rp10.000 / 30 hari.
-            </p>
-            <div className="flex items-center gap-2 text-xs text-emerald-400 font-medium">
-              <Shield className="w-4 h-4" />
-              <span>Verifikasi Langsung ke Pemilik</span>
+
+            <div className="footer-nav-column">
+              <h4><span>AREA KOST POPULER</span></h4>
+              <ul>
+                <li><Link href="/kost/jakarta/kuningan">Kost Kuningan (SCBD & Rasuna Said)</Link></li>
+                <li><Link href="/kost/jakarta/tebet">Kost Tebet (Stasiun KRL & Pusat Kuliner)</Link></li>
+                <li><Link href="/kost/jakarta/benhil">Kost Benhil (MRT & Sudirman)</Link></li>
+                <li><Link href="/kost/jakarta/palmerah">Kost Palmerah (Kampus BINUS)</Link></li>
+                <li><Link href="/kost/jakarta/grogol">Kost Grogol (Trisakti, UNTAR & Mall Ciputra)</Link></li>
+                <li><Link href="/kost/jakarta/setiabudi">Kost Setiabudi (Stasiun LRT Jabodebek)</Link></li>
+              </ul>
             </div>
-          </div>
 
-          {/* Area Populer Jakarta */}
-          <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">Area Kost Jakarta</h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/kost/jakarta/kuningan" className="hover:text-emerald-400 transition-colors">
-                  Kost Kuningan (Dekat Mega Kuningan & SCBD)
-                </Link>
-              </li>
-              <li>
-                <Link href="/kost/jakarta/tebet" className="hover:text-emerald-400 transition-colors">
-                  Kost Tebet (Dekat Stasiun KRL & Kuliner)
-                </Link>
-              </li>
-              <li>
-                <Link href="/kost/jakarta/benhil" className="hover:text-emerald-400 transition-colors">
-                  Kost Benhil (Dekat MRT & Sudirman)
-                </Link>
-              </li>
-              <li>
-                <Link href="/kost/jakarta/palmerah" className="hover:text-emerald-400 transition-colors">
-                  Kost Palmerah (Dekat Kampus BINUS)
-                </Link>
-              </li>
-              <li>
-                <Link href="/kost/jakarta/grogol" className="hover:text-emerald-400 transition-colors">
-                  Kost Grogol (Dekat Trisakti, UNTAR & Mall Ciputra)
-                </Link>
-              </li>
-              <li>
-                <Link href="/kost/jakarta/setiabudi" className="hover:text-emerald-400 transition-colors">
-                  Kost Setiabudi (Dekat Stasiun LRT)
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Informasi & Legalitas */}
-          <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">Halaman & Kebijakan</h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/tentang" className="hover:text-emerald-400 transition-colors">
-                  Tentang KostHunt
-                </Link>
-              </li>
-              <li>
-                <Link href="/kebijakan-privasi" className="hover:text-emerald-400 transition-colors">
-                  Kebijakan Privasi
-                </Link>
-              </li>
-              <li>
-                <Link href="/syarat-ketentuan" className="hover:text-emerald-400 transition-colors">
-                  Syarat & Ketentuan Akses
-                </Link>
-              </li>
-              <li>
-                <Link href="/kontak" className="hover:text-emerald-400 transition-colors">
-                  Kontak & Bantuan
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin" className="hover:text-emerald-400 transition-colors text-neutral-500">
-                  Panel Pengelola Kost (Admin)
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Transparansi Pembayaran */}
-          <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">Model Transparan</h4>
-            <div className="bg-neutral-800/80 p-3.5 rounded-xl border border-neutral-700/60 space-y-2 text-xs">
-              <div className="flex items-center gap-2 text-amber-400 font-bold">
-                <QrCode className="w-4 h-4" />
-                <span>Rp10.000 / 30 Hari</span>
-              </div>
-              <p className="text-[11px] text-neutral-400 leading-snug">
-                Hanya menggunakan QRIS & E-Wallet (GoPay, OVO, ShopeePay, DANA) untuk efisiensi biaya tanpa potongan Virtual Account.
-              </p>
-              <div className="flex items-center gap-1.5 text-[11px] text-emerald-400">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Tanpa batas kuota survey harian</span>
-              </div>
+            <div className="footer-nav-column">
+              <h4><span>MENU &amp; LEGAL</span></h4>
+              <ul>
+                <li><Link href="/tentang">Tentang kost-kostan</Link></li>
+                <li><Link href="/kebijakan-privasi">Kebijakan Privasi</Link></li>
+                <li><Link href="/syarat-ketentuan">Syarat &amp; Ketentuan Akses</Link></li>
+                <li><Link href="/kontak">Kontak &amp; Bantuan WhatsApp</Link></li>
+                <li><Link href="/admin">Panel Pengelola Kost (Admin)</Link></li>
+              </ul>
             </div>
           </div>
         </div>
-
-        {/* Copyright */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-3">
-          <p>© {new Date().getFullYear()} KostHunt Jakarta. Hak Cipta Dilindungi.</p>
-          <p className="flex items-center gap-1">
-            <span>Dibuat untuk kemudahan pencari kost Jakarta</span>
-          </p>
+      </footer>
+      <footer className="footer-bottom-center">
+        <div className="footer-content">
+          <p className="copyright-text">© {new Date().getFullYear()} kost-kostan. Hak Cipta Dilindungi. <CookieSettingsLink /></p>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </div>
   );
 }

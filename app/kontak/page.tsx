@@ -1,10 +1,11 @@
 import React from 'react';
 import { Mail, Phone, MapPin, MessageSquare, Clock } from 'lucide-react';
 import type { Metadata } from 'next';
+import ContactForm from '@/components/ContactForm';
 
 export const metadata: Metadata = {
-  title: 'Kontak & Bantuan - KostHunt Jakarta',
-  description: 'Hubungi tim operasional dan dukungan teknis KostHunt Jakarta.',
+  title: 'Kontak & Bantuan - kost-kostan',
+  description: 'Hubungi tim operasional dan dukungan teknis kost-kostan.',
 };
 
 export default function KontakPage() {
@@ -31,8 +32,8 @@ export default function KontakPage() {
               </div>
               <div>
                 <p className="font-semibold text-neutral-900">Email Bantuan & Kemitraan</p>
-                <p className="text-neutral-500">support@kosthunt.id</p>
-                <p className="text-neutral-500">owner@kosthunt.id (Khusus Pemilik Kost)</p>
+                <p className="text-neutral-500">support@kost-kostan.id</p>
+                <p className="text-neutral-500">owner@kost-kostan.id (Khusus Pemilik Kost)</p>
               </div>
             </div>
 
@@ -43,7 +44,7 @@ export default function KontakPage() {
               <div>
                 <p className="font-semibold text-neutral-900">Customer Service WhatsApp</p>
                 <p className="text-neutral-500">+62 812-3456-7890</p>
-                <p className="text-[11px] text-neutral-400">Senin - Minggu: 08:00 - 21:00 WIB</p>
+                <p className="text-[11px] text-neutral-500">Senin - Minggu: 08:00 - 21:00 WIB</p>
               </div>
             </div>
 
@@ -71,11 +72,19 @@ export default function KontakPage() {
             </p>
           </div>
 
-          <div className="pt-4 border-t border-neutral-800 text-xs text-neutral-400">
+          <div className="pt-4 border-t border-neutral-800 text-xs text-neutral-500">
             Respon rata-rata di bawah 10 menit pada jam kerja.
           </div>
         </div>
       </div>
+
+      <section className="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 space-y-5" aria-labelledby="form-kontak">
+        <div className="space-y-1">
+          <h2 id="form-kontak" className="text-lg font-bold text-neutral-900">Kirim Pesan</h2>
+          <p className="text-xs text-neutral-500">Isi formulir ini dan tim kami akan membalas lewat email.</p>
+        </div>
+        <ContactForm />
+      </section>
     </div>
   );
 }
