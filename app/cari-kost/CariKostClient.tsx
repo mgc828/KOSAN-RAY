@@ -997,7 +997,7 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
         <div className="space-y-6 min-w-0">
         {/* Ringkasan, urutan & tampilan - Sticky sejajar dengan sidebar filter di kiri */}
         <div className="sticky top-[80px] lg:top-[81px] z-30 p-1 sm:p-2 lg:p-3 mb-2 bg-transparent">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 bg-transparent py-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 bg-white p-4 sm:px-6 sm:py-3.5 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
           <p className="font-medium" suppressHydrationWarning>
             {sortedKosts.length > 0
               ? `Menampilkan ${sortedKosts.length} kost terverifikasi`
