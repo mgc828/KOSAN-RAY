@@ -12,3 +12,5 @@ logs/
 .element-inspect.json
 tsconfig.tsbuildinfo
 .vercel/
+.agents/
+skills-lock.json

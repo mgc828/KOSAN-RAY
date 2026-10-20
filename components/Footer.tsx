@@ -20,7 +20,7 @@ export default function Footer() {
               <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                 <Compass size={26} color="#0F2A43" />
                 <span style={{ fontSize: 26, fontWeight: 900, color: '#0F2A43', letterSpacing: '-0.02em' }}>
-                  kost-kostan
+                  Kost-Kostan
                 </span>
               </div>
               <div className="footer-social">

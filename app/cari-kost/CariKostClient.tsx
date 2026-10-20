@@ -72,6 +72,19 @@ function resolveAreaParam(kosts: Kost[], value: string | null): { city?: string;
   return hit ? { city: getKostCity(hit), kecamatan: getKostKecamatan(hit) } : {};
 }
 
+function getPaginationRange(current: number, total: number): (number | 'ellipsis-start' | 'ellipsis-end')[] {
+  if (total <= 5) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  if (current <= 3) {
+    return [1, 2, 3, 4, 'ellipsis-end', total];
+  }
+  if (current >= total - 2) {
+    return [1, 'ellipsis-start', total - 3, total - 2, total - 1, total];
+  }
+  return [1, 'ellipsis-start', current - 1, current, current + 1, 'ellipsis-end', total];
+}
+
 export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -983,8 +996,8 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
         {/* Kolom hasil (lebih lebar dari sidebar) */}
         <div className="space-y-6 min-w-0">
         {/* Ringkasan, urutan & tampilan - Sticky sejajar dengan sidebar filter di kiri */}
-        <div className="sticky top-[80px] lg:top-[81px] z-30 p-1 sm:p-2 lg:p-3 pb-2.5 bg-[#F8FAFC]/95 backdrop-blur-md -my-1 sm:-my-2 lg:-my-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 bg-white p-4 sm:px-6 sm:py-4 rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+        <div className="sticky top-[80px] lg:top-[81px] z-30 p-1 sm:p-2 lg:p-3 mb-2 bg-transparent">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 bg-transparent py-1">
           <p className="font-medium" suppressHydrationWarning>
             {sortedKosts.length > 0
               ? `Menampilkan ${sortedKosts.length} kost terverifikasi`
@@ -1040,13 +1053,13 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
           view === 'grid' || view === 'list' ? (
             <>
               {view === 'grid' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-1.5 pt-2 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-1.5 pt-4 sm:pt-6 pb-4">
                   {pageItems.map((kost, i) => (
                     <KostCard key={kost.id} kost={kost} priority={currentPage === 1 && i < 4} distanceLabel={distanceLabelFor(kost)} />
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col gap-4 p-1.5 pt-2 pb-4">
+                <div className="flex flex-col gap-4 p-1.5 pt-4 sm:pt-6 pb-4">
                   {pageItems.map((kost, i) => (
                     <KostCard key={kost.id} kost={kost} layout="list" priority={currentPage === 1 && i < 3} distanceLabel={distanceLabelFor(kost)} />
                   ))}
@@ -1054,35 +1067,56 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
               )}
 
               {totalPages > 1 && (
-                <nav className="flex items-center justify-center gap-1.5 pt-4" aria-label="Halaman hasil">
+                <nav className="flex items-center justify-center gap-1 sm:gap-1.5 pt-6 pb-2" aria-label="Halaman hasil">
                   <button
                     type="button"
                     onClick={() => goToPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="inline-flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                    aria-label="Halaman sebelumnya"
+                    className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
-                    <ChevronLeft className="w-4 h-4" /> Sebelumnya
+                    <ChevronLeft className="w-4 h-4 shrink-0" />
+                    <span className="hidden sm:inline">Sebelumnya</span>
                   </button>
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => goToPage(i + 1)}
-                      aria-current={currentPage === i + 1 ? 'page' : undefined}
-                      className={`w-9 h-9 rounded-full text-xs font-bold transition-colors ${
-                        currentPage === i + 1 ? 'bg-[#F97316] text-white' : 'bg-white border border-slate-200 text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
+                  {getPaginationRange(currentPage, totalPages).map((item, idx) => {
+                    if (typeof item === 'string') {
+                      return (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          className="w-5 sm:w-7 text-center text-xs font-bold text-slate-400 select-none"
+                          aria-hidden="true"
+                        >
+                          …
+                        </span>
+                      );
+                    }
+                    const isCurrent = currentPage === item;
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => goToPage(item)}
+                        aria-current={isCurrent ? 'page' : undefined}
+                        aria-label={`Ke halaman ${item}`}
+                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full text-xs font-bold transition-all flex items-center justify-center ${
+                          isCurrent
+                            ? 'bg-[#F97316] text-white shadow-xs'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
                   <button
                     type="button"
                     onClick={() => goToPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="inline-flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                    aria-label="Halaman berikutnya"
+                    className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
-                    Berikutnya <ChevronRight className="w-4 h-4" />
+                    <span className="hidden sm:inline">Berikutnya</span>
+                    <ChevronRight className="w-4 h-4 shrink-0" />
                   </button>
                 </nav>
               )}
