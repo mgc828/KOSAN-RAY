@@ -46,7 +46,7 @@ const DEFAULT_SETTINGS: AdminSettings = {
   },
   tools: {
     enableUiCustomizer: false,
-    enableElementInspector: false,
+    enableElementInspector: true,
   },
 };
 

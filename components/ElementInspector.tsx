@@ -15,17 +15,18 @@ export default function ElementInspector() {
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number }>({ mouseX: 0, mouseY: 0, startX: 0, startY: 0 });
   const hasMovedRef = useRef(false);
 
-  // Cek apakah fitur Inspect diaktifkan di Pengaturan Admin
+  // Cek apakah fitur Inspect diaktifkan di Pengaturan Admin atau berada di halaman /admin
   useEffect(() => {
     const checkVisibility = () => {
       if (typeof window === 'undefined') return;
-      if (window.location.pathname.startsWith('/admin')) {
-        setIsVisible(false);
-        return;
-      }
       const local = localStorage.getItem('kk_show_element_inspector');
       if (local !== null) {
         setIsVisible(local === 'true');
+        return;
+      }
+      // Khusus halaman /admin, tombol Inspect aktif secara default agar admin dapat menginspeksi elemen
+      if (window.location.pathname.startsWith('/admin')) {
+        setIsVisible(true);
         return;
       }
       fetch('/api/admin/data?type=settings')
