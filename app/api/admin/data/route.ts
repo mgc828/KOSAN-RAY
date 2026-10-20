@@ -369,6 +369,17 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Nama dan area kost wajib diisi' }, { status: 400 });
       }
 
+      // Proteksi anti-duplikasi: cegah request ganda untuk kost dengan nama & alamat sama dalam rentang 15 detik
+      const allExisting = await getAllKosts();
+      const recentDuplicate = allExisting.find(k => 
+        k.nama.trim().toLowerCase() === kost.nama.trim().toLowerCase() &&
+        k.alamat.trim().toLowerCase() === (kost.alamat || '').trim().toLowerCase() &&
+        Date.now() - new Date(k.created_at || 0).getTime() < 15000
+      );
+      if (recentDuplicate) {
+        return NextResponse.json({ success: true, kost: recentDuplicate, message: 'Kost berhasil ditambahkan ✅' });
+      }
+
       const slug = kost.slug || kost.nama.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).substring(2, 6);
       const newKost: Kost = {
         ...kost,

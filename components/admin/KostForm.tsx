@@ -56,6 +56,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
   const { addToast } = useAdmin();
 
   const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [areas, setAreas] = useState<AreaItem[]>([]);
   const [showMap, setShowMap] = useState(false);
 
@@ -235,18 +236,22 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
 
       const resData = await res.json();
       if (res.ok && resData.success) {
+        setIsRedirecting(true);
         addToast(
-          isEdit ? 'Kost berhasil diperbarui ✅' : 'Kost berhasil ditambahkan ✅',
+          isEdit ? 'Kost berhasil diperbarui ✅ Mengalihkan...' : 'Kost berhasil ditambahkan ✅ Mengalihkan...',
           'success'
         );
-        router.push('/admin/kost');
+        window.location.href = '/admin/kost';
+        return;
       } else {
         addToast(resData.error || resData.message || 'Gagal menyimpan data kost', 'error');
       }
     } catch {
       addToast('Terjadi kesalahan jaringan saat menyimpan kost', 'error');
     } finally {
-      setLoading(false);
+      if (!isRedirecting) {
+        setLoading(false);
+      }
     }
   };
 
@@ -287,8 +292,8 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
           <button
             type="button"
             onClick={() => handleSubmit('penuh')}
-            disabled={loading}
-            className="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold transition-all disabled:opacity-50"
+            disabled={loading || isRedirecting}
+            className="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold transition-all disabled:opacity-50 cursor-pointer"
           >
             Simpan Draft
           </button>
@@ -296,11 +301,11 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
           <button
             type="button"
             onClick={() => handleSubmit('tersedia')}
-            disabled={loading}
-            className="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold flex items-center gap-2 shadow-sm shadow-orange-500/20 transition-all disabled:opacity-50"
+            disabled={loading || isRedirecting}
+            className="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold flex items-center gap-2 shadow-sm shadow-orange-500/20 transition-all disabled:opacity-50 cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>{loading ? 'Menyimpan...' : 'Publikasikan'}</span>
+            <span>{isRedirecting ? 'Mengalihkan ke daftar kost...' : loading ? 'Menyimpan...' : 'Publikasikan'}</span>
           </button>
         </div>
       </div>
