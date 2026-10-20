@@ -43,6 +43,39 @@ const PRESET_COLORS = [
 export default function AdminLiveCustomizer() {
   const pathname = usePathname() || '/';
 
+  // Toggle Visibility dari Pengaturan Admin
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const checkVisibility = () => {
+      if (typeof window === 'undefined') return;
+      if (window.location.pathname.startsWith('/admin')) {
+        setIsVisible(false);
+        return;
+      }
+      const local = localStorage.getItem('kk_show_ui_customizer');
+      if (local !== null) {
+        setIsVisible(local === 'true');
+        return;
+      }
+      fetch('/api/admin/data?type=settings')
+        .then((r) => r.json())
+        .then((d) => {
+          const enabled = Boolean(d?.settings?.tools?.enableUiCustomizer);
+          setIsVisible(enabled);
+        })
+        .catch(() => {});
+    };
+
+    checkVisibility();
+    window.addEventListener('kk-tools-settings-changed', checkVisibility);
+    window.addEventListener('storage', checkVisibility);
+    return () => {
+      window.removeEventListener('kk-tools-settings-changed', checkVisibility);
+      window.removeEventListener('storage', checkVisibility);
+    };
+  }, []);
+
   // Status State
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -677,6 +710,8 @@ export default function AdminLiveCustomizer() {
   const dockLeft = () => setPanelPos({ x: 16, y: 70 });
   const dockRight = () => setPanelPos({ x: Math.max(16, window.innerWidth - 360), y: 70 });
   const dockBottom = () => setPanelPos({ x: Math.max(16, (window.innerWidth - 350) / 2), y: Math.max(80, window.innerHeight - 380) });
+
+  if (!isVisible) return null;
 
   return (
     <div data-customizer-dock className="select-none font-sans text-xs">

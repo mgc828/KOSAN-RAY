@@ -15,7 +15,9 @@ import {
   CheckCircle2,
   AlertCircle,
   RefreshCw,
-  UserCheck
+  UserCheck,
+  Sliders,
+  MousePointerClick
 } from 'lucide-react';
 import { useAdmin } from '@/lib/admin-client';
 import { AdminSettings, AdminAccount } from '@/lib/admin-types';
@@ -23,7 +25,7 @@ import { AdminSettings, AdminAccount } from '@/lib/admin-types';
 export default function AdminPengaturanPage() {
   const { admin, addToast } = useAdmin();
 
-  const [activeTab, setActiveTab] = useState<'umum' | 'pembayaran' | 'admin' | 'branding'>('umum');
+  const [activeTab, setActiveTab] = useState<'umum' | 'pembayaran' | 'admin' | 'branding' | 'tools'>('umum');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -46,6 +48,10 @@ export default function AdminPengaturanPage() {
       tagline: 'Cari kost terasa lebih mudah bersama Kost-Kostan',
       logoUrl: '/maskot-kost.svg',
     },
+    tools: {
+      enableUiCustomizer: false,
+      enableElementInspector: false,
+    },
   });
 
   // Toggle show keys
@@ -58,7 +64,7 @@ export default function AdminPengaturanPage() {
       id: 'adm-1',
       name: 'Super Admin',
       email: 'admin@kost-kostan.id',
-      role: 'super_admin',
+      role: 'superadmin',
       created_at: '2026-01-01T00:00:00Z',
     },
   ]);
@@ -68,7 +74,7 @@ export default function AdminPengaturanPage() {
   const [newAdminName, setNewAdminName] = useState('');
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [newAdminPass, setNewAdminPass] = useState('');
-  const [newAdminRole, setNewAdminRole] = useState<'super_admin' | 'editor'>('editor');
+  const [newAdminRole, setNewAdminRole] = useState<'superadmin' | 'admin'>('admin');
 
   // Change Password Self
   const [currentPassword, setCurrentPassword] = useState('');
@@ -81,7 +87,24 @@ export default function AdminPengaturanPage() {
       const res = await fetch('/api/admin/data?type=settings');
       const data = await res.json();
       if (data.settings) {
-        setSettings(data.settings);
+        const loadedTools = data.settings.tools || {
+          enableUiCustomizer: false,
+          enableElementInspector: false,
+        };
+        setSettings({
+          ...data.settings,
+          tools: loadedTools,
+        });
+
+        // Sync local storage
+        if (typeof window !== 'undefined') {
+          if (localStorage.getItem('kk_show_ui_customizer') === null) {
+            localStorage.setItem('kk_show_ui_customizer', String(loadedTools.enableUiCustomizer));
+          }
+          if (localStorage.getItem('kk_show_element_inspector') === null) {
+            localStorage.setItem('kk_show_element_inspector', String(loadedTools.enableElementInspector));
+          }
+        }
       }
     } catch {
       addToast('Gagal memuat pengaturan', 'error');
@@ -94,9 +117,48 @@ export default function AdminPengaturanPage() {
     fetchSettings();
   }, []);
 
+  const handleToggleTool = (tool: 'enableUiCustomizer' | 'enableElementInspector') => {
+    const curVal = Boolean(settings.tools?.[tool]);
+    const newVal = !curVal;
+
+    const updatedSettings = {
+      ...settings,
+      tools: {
+        enableUiCustomizer: settings.tools?.enableUiCustomizer ?? false,
+        enableElementInspector: settings.tools?.enableElementInspector ?? false,
+        [tool]: newVal,
+      },
+    };
+
+    setSettings(updatedSettings);
+
+    if (typeof window !== 'undefined') {
+      if (tool === 'enableUiCustomizer') {
+        localStorage.setItem('kk_show_ui_customizer', String(newVal));
+      } else {
+        localStorage.setItem('kk_show_element_inspector', String(newVal));
+      }
+      window.dispatchEvent(new Event('kk-tools-settings-changed'));
+    }
+
+    addToast(
+      tool === 'enableUiCustomizer'
+        ? `Tombol floating UI ${newVal ? 'diaktifkan (ON) 🟢' : 'dinonaktifkan (OFF) ⚪'}`
+        : `Tombol floating Inspect ${newVal ? 'diaktifkan (ON) 🟢' : 'dinonaktifkan (OFF) ⚪'}`,
+      'info'
+    );
+  };
+
   const handleSaveSettings = async () => {
     setSaving(true);
     try {
+      // Sync local storage on save
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('kk_show_ui_customizer', String(settings.tools?.enableUiCustomizer ?? false));
+        localStorage.setItem('kk_show_element_inspector', String(settings.tools?.enableElementInspector ?? false));
+        window.dispatchEvent(new Event('kk-tools-settings-changed'));
+      }
+
       const res = await fetch('/api/admin/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -108,7 +170,7 @@ export default function AdminPengaturanPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        addToast('Pengaturan berhasil disimpan permanen! ✅', 'success');
+        addToast('Pengaturan berhasil disimpan permanen ke database Supabase! ✅', 'success');
       } else {
         addToast(data.message || 'Gagal menyimpan pengaturan', 'error');
       }
@@ -133,7 +195,7 @@ export default function AdminPengaturanPage() {
 
     const newAcc: AdminAccount = {
       id: 'adm-' + Date.now(),
-      name: newAdminName,
+      fullName: newAdminName,
       email: newAdminEmail,
       role: newAdminRole,
       created_at: new Date().toISOString(),
@@ -168,6 +230,91 @@ export default function AdminPengaturanPage() {
     addToast('Kata sandi admin berhasil diperbarui! ✅', 'success');
   };
 
+  // Reusable Component for Tool Toggle Cards
+  const renderToolsToggles = () => (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Sliders className="w-4 h-4 text-orange-500" />
+          Tombol Floating On/Off (UI Customizer & Element Inspector)
+        </h3>
+        <p className="text-xs text-slate-500 mt-0.5">
+          Atur tombol melayang yang bisa digeser-geser di pojok layar pengguna pada tampilan publik:
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Toggle UI Customizer */}
+        <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-3 shadow-xs">
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-slate-800 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black text-[10px] shrink-0 shadow-sm">
+                UI
+              </span>
+              <span>Tombol Floating "UI"</span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+              Tombol kuning draggable untuk edit live tema, warna, dan gaya visual.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => handleToggleTool('enableUiCustomizer')}
+              className={`w-12 h-6 rounded-full transition-colors relative p-0.5 ${
+                settings.tools?.enableUiCustomizer ? 'bg-orange-500' : 'bg-slate-300'
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                  settings.tools?.enableUiCustomizer ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
+            <span className="text-[10px] font-bold text-slate-600">
+              {settings.tools?.enableUiCustomizer ? 'ON' : 'OFF'}
+            </span>
+          </div>
+        </div>
+
+        {/* Toggle Element Inspector */}
+        <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-3 shadow-xs">
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-slate-800 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-slate-900 text-orange-400 flex items-center justify-center font-black text-[10px] shrink-0 shadow-sm">
+                <MousePointerClick className="w-3.5 h-3.5" />
+              </span>
+              <span>Tombol Floating "Inspect"</span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+              Tombol gelap draggable untuk inspeksi tag HTML dan copy selector elemen.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => handleToggleTool('enableElementInspector')}
+              className={`w-12 h-6 rounded-full transition-colors relative p-0.5 ${
+                settings.tools?.enableElementInspector ? 'bg-orange-500' : 'bg-slate-300'
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                  settings.tools?.enableElementInspector ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
+            <span className="text-[10px] font-bold text-slate-600">
+              {settings.tools?.enableElementInspector ? 'ON' : 'OFF'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
       {/* Top Header */}
@@ -175,7 +322,7 @@ export default function AdminPengaturanPage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900">Pengaturan Sistem</h1>
           <p className="text-xs text-slate-500">
-            Konfigurasi tarif unlock pass, kredensial payment gateway Midtrans, akun admin, dan branding
+            Konfigurasi tarif unlock pass, kredensial payment gateway Midtrans, tombol UI & Inspect, dan branding
           </p>
         </div>
 
@@ -204,6 +351,18 @@ export default function AdminPengaturanPage() {
         </button>
 
         <button
+          onClick={() => setActiveTab('tools')}
+          className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 shrink-0 ${
+            activeTab === 'tools'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Sliders className="w-4 h-4 text-orange-400" />
+          <span>2. Tombol UI & Inspect</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('pembayaran')}
           className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 shrink-0 ${
             activeTab === 'pembayaran'
@@ -212,7 +371,7 @@ export default function AdminPengaturanPage() {
           }`}
         >
           <CreditCard className="w-4 h-4" />
-          <span>2. Pembayaran (Midtrans)</span>
+          <span>3. Pembayaran (Midtrans)</span>
         </button>
 
         <button
@@ -224,7 +383,7 @@ export default function AdminPengaturanPage() {
           }`}
         >
           <ShieldCheck className="w-4 h-4" />
-          <span>3. Akun Admin</span>
+          <span>4. Akun Admin</span>
         </button>
 
         <button
@@ -236,7 +395,7 @@ export default function AdminPengaturanPage() {
           }`}
         >
           <Globe className="w-4 h-4" />
-          <span>4. Branding & Teks</span>
+          <span>5. Branding & Teks</span>
         </button>
       </div>
 
@@ -329,10 +488,44 @@ export default function AdminPengaturanPage() {
               </div>
             </div>
           </div>
+
+          {/* Quick Tools Section inside Tab Umum */}
+          <div className="border-t border-slate-100 pt-5">
+            {renderToolsToggles()}
+          </div>
         </div>
       )}
 
-      {/* Tab 2: Pembayaran Midtrans */}
+      {/* Tab 2: Tombol UI & Inspect */}
+      {activeTab === 'tools' && (
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Sliders className="w-5 h-5 text-orange-500" />
+                Kontrol Tombol Floating UI & Inspect
+              </h2>
+              <p className="text-xs text-slate-500">
+                Pilih apakah tombol mengambang yang bisa digeser ditampilkan atau disembunyikan dari layar publik
+              </p>
+            </div>
+          </div>
+
+          {renderToolsToggles()}
+
+          <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-xs text-amber-900 space-y-1">
+            <p className="font-bold flex items-center gap-1.5">
+              <span>💡 Petunjuk Penggunaan:</span>
+            </p>
+            <p className="text-amber-800 leading-relaxed text-[11px]">
+              - Jika diatur ke <strong>OFF</strong>, kedua tombol tersebut tidak akan muncul sama sekali di layar pengguna saat membuka web publik.<br />
+              - Jika diatur ke <strong>ON</strong>, tombol akan muncul mengambang dan bisa digeser-geser sesuai kebutuhan.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 3: Pembayaran Midtrans */}
       {activeTab === 'pembayaran' && (
         <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -450,7 +643,7 @@ export default function AdminPengaturanPage() {
         </div>
       )}
 
-      {/* Tab 3: Akun Admin */}
+      {/* Tab 4: Akun Admin */}
       {activeTab === 'admin' && (
         <div className="space-y-6">
           {/* Daftar Admin */}
@@ -475,10 +668,10 @@ export default function AdminPengaturanPage() {
                 <div key={adm.id} className="py-3 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 font-bold flex items-center justify-center">
-                      {adm.name.substring(0, 2).toUpperCase()}
+                      {(adm.fullName || adm.email).substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900">{adm.name}</div>
+                      <div className="font-bold text-slate-900">{adm.fullName || 'Admin'}</div>
                       <div className="text-[11px] text-slate-400">{adm.email}</div>
                     </div>
                   </div>
@@ -486,12 +679,12 @@ export default function AdminPengaturanPage() {
                   <div className="flex items-center gap-3">
                     <span
                       className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                        adm.role === 'super_admin'
+                        adm.role === 'superadmin'
                           ? 'bg-purple-50 text-purple-700 border border-purple-200'
                           : 'bg-blue-50 text-blue-700 border border-blue-200'
                       }`}
                     >
-                      {adm.role === 'super_admin' ? 'Super Admin' : 'Editor'}
+                      {adm.role === 'superadmin' ? 'Super Admin' : 'Admin'}
                     </span>
                     <span className="text-[11px] text-slate-400">
                       {new Date(adm.created_at).toLocaleDateString('id-ID')}
@@ -559,7 +752,7 @@ export default function AdminPengaturanPage() {
         </div>
       )}
 
-      {/* Tab 4: Branding & Teks */}
+      {/* Tab 5: Branding & Teks */}
       {activeTab === 'branding' && (
         <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
           <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
@@ -677,8 +870,8 @@ export default function AdminPengaturanPage() {
                   onChange={(e) => setNewAdminRole(e.target.value as any)}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white"
                 >
-                  <option value="editor">Editor (Kelola Kost & Media)</option>
-                  <option value="super_admin">Super Admin (Akses Penuh)</option>
+                  <option value="admin">Admin (Kelola Kost & Media)</option>
+                  <option value="superadmin">Super Admin (Akses Penuh)</option>
                 </select>
               </div>
             </div>
@@ -704,4 +897,3 @@ export default function AdminPengaturanPage() {
     </div>
   );
 }
-

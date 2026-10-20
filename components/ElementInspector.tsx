@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MousePointerClick, Check, Copy, X } from 'lucide-react';
 
 export default function ElementInspector() {
+  const [isVisible, setIsVisible] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [lastSelected, setLastSelected] = useState<any>(null);
   const [copied, setCopied] = useState(false);
@@ -13,6 +14,37 @@ export default function ElementInspector() {
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number }>({ mouseX: 0, mouseY: 0, startX: 0, startY: 0 });
   const hasMovedRef = useRef(false);
+
+  // Cek apakah fitur Inspect diaktifkan di Pengaturan Admin
+  useEffect(() => {
+    const checkVisibility = () => {
+      if (typeof window === 'undefined') return;
+      if (window.location.pathname.startsWith('/admin')) {
+        setIsVisible(false);
+        return;
+      }
+      const local = localStorage.getItem('kk_show_element_inspector');
+      if (local !== null) {
+        setIsVisible(local === 'true');
+        return;
+      }
+      fetch('/api/admin/data?type=settings')
+        .then((r) => r.json())
+        .then((d) => {
+          const enabled = Boolean(d?.settings?.tools?.enableElementInspector);
+          setIsVisible(enabled);
+        })
+        .catch(() => {});
+    };
+
+    checkVisibility();
+    window.addEventListener('kk-tools-settings-changed', checkVisibility);
+    window.addEventListener('storage', checkVisibility);
+    return () => {
+      window.removeEventListener('kk-tools-settings-changed', checkVisibility);
+      window.removeEventListener('storage', checkVisibility);
+    };
+  }, []);
 
   // Inisialisasi posisi default di pojok kanan bawah
   useEffect(() => {
@@ -167,7 +199,7 @@ export default function ElementInspector() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!position) return null;
+  if (!isVisible || !position) return null;
 
   // Cek apakah popover harus muncul di kiri atau kanan tergantung posisi tombol di layar
   const isRightSide = position.x > (typeof window !== 'undefined' ? window.innerWidth / 2 : 500);

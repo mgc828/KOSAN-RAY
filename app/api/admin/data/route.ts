@@ -44,6 +44,10 @@ const DEFAULT_SETTINGS: AdminSettings = {
     tagline: 'Cari kost terasa lebih mudah bersama Kost-Kostan',
     logoUrl: '/maskot-kost.svg',
   },
+  tools: {
+    enableUiCustomizer: false,
+    enableElementInspector: false,
+  },
 };
 
 const DEFAULT_NOTIFICATIONS: AdminNotification[] = [

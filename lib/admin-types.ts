@@ -48,6 +48,10 @@ export interface AdminSettings {
     siteName: string;
     tagline: string;
   };
+  tools?: {
+    enableUiCustomizer: boolean;
+    enableElementInspector: boolean;
+  };
 }
 
 export interface UnlockMemberItem {
