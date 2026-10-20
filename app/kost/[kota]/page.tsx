@@ -1,7 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getPublicKosts } from '@/lib/public-kosts';
+import { getAllKosts } from '@/lib/data-store';
 import KostCard from '@/components/KostCard';
 import { MapPin, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -17,6 +18,16 @@ export async function generateMetadata({
   params: Promise<{ kota: string }>;
 }): Promise<Metadata> {
   const { kota } = await params;
+  if (kota.toLowerCase() !== 'jakarta') {
+    const all = await getAllKosts();
+    const hit = all.find((k) => k.slug.toLowerCase() === kota.toLowerCase());
+    if (hit) {
+      return {
+        title: `${hit.nama} - Info Kost & Kontak Pemilik`,
+        description: `Lihat fasilitas, foto, dan detail ${hit.nama}.`,
+      };
+    }
+  }
   const cityName = kota.charAt(0).toUpperCase() + kota.slice(1);
 
   return {
@@ -33,6 +44,14 @@ export default async function KotaKostPage({
 }) {
   const { kota } = await params;
   if (kota.toLowerCase() !== 'jakarta') {
+    // Toleransi jika URL yang diakses adalah slug langsung (/kost/[slug])
+    const all = await getAllKosts();
+    const hit = all.find((k) => k.slug.toLowerCase() === kota.toLowerCase());
+    if (hit) {
+      const citySlug = (hit.kota || 'jakarta').toLowerCase();
+      const areaSlug = (hit.area || 'jakarta').toLowerCase().replace(/\s+/g, '-');
+      redirect(`/kost/${citySlug}/${areaSlug}/${hit.slug}`);
+    }
     notFound();
   }
 

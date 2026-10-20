@@ -274,7 +274,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
         <div className="flex items-center gap-2 w-full sm:w-auto">
           {isEdit && initialKost?.slug && (
             <a
-              href={`/kost/${initialKost.slug}`}
+              href={`/kost/${(initialKost.kota || 'jakarta').toLowerCase()}/${(initialKost.area || 'jakarta').toLowerCase().replace(/\s+/g, '-')}/${initialKost.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-3.5 py-2 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-slate-700 text-sm font-semibold flex items-center gap-1.5 shadow-sm transition-all"

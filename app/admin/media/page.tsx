@@ -295,7 +295,7 @@ export default function AdminMediaPage() {
         <div className="flex items-center gap-2">
           {selectedKost?.slug && (
             <a
-              href={`/kost/${selectedKost.slug}`}
+              href={`/kost/${(selectedKost.kota || 'jakarta').toLowerCase()}/${(selectedKost.area || 'jakarta').toLowerCase().replace(/\s+/g, '-')}/${selectedKost.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold flex items-center gap-1.5 transition-all"
