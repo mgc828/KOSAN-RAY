@@ -132,7 +132,7 @@ export default function PhotoLightbox({ photos, index, onIndexChange, onClose, t
       role="dialog"
       aria-modal="true"
       aria-label={title ? `Foto ${title}` : 'Galeri foto'}
-      className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex flex-col"
+      className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-sm flex flex-col"
     >
       {/* Bar atas */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-3 text-white">
