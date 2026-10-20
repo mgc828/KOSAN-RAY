@@ -261,7 +261,7 @@ export default function Navbar() {
 
   return (
     <>
-    <header ref={headerRef} className={`${isHome ? 'fixed inset-x-0' : 'sticky'} top-0 z-[100] transition-all duration-300 border-b ${solid ? 'bg-white border-slate-200 backdrop-blur-none' : atTop ? 'bg-transparent border-transparent backdrop-blur-none' : `backdrop-blur-xl ${headerDark ? 'bg-black/20 border-white/10' : 'bg-white/30 border-white/40'}`}`}>
+    <header ref={headerRef} className={`${isHome ? 'fixed inset-x-0' : 'sticky'} top-0 z-[9990] transition-all duration-300 border-b ${solid ? 'bg-white border-slate-200 backdrop-blur-none' : atTop ? 'bg-transparent border-transparent backdrop-blur-none' : `backdrop-blur-xl ${headerDark ? 'bg-black/20 border-white/10' : 'bg-white/30 border-white/40'}`}`}>
 
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo - Sekitar Style */}
@@ -436,7 +436,7 @@ export default function Navbar() {
       role="presentation"
       aria-hidden="true"
       onClick={() => setMobileMenuOpen(false)}
-      className={`md:hidden fixed inset-0 z-[110] bg-black/60 transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+      className={`md:hidden fixed inset-0 z-[9998] bg-black/60 transition-opacity duration-300 ease-out motion-reduce:transition-none ${
         mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
     />
@@ -450,7 +450,7 @@ export default function Navbar() {
       aria-label="Menu navigasi"
       aria-hidden={!mobileMenuOpen}
       inert={!mobileMenuOpen}
-      className={`md:hidden fixed inset-x-0 bottom-0 z-[120] max-h-[88dvh] overflow-y-auto rounded-t-[1.75rem] border-t border-slate-200/90 bg-white px-6 pt-3.5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+      className={`md:hidden fixed inset-x-0 bottom-0 z-[9999] max-h-[88dvh] overflow-y-auto rounded-t-[1.75rem] border-t border-slate-200/90 bg-white px-6 pt-3.5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
         mobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
       }`}
     >
