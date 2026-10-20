@@ -2,7 +2,7 @@
 .sugg { position: relative; }
 .sugg .sugg-list,
 .papi-home .sugg .sugg-list {
-  position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 60;
+  position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 9999;
   margin: 0; padding: 6px; list-style: none; text-align: left;
   background: #fff; color: #0F2A43; border: 1px solid #e2e8f0; border-radius: 16px;
   box-shadow: 0 18px 40px rgba(15, 42, 67, 0.18); max-height: 340px; overflow-y: auto;

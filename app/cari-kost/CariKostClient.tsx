@@ -447,7 +447,7 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(300px,340px)_minmax(0,1fr)] gap-6 items-start">
         {/* Sidebar filter: di desktop menempel di bawah header saat halaman digulir */}
         <aside
-          className="space-y-4 p-1 sm:p-2 lg:p-3 lg:sticky lg:top-[81px] lg:max-h-[calc(100vh-81px)] lg:overflow-y-auto lg:overscroll-contain overflow-visible"
+          className="space-y-4 p-1 sm:p-2 lg:p-3 relative z-40 lg:z-[9991] lg:sticky lg:top-[81px] lg:max-h-[calc(100vh-81px)] lg:overflow-y-auto lg:overscroll-contain overflow-visible"
           aria-label="Filter pencarian kost"
           tabIndex={0}
         >
@@ -509,7 +509,7 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
               </button>
 
               {isLocationOpen && (
-                <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
+                <div className="absolute left-0 right-0 mt-2 z-[9999] bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
                   {locationOptions.map((loc) => {
                     const isChecked = selectedLocations.includes(loc);
                     return (
@@ -556,7 +556,7 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
                 </button>
 
                 {isKecamatanOpen && (
-                  <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
+                  <div className="absolute left-0 right-0 mt-2 z-[9999] bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
                     {selectedLocations.map((city) => (
                       <div key={city}>
                         <p className="px-3 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">{city}</p>
@@ -608,7 +608,7 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
               </button>
 
               {isTipeOpen && (
-                <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden p-1.5 space-y-1">
+                <div className="absolute left-0 right-0 mt-2 z-[9999] bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden p-1.5 space-y-1">
                   {tipeOptions.map((opt) => (
                     <button
                       key={opt.value}

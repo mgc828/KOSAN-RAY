@@ -7,6 +7,7 @@ import { Kost } from '@/lib/types';
 import { useCompare, COMPARE_MAX } from '@/lib/wishlist';
 import { FACILITY_CATEGORIES, otherFacilities } from '@/lib/facilities';
 import { RatingBadge } from '@/components/StarRating';
+import { formatKostLocation } from '@/lib/jakarta-regions';
 
 const TIPE_LABEL: Record<string, string> = { putra: 'Putra', putri: 'Putri', campur: 'Campur' };
 
@@ -96,7 +97,7 @@ export default function BandingkanClient({ kosts: all }: { kosts: Kost[] }) {
                   ))}
                 </Row>
                 <Row label="Area">
-                  {items.map((k) => <td key={k.id} className="p-4 align-top text-slate-700">{k.area}, Jakarta</td>)}
+                  {items.map((k) => <td key={k.id} className="p-4 align-top text-slate-700">{formatKostLocation(k)}</td>)}
                 </Row>
                 <Row label="Tipe">
                   {items.map((k) => <td key={k.id} className="p-4 align-top text-slate-700">Kost {TIPE_LABEL[k.tipe] || k.tipe}</td>)}

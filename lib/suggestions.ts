@@ -1,6 +1,7 @@
 import { Kost } from './types';
 import { LANDMARKS } from './geo';
 import { FACILITY_CATEGORIES } from './facilities';
+import { formatKostLocation, getCityForArea, JAKARTA_CITIES } from './jakarta-regions';
 
 export type SuggestionKind = 'kost' | 'area' | 'kampus' | 'stasiun' | 'fasilitas';
 
@@ -45,22 +46,55 @@ export function buildSuggestions(query: string, kosts: Kost[], limit = 8): Sugge
   const push = (s: Suggestion, sc: number, order: number) => sc > 0 && out.push({ ...s, s: sc, order });
 
   for (const k of kosts) {
+    const loc = formatKostLocation(k);
     push(
       {
         kind: 'kost',
         label: k.nama,
-        sub: `${k.area}, Jakarta`,
+        sub: loc,
         value: k.slug,
         href: `/kost/${(k.kota || 'jakarta').toLowerCase()}/${k.area.toLowerCase()}/${k.slug}`,
       },
-      Math.max(score(k.nama, q), score(k.alamat, q) > 0 ? 1 : 0),
+      Math.max(
+        score(k.nama, q),
+        score(k.alamat, q) > 0 ? 1 : 0,
+        score(loc, q) > 0 ? 1 : 0
+      ),
       1
     );
   }
 
   for (const area of Array.from(new Set(kosts.map((k) => k.area)))) {
     const n = kosts.filter((k) => k.area === area).length;
-    push({ kind: 'area', label: `Kost di ${area}`, sub: `${n} kost`, value: area }, score(area, q), 0);
+    const city = getCityForArea(area);
+    const fullLoc = `${area}, ${city}`;
+    const areaScore = Math.max(score(area, q), score(fullLoc, q), score(city, q) > 0 ? 1 : 0);
+    push(
+      {
+        kind: 'area',
+        label: `Kost di ${fullLoc}`,
+        sub: `${city} • ${n} kost`,
+        value: area,
+      },
+      areaScore,
+      0
+    );
+  }
+
+  for (const city of JAKARTA_CITIES) {
+    const n = kosts.filter((k) => getCityForArea(k.area) === city).length;
+    if (n > 0) {
+      push(
+        {
+          kind: 'area',
+          label: `Kost di ${city}`,
+          sub: `${n} kost di ${city}`,
+          value: city,
+        },
+        score(city, q),
+        0
+      );
+    }
   }
 
   for (const l of LANDMARKS) {

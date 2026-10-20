@@ -9,6 +9,7 @@ import './papi-home.css';
 import { useWishlist } from '@/lib/wishlist';
 import { toast } from '@/lib/toast';
 import { RatingBadge } from '@/components/StarRating';
+import { formatKostLocation } from '@/lib/jakarta-regions';
 import SearchSuggest from '@/components/SearchSuggest';
 import type { Suggestion } from '@/lib/suggestions';
 import {
@@ -129,7 +130,7 @@ function PropertyCard({ kost }: { kost: Kost }) {
           </div>
           <h3 className="property-title" title={kost.nama}>{kost.nama}</h3>
           <p className="papi-location">
-            <MapPin size={13} className="location-pin" style={{ display: 'inline', verticalAlign: '-2px' }} /> {kost.area}, Jakarta
+            <MapPin size={13} className="location-pin" style={{ display: 'inline', verticalAlign: '-2px' }} /> {formatKostLocation(kost)}
           </p>
           {kost.rating && kost.rating.count > 0 && (
             <div style={{ marginBottom: '0.5rem' }}><RatingBadge rating={kost.rating} /></div>

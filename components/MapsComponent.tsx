@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Kost } from '@/lib/types';
 import { MapPin, X, ArrowRight, ShieldCheck, Eye, Layers, Compass, ZoomIn, ZoomOut } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+import { formatKostLocation } from '@/lib/jakarta-regions';
 
 interface MapsComponentProps {
   kosts: Kost[];
@@ -248,7 +249,7 @@ export default function MapsComponent({ kosts, selectedKost, onSelectKost }: Map
           <div className="flex items-start justify-between gap-3 mb-2">
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#0F2A43] bg-[#FFEDD5] px-2.5 py-0.5 rounded-full border border-[#F97316]/40">
               <ShieldCheck className="w-3.5 h-3.5 text-[#C2410C]" />
-              <span>{selectedKost.area}, Jakarta</span>
+              <span>{formatKostLocation(selectedKost)}</span>
             </div>
             <button
               onClick={() => onSelectKost(null)}

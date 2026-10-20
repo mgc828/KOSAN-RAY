@@ -9,6 +9,7 @@ import { MapPin, Lock, Unlock, Eye, Sparkles, ShieldCheck, Heart, Scale, Navigat
 import { useWishlist, useCompare, COMPARE_MAX } from '@/lib/wishlist';
 import { toast } from '@/lib/toast';
 import { RatingBadge } from '@/components/StarRating';
+import { formatKostLocation } from '@/lib/jakarta-regions';
 
 interface KostCardProps {
   kost: Kost;
@@ -97,7 +98,7 @@ export default function KostCard({ kost, priority = false, distanceLabel, layout
                   </h3>
                   <p className="flex items-center gap-1 text-xs text-slate-500 mt-0.5 truncate">
                     <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                    <span>{kost.area}, Jakarta</span>
+                    <span>{formatKostLocation(kost)}</span>
                   </p>
                 </div>
                 <RatingBadge rating={kost.rating} />
@@ -241,7 +242,7 @@ export default function KostCard({ kost, priority = false, distanceLabel, layout
             {/* Location */}
             <p className="flex items-center gap-1 text-xs text-slate-500 mt-0.5 truncate">
               <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <span>{kost.area}, Jakarta</span>
+              <span>{formatKostLocation(kost)}</span>
             </p>
             <RatingBadge rating={kost.rating} />
             {distanceLabel && (
