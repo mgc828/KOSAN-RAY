@@ -27,8 +27,8 @@ export default function Footer() {
 
           <div className="footer-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2.5rem' }}>
             {/* Bagian Brand: Isi dibuat space between */}
-            <div className="footer-brand" style={{ display: 'flex', justifyContent: 'space-between', gap: '2rem', flex: '1.8 1 450px', flexWrap: 'wrap' }}>
-              <div className="footer-social" style={{ flex: '1 1 200px', maxWidth: 300, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div className="footer-brand" style={{ display: 'flex', justifyContent: 'space-between', gap: '2rem', flex: '1.8 1 450px', flexWrap: 'wrap', textAlign: 'left', alignItems: 'flex-start' }}>
+              <div className="footer-social" style={{ flex: '1 1 200px', maxWidth: 300, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', textAlign: 'left', alignItems: 'flex-start' }}>
                 <div>
                   <h4>TETAP TERHUBUNG</h4>
                   <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
@@ -39,7 +39,7 @@ export default function Footer() {
                   <Shield size={16} /> Verifikasi Langsung ke Pemilik
                 </p>
               </div>
-              <div className="footer-app" style={{ flex: '1 1 200px', maxWidth: 300 }}>
+              <div className="footer-app" style={{ flex: '1 1 200px', maxWidth: 300, textAlign: 'left', alignItems: 'flex-start' }}>
                 <h4>SISTEM TRANSPARAN</h4>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#F97316', fontWeight: 800, fontSize: 14 }}>
                   <QrCode size={16} /> Rp15.000 Flat / 30 Hari

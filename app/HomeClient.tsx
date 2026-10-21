@@ -339,29 +339,30 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
         <div className="container" style={{ overflow: 'visible' }}>
           <h2>Rekomendasi Kost Di Jakarta Untukmu</h2>
           <p className="section-description">Cari kost terbaik di Jakarta yang sesuai dengan kebutuhan dan budget kamu</p>
-          <div className="papi-property-carousel-container" style={{ overflow: 'visible' }}>
+          <div className="papi-property-carousel-container">
             <button className="papi-carousel-control papi-prev-btn" onClick={() => goTo(page - 1)} aria-label="Sebelumnya" style={{ display: pages > 1 ? 'flex' : 'none' }}>
               <ChevronLeft size={20} />
             </button>
-            <div
-              className="papi-property-carousel"
-              ref={carouselRef}
-              tabIndex={0}
-              role="region"
-              aria-label="Rekomendasi kost"
-              onKeyDown={onKeyDown}
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
-              style={{
-                overflow: 'visible',
-                transform: `translateX(-${Math.max(0, translateX - dragDelta)}px)`,
-                transition: dragDelta !== 0 ? 'none' : 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
-              }}
-            >
-              {kosts.map((k) => (
-                <PropertyCard key={k.id} kost={k} />
-              ))}
+            <div className="papi-property-carousel-wrapper">
+              <div
+                className="papi-property-carousel"
+                ref={carouselRef}
+                tabIndex={0}
+                role="region"
+                aria-label="Rekomendasi kost"
+                onKeyDown={onKeyDown}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                style={{
+                  transform: `translateX(-${Math.max(0, translateX - dragDelta)}px)`,
+                  transition: dragDelta !== 0 ? 'none' : 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+                }}
+              >
+                {kosts.map((k) => (
+                  <PropertyCard key={k.id} kost={k} />
+                ))}
+              </div>
             </div>
             <button className="papi-carousel-control papi-next-btn" onClick={() => goTo(page + 1)} aria-label="Selanjutnya" style={{ display: pages > 1 ? 'flex' : 'none' }}>
               <ChevronRight size={20} />

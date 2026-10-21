@@ -49,10 +49,10 @@ export default function KostCard({ kost, priority = false, distanceLabel, layout
 
   if (layout === 'list') {
     return (
-      <div className="group relative block w-full rounded-2xl overflow-visible border border-slate-200 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#F97316] hover:shadow-[0_12px_28px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] focus-within:shadow-[0_12px_28px_rgba(249,115,22,0.18)]">
+      <div className="group relative block w-full rounded-[20px] overflow-visible border border-slate-200 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#F97316] hover:shadow-[0_12px_28px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] focus-within:shadow-[0_12px_28px_rgba(249,115,22,0.18)]">
         <Link href={detailUrl} className="block relative sm:flex sm:flex-row sm:items-stretch">
           {/* Main Image Container */}
-          <div className="relative aspect-[16/10] sm:aspect-auto sm:w-72 md:w-80 lg:w-96 overflow-hidden bg-slate-100 shrink-0 min-h-[190px]">
+          <div className="relative aspect-[16/10] sm:aspect-auto sm:w-72 md:w-80 lg:w-96 overflow-hidden bg-slate-100 shrink-0 min-h-[190px] rounded-t-[20px] sm:rounded-l-[20px] sm:rounded-tr-none">
             <Image
               src={thumbUrl}
               alt={thumbMedia?.alt_text || kost.nama}
@@ -89,7 +89,7 @@ export default function KostCard({ kost, priority = false, distanceLabel, layout
           </div>
 
           {/* Info Card */}
-          <div className="bg-white p-4 sm:p-5 flex-1 flex flex-col justify-between">
+          <div className="bg-white p-4 sm:p-5 flex-1 flex flex-col justify-between rounded-b-[20px] sm:rounded-r-[20px] sm:rounded-bl-none">
             <div>
               <div className="flex items-start justify-between gap-3 sm:pr-24">
                 <div className="min-w-0">
@@ -191,10 +191,10 @@ export default function KostCard({ kost, priority = false, distanceLabel, layout
   }
 
   return (
-    <div className="group relative block w-full rounded-xl overflow-visible border border-slate-200 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-[#F97316] hover:shadow-[0_12px_28px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] focus-within:shadow-[0_12px_28px_rgba(249,115,22,0.18)]">
+    <div className="group relative block w-full rounded-[20px] overflow-visible border border-slate-200 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-[#F97316] hover:shadow-[0_12px_28px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] focus-within:shadow-[0_12px_28px_rgba(249,115,22,0.18)]">
       <Link href={detailUrl} className="block relative">
         {/* Main Image Container - Sekitar Vertical Card Style */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 rounded-t-[20px]">
           <Image
             src={thumbUrl}
             alt={thumbMedia?.alt_text || kost.nama}
@@ -233,7 +233,7 @@ export default function KostCard({ kost, priority = false, distanceLabel, layout
 
         </div>
           {/* Signature Floating Glass Info Card (Sekitar Style) */}
-          <div className="bg-white p-4">
+          <div className="bg-white p-4 rounded-b-[20px]">
             {/* Title */}
             <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate group-hover:text-black transition-colors">
               {kost.nama}

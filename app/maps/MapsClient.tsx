@@ -69,10 +69,12 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
   const [isKecamatanDropdownOpen, setIsKecamatanDropdownOpen] = useState(false);
   const [isTipeDropdownOpen, setIsTipeDropdownOpen] = useState(false);
+  const [isLandmarkDropdownOpen, setIsLandmarkDropdownOpen] = useState(false);
 
   const locationDropdownRef = useRef<HTMLDivElement>(null);
   const kecamatanDropdownRef = useRef<HTMLDivElement>(null);
   const tipeDropdownRef = useRef<HTMLDivElement>(null);
+  const landmarkDropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -85,6 +87,9 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
       }
       if (tipeDropdownRef.current && !tipeDropdownRef.current.contains(event.target as Node)) {
         setIsTipeDropdownOpen(false);
+      }
+      if (landmarkDropdownRef.current && !landmarkDropdownRef.current.contains(event.target as Node)) {
+        setIsLandmarkDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -899,22 +904,84 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               {/* 4. Dekat kampus / stasiun */}
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
-                  <div>
-                    <label htmlFor="map-landmark" className="font-bold text-slate-700 mb-1.5 block">Dekat kampus / stasiun</label>
-                    <select
-                      id="map-landmark"
-                      value={landmarkId ?? ''}
-                      onChange={(e) => setLandmarkId(e.target.value || null)}
-                      className={`w-full py-2.5 px-3 bg-white rounded-xl border ${landmark ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900' : 'border-slate-300 text-slate-500'}`}
+                  <div ref={landmarkDropdownRef} className="relative">
+                    <label className="font-bold text-slate-700 mb-1.5 block">Dekat kampus / stasiun</label>
+                    <button
+                      type="button"
+                      onClick={() => setIsLandmarkDropdownOpen(!isLandmarkDropdownOpen)}
+                      className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all ${
+                        landmark
+                          ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900'
+                          : 'border-slate-300 text-slate-500'
+                      }`}
                     >
-                      <option value="">Semua lokasi</option>
-                      <optgroup label="Kampus">
-                        {LANDMARKS.filter((l) => l.type === 'kampus').map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
-                      </optgroup>
-                      <optgroup label="Stasiun & MRT">
-                        {LANDMARKS.filter((l) => l.type === 'stasiun').map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
-                      </optgroup>
-                    </select>
+                      <span className="truncate">{landmark ? landmark.name : 'Semua lokasi'}</span>
+                      <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isLandmarkDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isLandmarkDropdownOpen && (
+                      <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLandmarkId(null);
+                            setIsLandmarkDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors text-left ${
+                            !landmarkId ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                          }`}
+                        >
+                          <span>Semua lokasi</span>
+                          {!landmarkId && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                        </button>
+
+                        <div>
+                          <p className="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">Kampus</p>
+                          {LANDMARKS.filter((l) => l.type === 'kampus').map((l) => {
+                            const isSelected = landmarkId === l.id;
+                            return (
+                              <button
+                                key={l.id}
+                                type="button"
+                                onClick={() => {
+                                  setLandmarkId(l.id);
+                                  setIsLandmarkDropdownOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors text-left ${
+                                  isSelected ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                                }`}
+                              >
+                                <span className="truncate">{l.name}</span>
+                                {isSelected && <Check className="w-3.5 h-3.5 text-[#C2410C] shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div>
+                          <p className="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">Stasiun & MRT</p>
+                          {LANDMARKS.filter((l) => l.type === 'stasiun').map((l) => {
+                            const isSelected = landmarkId === l.id;
+                            return (
+                              <button
+                                key={l.id}
+                                type="button"
+                                onClick={() => {
+                                  setLandmarkId(l.id);
+                                  setIsLandmarkDropdownOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors text-left ${
+                                  isSelected ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                                }`}
+                              >
+                                <span className="truncate">{l.name}</span>
+                                {isSelected && <Check className="w-3.5 h-3.5 text-[#C2410C] shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <button
                     type="button"
