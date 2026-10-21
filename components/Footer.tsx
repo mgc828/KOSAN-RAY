@@ -14,7 +14,7 @@ export default function Footer() {
   return (
     <div className="papi-home">
       <footer className="site-footer" data-header-theme="dark">
-        <div className="container">
+        <div className="container" style={{ overflow: 'visible' }}>
           {/* Logo Kost-Kostan di atas konten footer dan posisinya di kiri */}
           <div className="footer-top-brand" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '2rem' }}>
             <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 10, margin: 0 }}>
@@ -25,23 +25,26 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="footer-content">
-            <div className="footer-brand">
-              <div className="footer-social">
-                <h4>TETAP TERHUBUNG</h4>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, maxWidth: 280 }}>
-                  Platform cari kost terpercaya di sekitarmu. Buka seluruh nomor kontak pemilik kost asli, foto kamar resolusi tinggi, dan video walkthrough 360° tanpa calo hanya Rp15.000 / 30 hari.
-                </p>
+          <div className="footer-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2.5rem' }}>
+            {/* Bagian Brand: Isi dibuat space between */}
+            <div className="footer-brand" style={{ display: 'flex', justifyContent: 'space-between', gap: '2rem', flex: '1.8 1 450px', flexWrap: 'wrap' }}>
+              <div className="footer-social" style={{ flex: '1 1 200px', maxWidth: 300, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <h4>TETAP TERHUBUNG</h4>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+                    Platform cari kost terpercaya di sekitarmu. Buka seluruh nomor kontak pemilik kost asli, foto kamar resolusi tinggi, dan video walkthrough 360° tanpa calo hanya Rp15.000 / 30 hari.
+                  </p>
+                </div>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#F97316', fontWeight: 600, marginTop: 12 }}>
                   <Shield size={16} /> Verifikasi Langsung ke Pemilik
                 </p>
               </div>
-              <div className="footer-app">
+              <div className="footer-app" style={{ flex: '1 1 200px', maxWidth: 300 }}>
                 <h4>SISTEM TRANSPARAN</h4>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#F97316', fontWeight: 800, fontSize: 14 }}>
                   <QrCode size={16} /> Rp15.000 Flat / 30 Hari
                 </p>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, maxWidth: 280, marginTop: 6 }}>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, marginTop: 6 }}>
                   Pembayaran instan QRIS (GoPay, OVO, ShopeePay, DANA) langsung aktif otomatis. kost-kostan tidak memotong komisi sewa bulanan apapun dari pemilik maupun penghuni kost.
                 </p>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#34d399', fontWeight: 600, marginTop: 8 }}>
@@ -50,16 +53,8 @@ export default function Footer() {
               </div>
             </div>
 
-            <div className="footer-nav-column">
-              <h4><span>Halaman</span></h4>
-              <ul>
-                <li><Link href="/">Beranda</Link></li>
-                <li><Link href="/cari-kost">Cari Kost</Link></li>
-                <li><Link href="/maps">Maps</Link></li>
-              </ul>
-            </div>
-
-            <div className="footer-nav-column">
+            {/* Di tengah: MENU & LEGAL */}
+            <div className="footer-nav-column" style={{ flex: '1 1 200px', minWidth: 180 }}>
               <h4><span>MENU &amp; LEGAL</span></h4>
               <ul>
                 <li><Link href="/tentang">Tentang kost-kostan</Link></li>
@@ -67,6 +62,16 @@ export default function Footer() {
                 <li><Link href="/syarat-ketentuan">Syarat &amp; Ketentuan Akses</Link></li>
                 <li><Link href="/kontak">Kontak &amp; Bantuan WhatsApp</Link></li>
                 <li><Link href="/admin">Panel Pengelola Kost (Admin)</Link></li>
+              </ul>
+            </div>
+
+            {/* Sebelah kanan: Halaman */}
+            <div className="footer-nav-column" style={{ flex: '0.8 1 150px', minWidth: 140 }}>
+              <h4><span>Halaman</span></h4>
+              <ul>
+                <li><Link href="/">Beranda</Link></li>
+                <li><Link href="/cari-kost">Cari Kost</Link></li>
+                <li><Link href="/maps">Maps</Link></li>
               </ul>
             </div>
           </div>
