@@ -22,6 +22,26 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const logout = useCallback(async () => {
+    try {
+      await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ action: 'logout' }),
+      });
+    } catch {
+      // Ignore network errors on logout
+    } finally {
+      setAdmin(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('kk_admin_last_activity');
+      }
+      toast('Berhasil keluar dari sesi admin', 'info');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
   const checkSession = useCallback(async (): Promise<boolean> => {
     try {
       const res = await fetch('/api/admin/auth', {
@@ -47,6 +67,28 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const login = useCallback(async (email: string, password: string, rememberMe = false) => {
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ action: 'login', email, password, rememberMe }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAdmin(data.admin);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('kk_admin_last_activity', Date.now().toString());
+        }
+        return { success: true };
+      }
+      return { success: false, error: data.error || 'Email atau password salah' };
+    } catch {
+      return { success: false, error: 'Gagal terhubung ke server autentikasi' };
+    }
+  }, []);
+
   // 15 Minutes Idle Timeout: Auto logout if no activity for 15 minutes
   const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 menit
   const LAST_ACTIVITY_KEY = 'kk_admin_last_activity';
@@ -68,6 +110,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!pathname.startsWith('/admin') || pathname === '/admin/login') return;
+    if (typeof window === 'undefined') return;
 
     // Reset timestamp on mount if not set
     if (!localStorage.getItem(LAST_ACTIVITY_KEY)) {
@@ -79,7 +122,11 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       const now = Date.now();
       if (now - lastRecorded > 3000) {
         lastRecorded = now;
-        localStorage.setItem(LAST_ACTIVITY_KEY, now.toString());
+        try {
+          localStorage.setItem(LAST_ACTIVITY_KEY, now.toString());
+        } catch {
+          // ignore localStorage quota errors
+        }
       }
     };
 
@@ -88,15 +135,19 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check every 5 seconds if 15 minutes of inactivity have elapsed
     const checkInterval = setInterval(() => {
-      const lastActiveStr = localStorage.getItem(LAST_ACTIVITY_KEY);
-      const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : Date.now();
-      const idleTime = Date.now() - lastActive;
+      try {
+        const lastActiveStr = localStorage.getItem(LAST_ACTIVITY_KEY);
+        const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : Date.now();
+        const idleTime = Date.now() - lastActive;
 
-      if (idleTime >= IDLE_TIMEOUT_MS) {
-        clearInterval(checkInterval);
-        localStorage.removeItem(LAST_ACTIVITY_KEY);
-        toast('Sesi Anda telah berakhir karena tidak ada aktivitas selama 15 menit. Silakan login kembali.', 'error');
-        logout();
+        if (idleTime >= IDLE_TIMEOUT_MS) {
+          clearInterval(checkInterval);
+          localStorage.removeItem(LAST_ACTIVITY_KEY);
+          toast('Sesi Anda telah berakhir karena tidak ada aktivitas selama 15 menit. Silakan login kembali.', 'error');
+          logout();
+        }
+      } catch {
+        // ignore
       }
     }, 5000);
 
@@ -105,40 +156,6 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       clearInterval(checkInterval);
     };
   }, [pathname, logout]);
-
-  const login = async (email: string, password: string, rememberMe = false) => {
-    try {
-      const res = await fetch('/api/admin/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ action: 'login', email, password, rememberMe }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setAdmin(data.admin);
-        return { success: true };
-      }
-      return { success: false, error: data.error || 'Email atau password salah' };
-    } catch {
-      return { success: false, error: 'Gagal terhubung ke server autentikasi' };
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await fetch('/api/admin/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ action: 'logout' }),
-      });
-    } finally {
-      setAdmin(null);
-      toast('Berhasil keluar dari sesi admin', 'info');
-      router.push('/admin/login');
-    }
-  };
 
   return (
     <AdminContext.Provider
@@ -163,4 +180,3 @@ export function useAdmin() {
   }
   return ctx;
 }
-
