@@ -47,6 +47,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // 15 Minutes Idle Timeout: Auto logout if no activity for 15 minutes
+  const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 menit
+  const LAST_ACTIVITY_KEY = 'kk_admin_last_activity';
+
   useEffect(() => {
     let isMounted = true;
     checkSession().then((isAuth) => {
@@ -61,6 +65,46 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       isMounted = false;
     };
   }, [checkSession, pathname, router]);
+
+  useEffect(() => {
+    if (!pathname.startsWith('/admin') || pathname === '/admin/login') return;
+
+    // Reset timestamp on mount if not set
+    if (!localStorage.getItem(LAST_ACTIVITY_KEY)) {
+      localStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
+    }
+
+    let lastRecorded = Date.now();
+    const handleUserActivity = () => {
+      const now = Date.now();
+      if (now - lastRecorded > 3000) {
+        lastRecorded = now;
+        localStorage.setItem(LAST_ACTIVITY_KEY, now.toString());
+      }
+    };
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach(evt => window.addEventListener(evt, handleUserActivity, { passive: true }));
+
+    // Check every 5 seconds if 15 minutes of inactivity have elapsed
+    const checkInterval = setInterval(() => {
+      const lastActiveStr = localStorage.getItem(LAST_ACTIVITY_KEY);
+      const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : Date.now();
+      const idleTime = Date.now() - lastActive;
+
+      if (idleTime >= IDLE_TIMEOUT_MS) {
+        clearInterval(checkInterval);
+        localStorage.removeItem(LAST_ACTIVITY_KEY);
+        toast('Sesi Anda telah berakhir karena tidak ada aktivitas selama 15 menit. Silakan login kembali.', 'error');
+        logout();
+      }
+    }, 5000);
+
+    return () => {
+      events.forEach(evt => window.removeEventListener(evt, handleUserActivity));
+      clearInterval(checkInterval);
+    };
+  }, [pathname, logout]);
 
   const login = async (email: string, password: string, rememberMe = false) => {
     try {

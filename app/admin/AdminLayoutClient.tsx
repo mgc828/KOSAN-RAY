@@ -160,19 +160,19 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
       {/* 1. SIDEBAR (Collapsible, Navy #0F2A43) */}
       <aside 
         className={`fixed inset-y-0 left-0 z-40 bg-[#0F2A43] text-white flex flex-col justify-between transition-all duration-300 shadow-xl ${
-          collapsed ? 'w-16' : 'w-60'
+          collapsed ? 'w-16' : 'w-72'
         } max-md:hidden`}
       >
         <div>
           {/* Brand & Collapse Header */}
-          <div className="h-16 px-4 flex items-center justify-between border-b border-white/10">
+          <div className="h-20 px-5 flex items-center justify-between border-b border-white/10">
             {!collapsed && (
               <Link href="/admin" className="flex items-center gap-2.5 overflow-hidden">
                 <div className="w-9 h-9 rounded-xl bg-[#F97316] flex items-center justify-center shrink-0 shadow-md">
                   <Compass className="w-5 h-5 text-slate-900" />
                 </div>
                 <div className="truncate">
-                  <span className="font-black text-lg tracking-tight block leading-tight text-white">Kost-Kostan</span>
+                  <span className="font-black text-2xl tracking-tight block leading-tight text-white">Kost-Kostan</span>
                   <span className="text-[10px] text-[#F97316] font-extrabold uppercase tracking-widest">Admin Portal</span>
                 </div>
               </Link>
@@ -199,7 +199,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           </div>
 
           {/* Nav Items */}
-          <nav className="p-3 space-y-1.5 overflow-y-auto max-h-[calc(100vh-140px)]">
+          <nav className="p-3.5 space-y-3 overflow-y-auto max-h-[calc(100vh-160px)]">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -208,13 +208,13 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                   key={item.href}
                   href={item.href}
                   title={collapsed ? item.name : undefined}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
                     isActive
-                      ? 'bg-[#F97316] text-white shadow-md shadow-[#F97316]/20'
-                      : 'text-white/75 hover:bg-white/10 hover:text-white'
+                      ? 'bg-[#F97316] text-white shadow-md shadow-[#F97316]/25'
+                      : 'text-white/80 hover:bg-[#F97316]/20 hover:text-white hover:border hover:border-[#F97316]/30'
                   } ${collapsed ? 'justify-center px-2' : ''}`}
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
+                  <Icon className="w-4.5 h-4.5 shrink-0" />
                   {!collapsed && <span className="truncate">{item.name}</span>}
                 </Link>
               );
@@ -266,11 +266,11 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
       {/* 2. MAIN WRAPPER */}
       <div 
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-          collapsed ? 'md:pl-16' : 'md:pl-60'
+          collapsed ? 'md:pl-16' : 'md:pl-72'
         }`}
       >
         {/* TOPBAR */}
-        <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between gap-4 shadow-xs">
+        <header className="sticky top-0 z-30 h-20 bg-white border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between gap-4 shadow-xs">
           {/* Left: Mobile hamburger & Title/Breadcrumbs */}
           <div className="flex items-center gap-3">
             <button
@@ -291,7 +291,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                   </React.Fragment>
                 ))}
               </div>
-              <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
                 {pageTitle}
               </h1>
             </div>
