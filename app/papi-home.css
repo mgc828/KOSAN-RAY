@@ -515,10 +515,10 @@
 .papi-home .papi-recommendations .container{max-width:1200px;margin:0 auto;padding:0 1rem}
 .papi-home .papi-property-carousel-container{position:relative;width:100%;max-width:1300px;margin:0 auto 0.25rem;padding:0 2.5rem}
 .papi-home .papi-property-carousel-wrapper{width:100%;overflow:hidden}
-.papi-home .papi-property-carousel{display:flex;gap:1.25rem;padding:24px 20px 24px 20px;margin:0;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-x:contain;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.papi-home .papi-property-carousel{display:flex;gap:1.25rem;padding:24px 20px;margin:0;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scroll-snap-type:x mandatory;scroll-padding:0 20px;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .papi-home .papi-property-carousel:active{cursor:grabbing}
 .papi-home .papi-property-carousel::-webkit-scrollbar{display:none}
-.papi-home .papi-property-card{width:calc((100% - 3.75rem) / 4);background:var(--white);border-radius:20px;position:relative;flex-shrink:0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);border:1px solid rgba(0,0,0,0.08);box-shadow:0 4px 16px rgba(0,0,0,0.08);overflow:visible}
+.papi-home .papi-property-card{width:calc((100% - 3.75rem) / 4);background:var(--white);border-radius:20px;position:relative;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:normal;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);border:1px solid rgba(0,0,0,0.08);box-shadow:0 4px 16px rgba(0,0,0,0.08);overflow:visible}
 .papi-home .papi-property-card:hover{transform:translateY(-6px);box-shadow:0 16px 36px rgba(249,115,22,0.24);border-color:var(--yellow);z-index:5}
 .papi-home .property-card-link{display:block;color:inherit;text-decoration:none;position:relative;height:100%;width:100%;border-radius:20px;overflow:hidden;z-index:1;-webkit-user-drag:none;user-select:none}
 .papi-home .property-card-link:hover{color:inherit;text-decoration:none}
@@ -579,8 +579,8 @@
 .papi-home .papi-recommendations{padding:2.5rem 0 1.75rem}
 .papi-home .papi-recommendations h2{margin-bottom:1.5rem;font-size:1.5rem}
 .papi-home .papi-property-carousel-container{padding:0 0.5rem;margin:0 auto 0.25rem}
-.papi-home .papi-property-carousel{padding:20px 16px 20px 16px}
-.papi-home .papi-property-card{width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 !important}
+.papi-home .papi-property-carousel{padding:20px 16px;scroll-padding:0 16px}
+.papi-home .papi-property-card{width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 !important;scroll-snap-align:start;scroll-snap-stop:normal}
 .papi-home .papi-carousel-control{width:36px;height:36px}
 .papi-home .papi-carousel-indicators{margin:0.25rem auto 1rem;gap:0.45rem;padding:4px 16px}
 .papi-home .papi-indicator{width:9px;height:9px}
@@ -589,12 +589,14 @@
 }
 @media (max-width:576px){
 .papi-home .papi-property-carousel-container{padding:0 0.5rem}
-.papi-home .papi-property-card{width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 !important}
+.papi-home .papi-property-carousel{padding:16px 12px;scroll-padding:0 12px}
+.papi-home .papi-property-card{width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 !important;scroll-snap-align:start;scroll-snap-stop:normal}
 .papi-home .papi-property-info{padding:1rem}
 .papi-home .papi-property-info h3{font-size:1rem;line-height:1.3}
 }
 @media (max-width:480px){
-.papi-home .papi-property-card{width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 !important}
+.papi-home .papi-property-carousel{padding:16px 8px;scroll-padding:0 8px}
+.papi-home .papi-property-card{width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 !important;scroll-snap-align:start;scroll-snap-stop:normal}
 .papi-home .papi-property-info{padding:0.8rem}
 .papi-home .papi-property-info h3{font-size:0.95rem;line-height:1.3}
 .papi-home .papi-discounted-price{font-size:1.1rem}

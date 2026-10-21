@@ -200,60 +200,71 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
 
   const pages = Math.max(1, Math.ceil(displayKosts.length / perView));
 
-  const getStep = useCallback(() => {
-    const el = carouselRef.current;
-    const card = el?.querySelector('.papi-property-card') as HTMLElement | null;
-    if (!card) return 0;
-    return perView * (card.offsetWidth + 20);
-  }, [perView]);
-
-  const smoothScrollTo = useCallback((el: HTMLElement, targetLeft: number, duration = 350) => {
-    const startLeft = el.scrollLeft;
-    const distance = targetLeft - startLeft;
-    if (Math.abs(distance) < 2) {
-      el.scrollLeft = targetLeft;
-      return;
-    }
-    const startTime = performance.now();
-    const step = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-      el.scrollLeft = startLeft + distance * ease;
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-    requestAnimationFrame(step);
-  }, []);
-
   const goTo = useCallback((p: number) => {
     const clamped = Math.max(0, Math.min(p, pages - 1));
     setPage(clamped);
     const el = carouselRef.current;
-    if (el) {
-      const step = getStep();
-      smoothScrollTo(el, clamped * step);
+    if (!el) return;
+
+    const cards = el.querySelectorAll<HTMLElement>('.papi-property-card');
+    if (!cards.length) return;
+
+    let targetLeft = 0;
+    const cardIndex = clamped * perView;
+    if (cards[cardIndex]) {
+      targetLeft = cards[cardIndex].offsetLeft - el.offsetLeft;
+    } else {
+      const card = cards[0];
+      const step = perView * (card.offsetWidth + 20);
+      targetLeft = clamped * step;
     }
-  }, [pages, getStep, smoothScrollTo]);
+
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (clamped === pages - 1 && targetLeft < maxScroll) {
+      targetLeft = maxScroll;
+    }
+
+    el.scrollTo({
+      left: Math.max(0, targetLeft),
+      behavior: 'smooth',
+    });
+  }, [pages, perView]);
 
   useEffect(() => {
     const el = carouselRef.current;
     if (!el) return;
-    const step = getStep();
-    el.scrollLeft = page * step;
-  }, [perView, getStep]);
+    const cards = el.querySelectorAll<HTMLElement>('.papi-property-card');
+    const cardIndex = page * perView;
+    if (cards[cardIndex]) {
+      el.scrollLeft = Math.max(0, cards[cardIndex].offsetLeft - el.offsetLeft);
+    }
+  }, [perView]);
 
   const syncPageFromScroll = useCallback(() => {
     if (isPointerDownRef.current) return;
     const el = carouselRef.current;
-    const card = el?.querySelector('.papi-property-card') as HTMLElement | null;
-    if (!el || !card) return;
-    const step = perView * (card.offsetWidth + 20);
+    if (!el) return;
+
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) return;
+
+    if (el.scrollLeft + 15 >= maxScroll) {
+      setPage(pages - 1);
+      return;
+    }
+
+    const cards = el.querySelectorAll<HTMLElement>('.papi-property-card');
+    if (!cards.length) return;
+
+    const card = cards[0];
+    const cardWidth = card.offsetWidth;
+    const gap = 20;
+    const step = perView * (cardWidth + gap);
     if (step <= 0) return;
-    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10;
-    const next = atEnd ? pages - 1 : Math.round(el.scrollLeft / step);
-    setPage(Math.max(0, Math.min(next, pages - 1)));
+
+    const calculated = Math.round(el.scrollLeft / step);
+    const target = Math.max(0, Math.min(calculated, pages - 1));
+    setPage(target);
   }, [pages, perView]);
 
   useEffect(() => {
@@ -280,39 +291,9 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
     }
   }, [page]);
 
-  // Handle trackpad two-finger horizontal gesture
-  useEffect(() => {
-    const el = carouselRef.current;
-    if (!el) return;
-
-    let wheelTimeout: ReturnType<typeof setTimeout>;
-
-    const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || Math.abs(e.deltaX) > 2) {
-        e.preventDefault();
-        el.scrollLeft += e.deltaX;
-
-        clearTimeout(wheelTimeout);
-        wheelTimeout = setTimeout(() => {
-          const card = el.querySelector('.papi-property-card') as HTMLElement | null;
-          if (!card) return;
-          const step = perView * (card.offsetWidth + 20);
-          if (step <= 0) return;
-          const targetPage = Math.max(0, Math.min(Math.round(el.scrollLeft / step), pages - 1));
-          goTo(targetPage);
-        }, 100);
-      }
-    };
-
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => {
-      el.removeEventListener('wheel', onWheel);
-      clearTimeout(wheelTimeout);
-    };
-  }, [perView, pages, goTo]);
-
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    // Tangani mouse drag di desktop, biarkan native touch di mobile dan trackpad gesture berjalan fluid
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
     const el = carouselRef.current;
     if (!el) return;
 
@@ -323,10 +304,14 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
     startScrollLeftRef.current = el.scrollLeft;
     dragDistanceRef.current = 0;
     isHorizontalDragRef.current = null;
+
+    // Matikan snap & smooth sesaat saat mouse dragging fisik
+    el.style.scrollBehavior = 'auto';
+    el.style.scrollSnapType = 'none';
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isPointerDownRef.current) return;
+    if (!isPointerDownRef.current || e.pointerType !== 'mouse') return;
     const el = carouselRef.current;
     if (!el) return;
 
@@ -349,12 +334,21 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
   const endDrag = (clientX?: number) => {
     if (!isPointerDownRef.current) return;
     isPointerDownRef.current = false;
+    const el = carouselRef.current;
+    if (el) {
+      el.style.scrollBehavior = 'smooth';
+      el.style.scrollSnapType = 'x mandatory';
+    }
 
     if (hasDraggedRef.current) {
       const dx = clientX !== undefined ? clientX - startXRef.current : dragDistanceRef.current;
-      if (dx < -40) {
+      const card = el?.querySelector('.papi-property-card') as HTMLElement | null;
+      const cardWidth = card ? card.offsetWidth + 20 : 300;
+      const threshold = Math.min(cardWidth * 0.25, 70);
+
+      if (dx < -threshold) {
         goTo(page + 1);
-      } else if (dx > 40) {
+      } else if (dx > threshold) {
         goTo(page - 1);
       } else {
         goTo(page);
@@ -496,12 +490,6 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerCancel}
-                style={{
-                  overflowX: 'auto',
-                  overflowY: 'hidden',
-                  padding: '24px 20px 24px 20px',
-                  touchAction: 'pan-y',
-                }}
               >
                 {displayKosts.map((k) => (
                   <PropertyCard key={k.id} kost={k} onLinkClick={handleCardLinkClick} />
