@@ -9,7 +9,7 @@ export async function onRequestError(
 ) {
   if (process.env.NEXT_RUNTIME !== 'nodejs') return;
   try {
-    const { dbPut } = await import('./lib/db');
+    const { dbPut } = await eval('import("./lib/db")');
     const e = err as { message?: string; stack?: string; digest?: string };
     await dbPut('error-logs', {
       id: `err-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
