@@ -178,6 +178,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
   const indicatorsRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
   const [perView, setPerView] = useState(4);
+  const displayKosts = React.useMemo(() => kosts.slice(0, 12), [kosts]);
 
   const isPointerDownRef = useRef(false);
   const hasDraggedRef = useRef(false);
@@ -197,7 +198,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const pages = Math.max(1, Math.ceil(kosts.length / perView));
+  const pages = Math.max(1, Math.ceil(displayKosts.length / perView));
 
   const getStep = useCallback(() => {
     const el = carouselRef.current;
@@ -278,6 +279,37 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
       activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
   }, [page]);
+
+  // Handle trackpad two-finger horizontal gesture
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+
+    let wheelTimeout: ReturnType<typeof setTimeout>;
+
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || Math.abs(e.deltaX) > 2) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaX;
+
+        clearTimeout(wheelTimeout);
+        wheelTimeout = setTimeout(() => {
+          const card = el.querySelector('.papi-property-card') as HTMLElement | null;
+          if (!card) return;
+          const step = perView * (card.offsetWidth + 20);
+          if (step <= 0) return;
+          const targetPage = Math.max(0, Math.min(Math.round(el.scrollLeft / step), pages - 1));
+          goTo(targetPage);
+        }, 100);
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      clearTimeout(wheelTimeout);
+    };
+  }, [perView, pages, goTo]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -465,12 +497,13 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerCancel}
                 style={{
-                  overflow: 'hidden',
-                  padding: '32px 24px 52px 24px',
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  padding: '24px 20px 24px 20px',
                   touchAction: 'pan-y',
                 }}
               >
-                {kosts.map((k) => (
+                {displayKosts.map((k) => (
                   <PropertyCard key={k.id} kost={k} onLinkClick={handleCardLinkClick} />
                 ))}
               </div>
@@ -491,6 +524,13 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goTo(i); }}
               />
             ))}
+          </div>
+
+          <div className="papi-recommendations-cta">
+            <Link href="/cari-kost" className="papi-see-all-btn">
+              <span>Lihat Semua Kost</span>
+              <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>
