@@ -41,7 +41,7 @@ export default function WishlistClient({ kosts: all }: { kosts: Kost[] }) {
         </div>
 
         {saved.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-1.5 pt-2 pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-3 pt-3 pb-8">
             {saved.map((k) => (
               <KostCard key={k.id} kost={k} />
             ))}

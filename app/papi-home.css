@@ -513,8 +513,8 @@
 .papi-home .papi-recommendations h2{margin-bottom:2.5rem;font-size:2.75rem;color:var(--text-primary);text-align:center;font-weight:700;position:relative;padding-bottom:1rem}
 .papi-home .papi-recommendations h2::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:70px;height:4px;background:var(--yellow);border-radius:3px}
 .papi-home .papi-recommendations .container{max-width:1200px;margin:0 auto;padding:0 1rem}
-.papi-home .papi-property-carousel-container{position:relative;width:100%;max-width:1300px;margin:0 auto 2rem;padding:0 3rem}
-.papi-home .papi-property-carousel{display:flex;transition:transform 0.5s ease;gap:1rem;padding:0.75rem 0 1.5rem;margin-bottom:-1rem}
+.papi-home .papi-property-carousel-container{position:relative;width:100%;max-width:1300px;margin:0 auto 2rem;padding:0 3rem;overflow:visible}
+.papi-home .papi-property-carousel{display:flex;transition:transform 0.5s ease;gap:1.25rem;padding:1.5rem 1.25rem 2.75rem;margin:-1rem -1.25rem -1.5rem}
 .papi-home .papi-property-card{width:calc(25% - 0.75rem);background:var(--white);border-radius:20px;overflow:hidden;position:relative;flex-shrink:0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);border:1px solid rgba(0,0,0,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
 .papi-home .papi-property-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(249,115,22,0.18);border-color:var(--yellow)}
 .papi-home .property-card-link{display:block;color:inherit;text-decoration:none;position:relative;height:100%;width:100%;z-index:1}
@@ -611,7 +611,7 @@
 .papi-home .explore-carousel-control:disabled i{color:#9ca3af}
 .papi-home .explore-prev-btn,
 .papi-home .explore-next-btn{position:static}
-.papi-home .explore-carousel-container{overflow:hidden;padding:24px 0}
+.papi-home .explore-carousel-container{overflow:hidden;padding:24px 16px;margin:0 -16px}
 .papi-home .explore-grid{display:flex;gap:12px;transition:transform 0.3s ease;width:max-content}
 .papi-home .explore-card{position:relative;border:1px solid transparent;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 .papi-home .explore-card.portrait{width:190px;height:256px}
@@ -668,7 +668,7 @@
 .papi-home .booking-guide h2{text-align:center;margin-bottom:2rem;font-size:2.5rem;font-weight:700;color:#0F2A43;position:relative;padding-bottom:1rem;letter-spacing:-0.02em;line-height:1.2}
 .papi-home .guide-subtitle{text-align:center;color:#64748B;font-size:1.05rem;margin:0 0 3rem}
 .papi-home .booking-guide h2::after{content:'';position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);width:60px;height:3px;background:var(--yellow);border-radius:2px}
-.papi-home .guide-steps-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;margin-top:3rem}
+.papi-home .guide-steps-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;margin-top:2rem;padding:1rem 0.5rem 2rem;margin-bottom:-1rem}
 .papi-home .guide-step{display:flex;flex-direction:column;align-items:center;text-align:center;background:#ffffff;padding:2.5rem 2rem;border-radius:16px;transition:all 0.3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.05);border:1px solid #e5e7eb;position:relative;animation:fadeInUp 0.6s ease forwards}
 .papi-home .guide-step::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:16px 16px 0 0;opacity:0;transition:opacity 0.3s ease}
 .papi-home .guide-step:hover::before{opacity:1}
@@ -705,7 +705,7 @@
 .papi-home .tips-section h2{font-size:2.5rem;font-weight:700;color:#0F2A43;margin-bottom:1rem;text-align:center;letter-spacing:-0.02em;line-height:1.2;position:relative}
 .papi-home .tips-section h2::after{content:'';position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);width:60px;height:3px;background:var(--yellow);border-radius:2px}
 .papi-home .tips-section .section-description{color:#666666;margin-bottom:3rem}
-.papi-home .tips-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:3rem;padding:0 2rem}
+.papi-home .tips-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:1.5rem;padding:1.5rem 2rem 2.5rem;margin-bottom:-1rem}
 .papi-home .tip-card{background:#ffffff;padding:2.5rem 2rem;border-radius:16px;text-align:center;transition:all 0.3s ease;border:1px solid rgba(0,0,0,0.08);position:relative;overflow:hidden}
 .papi-home .tip-card:hover{transform:translateY(-8px);background:#ffffff;border-color:rgba(0,0,0,0.12);box-shadow:0 20px 40px rgba(15,42,67,0.12)}
 .papi-home .tip-icon{width:72px;height:72px;margin:0 auto 1.5rem;background:linear-gradient(135deg,var(--yellow) 0%,#EA580C 100%);border-radius:16px;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease;box-shadow:0 8px 25px rgba(249,115,22,0.2)}
@@ -739,7 +739,7 @@
 .papi-home .faq-item.active .faq-icon{background:linear-gradient(135deg,var(--yellow) 0%,#EA580C 100%);transform:rotate(180deg);border-color:var(--yellow);box-shadow:0 4px 12px rgba(249,115,22,0.2)}
 .papi-home .faq-icon i{font-size:0.875rem;color:#666666;transition:color 0.3s ease}
 .papi-home .faq-item.active .faq-icon i{color:#0F2A43}
-.papi-home .faq-answer{max-height:0;overflow:hidden;transition:all 0.3s ease;background:#fafbfc}
+.papi-home .faq-answer{max-height:0;overflow:hidden;transition:all 0.3s ease;background:linear-gradient(135deg,#ffffff 0%,#fafbfc 100%)}
 .papi-home .faq-item.active .faq-answer{max-height:300px;padding:0 2rem 1.5rem}
 .papi-home .faq-answer p{color:#666666;line-height:1.7;margin:0;padding-top:1rem;font-size:1rem}
 @media (max-width:768px){
@@ -838,11 +838,11 @@
 @media (max-width:991px){
 .papi-home .footer-bottom-center{padding:0}
 }
-.papi-home .footer-bottom-center .copyright-text{font-size:var(--font-xs);color:#ffffff;margin:0;white-space:nowrap}
+.papi-home .footer-bottom-center .copyright-text{font-size:var(--font-xs);color:var(--yellow);margin:0;white-space:nowrap}
 @media (max-width:768px){
 .papi-home .footer-bottom-center{padding:0;min-height:50px}
 .papi-home .footer-bottom-center .footer-content{padding:8px 12px;border-radius:6px;max-width:calc(100% - 16px)}
-.papi-home .footer-bottom-center .copyright-text{font-size:var(--font-xs);padding:0;white-space:normal;text-align:center}
+.papi-home .footer-bottom-center .copyright-text{font-size:var(--font-xs);padding:0;white-space:normal;text-align:center;color:var(--yellow)}
 }
 .papi-home .site-footer{background-color:#0F2A43;color:#ffffff;padding:3rem 0}
 @media (max-width:768px){
@@ -899,8 +899,8 @@
 .papi-home .footer-nav-column h4 .chevron-toggle svg{color:var(--yellow)}
 .papi-home .footer-nav-column.active h4 .chevron-toggle{transform:rotate(180deg)}
 .papi-home .footer-nav-column h4::after{display:none}
-.papi-home .footer-nav-column ul{max-height:0;overflow:hidden;transition:max-height 0.3s ease}
-.papi-home .footer-nav-column.active ul{max-height:500px;margin-bottom:1.25rem}
+.papi-home .footer-nav-column ul{max-height:none;overflow:visible;margin-bottom:1.25rem}
+
 }
 
 .papi-home{--text-primary:#0F2A43;--gray-800:#0F2A43}

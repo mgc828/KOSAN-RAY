@@ -1053,13 +1053,13 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
           view === 'grid' || view === 'list' ? (
             <>
               {view === 'grid' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-1.5 pt-4 sm:pt-6 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-3 pt-4 sm:pt-6 pb-8">
                   {pageItems.map((kost, i) => (
                     <KostCard key={kost.id} kost={kost} priority={currentPage === 1 && i < 4} distanceLabel={distanceLabelFor(kost)} />
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col gap-4 p-1.5 pt-4 sm:pt-6 pb-4">
+                <div className="flex flex-col gap-4 p-3 pt-4 sm:pt-6 pb-8">
                   {pageItems.map((kost, i) => (
                     <KostCard key={kost.id} kost={kost} layout="list" priority={currentPage === 1 && i < 3} distanceLabel={distanceLabelFor(kost)} />
                   ))}

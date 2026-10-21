@@ -195,7 +195,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
     const el = carouselRef.current;
     if (el) {
       const card = el.querySelector('.papi-property-card') as HTMLElement | null;
-      if (card) el.scrollTo({ left: clamped * perView * (card.offsetWidth + 16), behavior: 'smooth' });
+      if (card) el.scrollTo({ left: clamped * perView * (card.offsetWidth + 20), behavior: 'smooth' });
     }
   }, [pages, perView]);
 
@@ -204,7 +204,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
     const el = carouselRef.current;
     const card = el?.querySelector('.papi-property-card') as HTMLElement | null;
     if (!el || !card) return;
-    const step = perView * (card.offsetWidth + 16);
+    const step = perView * (card.offsetWidth + 20);
     const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
     const next = atEnd ? pages - 1 : Math.round(el.scrollLeft / step);
     setPage(Math.max(0, Math.min(next, pages - 1)));
@@ -340,6 +340,26 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
         </div>
       </section>
 
+      {/* TIPS */}
+      <section className="tips-section" data-header-theme="light">
+        <div className="container">
+          <div className="tips-content">
+            <h2>Kenapa Pilih Kost-Kostan ?</h2>
+            <div className="tips-grid">
+              {TIPS.map((t) => (
+                <div className="tip-card" key={t.title}>
+                  <div className="tip-icon"><t.icon /></div>
+                  <div className="tip-content">
+                    <h3>{t.title}</h3>
+                    <p>{t.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* PANDUAN BOOKING */}
       <section className="booking-guide">
         <div className="container">
@@ -378,26 +398,6 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
           </div>
           <div className="explore-carousel-container" ref={exploreRef} tabIndex={0} role="region" aria-label="Daftar area pencarian populer, geser dengan panah keyboard" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
             <div className="explore-grid">{exploreCols}</div>
-          </div>
-        </div>
-      </section>
-
-      {/* TIPS */}
-      <section className="tips-section" data-header-theme="light">
-        <div className="container">
-          <div className="tips-content">
-            <h2>Kenapa Pilih Kost-Kostan ?</h2>
-            <div className="tips-grid">
-              {TIPS.map((t) => (
-                <div className="tip-card" key={t.title}>
-                  <div className="tip-icon"><t.icon /></div>
-                  <div className="tip-content">
-                    <h3>{t.title}</h3>
-                    <p>{t.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>

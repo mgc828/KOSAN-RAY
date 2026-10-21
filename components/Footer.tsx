@@ -15,14 +15,18 @@ export default function Footer() {
     <div className="papi-home">
       <footer className="site-footer" data-header-theme="dark">
         <div className="container">
+          {/* Logo Kost-Kostan di atas konten footer dan posisinya di kiri */}
+          <div className="footer-top-brand" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '2rem' }}>
+            <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 10, margin: 0 }}>
+              <Compass size={26} color="#0F2A43" />
+              <span style={{ fontSize: 26, fontWeight: 900, color: '#0F2A43', letterSpacing: '-0.02em' }}>
+                Kost-Kostan
+              </span>
+            </div>
+          </div>
+
           <div className="footer-content">
             <div className="footer-brand">
-              <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                <Compass size={26} color="#0F2A43" />
-                <span style={{ fontSize: 26, fontWeight: 900, color: '#0F2A43', letterSpacing: '-0.02em' }}>
-                  Kost-Kostan
-                </span>
-              </div>
               <div className="footer-social">
                 <h4>TETAP TERHUBUNG</h4>
                 <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, maxWidth: 280 }}>
@@ -47,14 +51,11 @@ export default function Footer() {
             </div>
 
             <div className="footer-nav-column">
-              <h4><span>AREA KOST POPULER</span></h4>
+              <h4><span>Halaman</span></h4>
               <ul>
-                <li><Link href="/kost/jakarta/kuningan">Kost Kuningan (SCBD & Rasuna Said)</Link></li>
-                <li><Link href="/kost/jakarta/tebet">Kost Tebet (Stasiun KRL & Pusat Kuliner)</Link></li>
-                <li><Link href="/kost/jakarta/benhil">Kost Benhil (MRT & Sudirman)</Link></li>
-                <li><Link href="/kost/jakarta/palmerah">Kost Palmerah (Kampus BINUS)</Link></li>
-                <li><Link href="/kost/jakarta/grogol">Kost Grogol (Trisakti, UNTAR & Mall Ciputra)</Link></li>
-                <li><Link href="/kost/jakarta/setiabudi">Kost Setiabudi (Stasiun LRT Jabodebek)</Link></li>
+                <li><Link href="/">Beranda</Link></li>
+                <li><Link href="/cari-kost">Cari Kost</Link></li>
+                <li><Link href="/maps">Maps</Link></li>
               </ul>
             </div>
 
@@ -73,7 +74,7 @@ export default function Footer() {
       </footer>
       <footer className="footer-bottom-center">
         <div className="footer-content">
-          <p className="copyright-text">© {new Date().getFullYear()} kost-kostan. Hak Cipta Dilindungi. <CookieSettingsLink /></p>
+          <p className="copyright-text" style={{ color: '#F97316' }}>© {new Date().getFullYear()} kost-kostan. Hak Cipta Dilindungi. <CookieSettingsLink /></p>
         </div>
       </footer>
     </div>
