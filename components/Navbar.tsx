@@ -66,6 +66,70 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  // Swipe down gesture to close mobile navigation sheet
+  const touchStartY = useRef(0);
+  const isDraggingRef = useRef(false);
+
+  useEffect(() => {
+    if (!mobileMenuOpen && mobileMenuRef.current) {
+      mobileMenuRef.current.style.transform = '';
+      mobileMenuRef.current.style.transition = '';
+    }
+  }, [mobileMenuOpen]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    isDraggingRef.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const sheet = mobileMenuRef.current;
+    if (!sheet) return;
+
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - touchStartY.current;
+
+    // Only drag down when swiping downwards and sheet scroll position is at the top
+    if (diff > 0 && sheet.scrollTop <= 0) {
+      isDraggingRef.current = true;
+      sheet.style.transition = 'none';
+      sheet.style.transform = `translateY(${diff}px)`;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const sheet = mobileMenuRef.current;
+    if (!sheet) return;
+
+    if (isDraggingRef.current) {
+      const endY = e.changedTouches[0].clientY;
+      const diff = endY - touchStartY.current;
+
+      sheet.style.transition = 'transform 0.25s cubic-bezier(0.22, 1, 0.36, 1)';
+      if (diff > 75) {
+        // Swiped down sufficiently -> animate closed
+        sheet.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+          setMobileMenuOpen(false);
+          if (sheet) {
+            sheet.style.transform = '';
+            sheet.style.transition = '';
+          }
+        }, 200);
+      } else {
+        // Snap back up
+        sheet.style.transform = 'translateY(0)';
+        setTimeout(() => {
+          if (sheet) {
+            sheet.style.transform = '';
+            sheet.style.transition = '';
+          }
+        }, 250);
+      }
+      isDraggingRef.current = false;
+    }
+  };
+
   // Header transparan penuh. Untuk tiap titik di bawah header, cari latar yang terlihat
   // (warna solid, gradien, atau foto) lalu hitung kecerahannya: gelap -> tulisan putih, terang -> hitam.
   useEffect(() => {
@@ -450,12 +514,20 @@ export default function Navbar() {
       aria-label="Menu navigasi"
       aria-hidden={!mobileMenuOpen}
       inert={!mobileMenuOpen}
-      className={`md:hidden fixed inset-x-0 bottom-0 z-[9999] max-h-[88dvh] overflow-y-auto rounded-t-[1.75rem] border-t border-slate-200/90 bg-white px-6 pt-3.5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className={`md:hidden fixed inset-x-0 bottom-0 z-[9999] max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-[1.75rem] border-t border-slate-200/90 bg-white px-6 pt-2 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none touch-pan-y ${
         mobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
       }`}
     >
-      {/* Top drag handle indicator */}
-      <div className="mx-auto mb-3.5 h-1.5 w-12 rounded-full bg-slate-200" aria-hidden="true" />
+      {/* Top drag handle indicator (swipe down area) */}
+      <div 
+        className="w-full py-2.5 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none"
+        aria-hidden="true"
+      >
+        <div className="h-1.5 w-12 rounded-full bg-slate-300 transition-colors hover:bg-slate-400" />
+      </div>
 
       {/* Header: "Menu" & "X" */}
       <div className="mb-4 flex items-center justify-between">
