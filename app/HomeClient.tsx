@@ -96,7 +96,7 @@ function genderBadge(tipe: Kost['tipe']) {
   return { cls: 'campur', label: 'Campur', Icon: Users2 };
 }
 
-function PropertyCard({ kost }: { kost: Kost }) {
+function PropertyCard({ kost, onLinkClick }: { kost: Kost; onLinkClick?: (e: React.MouseEvent) => void }) {
   const thumbMedia =
     kost.media?.find((m) => m.tipe === 'foto_gedung') ||
     kost.media?.find((m) => m.is_preview) ||
@@ -113,10 +113,10 @@ function PropertyCard({ kost }: { kost: Kost }) {
 
   return (
     <div className="papi-property-card">
-      <Link href={detailUrl} className="property-card-link">
+      <Link href={detailUrl} className="property-card-link" onClick={onLinkClick} draggable={false}>
         <div className="papi-property-image">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={thumbUrl} alt={kost.nama} loading="lazy" width={400} height={280} referrerPolicy="no-referrer" />
+          <img src={thumbUrl} alt={kost.nama} loading="lazy" width={400} height={280} referrerPolicy="no-referrer" draggable={false} />
           <span className={`papi-room-count${kost.status === 'penuh' ? ' full' : ''}`}>
             {kost.status === 'penuh' ? 'Kamar penuh' : 'Kamar tersedia'}
           </span>
@@ -175,16 +175,22 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
 
   // carousel
   const carouselRef = useRef<HTMLDivElement>(null);
+  const indicatorsRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
   const [perView, setPerView] = useState(4);
-  const touchStartRef = useRef<number | null>(null);
-  const initialScrollLeftRef = useRef<number>(0);
-  const touchDeltaRef = useRef<number>(0);
+
+  const isPointerDownRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const startXRef = useRef(0);
+  const startYRef = useRef(0);
+  const startScrollLeftRef = useRef(0);
+  const dragDistanceRef = useRef(0);
+  const isHorizontalDragRef = useRef<boolean | null>(null);
 
   useEffect(() => {
     const onResize = () => {
       const w = window.innerWidth;
-      setPerView(w <= 576 ? 1 : w <= 992 ? 2 : w <= 1200 ? 3 : 4);
+      setPerView(w <= 768 ? 1 : w <= 992 ? 2 : w <= 1200 ? 3 : 4);
     };
     onResize();
     window.addEventListener('resize', onResize);
@@ -200,7 +206,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
     return perView * (card.offsetWidth + 20);
   }, [perView]);
 
-  const smoothScrollTo = useCallback((el: HTMLElement, targetLeft: number, duration = 380) => {
+  const smoothScrollTo = useCallback((el: HTMLElement, targetLeft: number, duration = 350) => {
     const startLeft = el.scrollLeft;
     const distance = targetLeft - startLeft;
     if (Math.abs(distance) < 2) {
@@ -238,12 +244,13 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
   }, [perView, getStep]);
 
   const syncPageFromScroll = useCallback(() => {
+    if (isPointerDownRef.current) return;
     const el = carouselRef.current;
     const card = el?.querySelector('.papi-property-card') as HTMLElement | null;
     if (!el || !card) return;
     const step = perView * (card.offsetWidth + 20);
     if (step <= 0) return;
-    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10;
     const next = atEnd ? pages - 1 : Math.round(el.scrollLeft / step);
     setPage(Math.max(0, Math.min(next, pages - 1)));
   }, [pages, perView]);
@@ -263,36 +270,88 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
     };
   }, [syncPageFromScroll]);
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartRef.current = e.touches[0].clientX;
-    touchDeltaRef.current = 0;
-    if (carouselRef.current) {
-      initialScrollLeftRef.current = carouselRef.current.scrollLeft;
+  // Keep active indicator in view on mobile
+  useEffect(() => {
+    if (!indicatorsRef.current) return;
+    const activeDot = indicatorsRef.current.querySelector('.papi-indicator.active') as HTMLElement | null;
+    if (activeDot) {
+      activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [page]);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const el = carouselRef.current;
+    if (!el) return;
+
+    isPointerDownRef.current = true;
+    hasDraggedRef.current = false;
+    startXRef.current = e.clientX;
+    startYRef.current = e.clientY;
+    startScrollLeftRef.current = el.scrollLeft;
+    dragDistanceRef.current = 0;
+    isHorizontalDragRef.current = null;
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDownRef.current) return;
+    const el = carouselRef.current;
+    if (!el) return;
+
+    const dx = e.clientX - startXRef.current;
+    const dy = e.clientY - startYRef.current;
+
+    if (isHorizontalDragRef.current === null) {
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+        isHorizontalDragRef.current = Math.abs(dx) >= Math.abs(dy);
+      }
+    }
+
+    if (isHorizontalDragRef.current) {
+      hasDraggedRef.current = true;
+      dragDistanceRef.current = dx;
+      el.scrollLeft = startScrollLeftRef.current - dx;
     }
   };
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (touchStartRef.current === null) return;
-    const delta = e.touches[0].clientX - touchStartRef.current;
-    touchDeltaRef.current = delta;
-    if (carouselRef.current) {
-      carouselRef.current.scrollLeft = initialScrollLeftRef.current - delta;
+
+  const endDrag = (clientX?: number) => {
+    if (!isPointerDownRef.current) return;
+    isPointerDownRef.current = false;
+
+    if (hasDraggedRef.current) {
+      const dx = clientX !== undefined ? clientX - startXRef.current : dragDistanceRef.current;
+      if (dx < -40) {
+        goTo(page + 1);
+      } else if (dx > 40) {
+        goTo(page - 1);
+      } else {
+        goTo(page);
+      }
+      setTimeout(() => {
+        hasDraggedRef.current = false;
+      }, 100);
     }
+    isHorizontalDragRef.current = null;
   };
-  const onTouchEnd = () => {
-    if (touchDeltaRef.current > 40) {
-      goTo(page - 1);
-    } else if (touchDeltaRef.current < -40) {
-      goTo(page + 1);
-    } else {
-      goTo(page);
-    }
-    touchStartRef.current = null;
-    touchDeltaRef.current = 0;
+
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    endDrag(e.clientX);
+  };
+
+  const onPointerCancel = () => {
+    endDrag();
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft') goTo(page - 1);
     if (e.key === 'ArrowRight') goTo(page + 1);
+  };
+
+  const handleCardLinkClick = (e: React.MouseEvent) => {
+    if (hasDraggedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
 
   const pickSuggestion = (sg: Suggestion) => {
@@ -401,17 +460,18 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
                 role="region"
                 aria-label="Rekomendasi kost"
                 onKeyDown={onKeyDown}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerCancel}
                 style={{
                   overflow: 'hidden',
-                  paddingTop: 24,
-                  paddingBottom: 40,
+                  padding: '32px 24px 52px 24px',
+                  touchAction: 'pan-y',
                 }}
               >
                 {kosts.map((k) => (
-                  <PropertyCard key={k.id} kost={k} />
+                  <PropertyCard key={k.id} kost={k} onLinkClick={handleCardLinkClick} />
                 ))}
               </div>
             </div>
@@ -419,9 +479,17 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
               <ChevronRight size={20} />
             </button>
           </div>
-          <div className="papi-carousel-indicators">
+          <div className="papi-carousel-indicators" ref={indicatorsRef}>
             {Array.from({ length: pages }).map((_, i) => (
-              <div key={i} className={`papi-indicator${i === page ? ' active' : ''}`} onClick={() => goTo(i)} />
+              <div
+                key={i}
+                role="button"
+                tabIndex={0}
+                aria-label={`Halaman ${i + 1}`}
+                className={`papi-indicator${i === page ? ' active' : ''}`}
+                onClick={() => goTo(i)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goTo(i); }}
+              />
             ))}
           </div>
         </div>
