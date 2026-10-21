@@ -123,6 +123,15 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
   // Dropdown open states
   // Di HP, filter disembunyikan di balik tombol supaya hasil pencarian tidak tertutup panel yang panjang.
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isModalLocationOpen, setIsModalLocationOpen] = useState(false);
+  const [isModalKecamatanOpen, setIsModalKecamatanOpen] = useState(false);
+  const [isModalTipeOpen, setIsModalTipeOpen] = useState(false);
+  const [isModalLandmarkOpen, setIsModalLandmarkOpen] = useState(false);
+  const modalLocationRef = useRef<HTMLDivElement>(null);
+  const modalKecamatanRef = useRef<HTMLDivElement>(null);
+  const modalTipeRef = useRef<HTMLDivElement>(null);
+  const modalLandmarkRef = useRef<HTMLDivElement>(null);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isKecamatanOpen, setIsKecamatanOpen] = useState(false);
   const [isTipeOpen, setIsTipeOpen] = useState(false);
@@ -132,6 +141,18 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
   const tipeDropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
+
+  // Close filter modal on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFilterModalOpen) {
+        setIsFilterModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFilterModalOpen]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target as Node)) {
@@ -142,6 +163,18 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
       }
       if (tipeDropdownRef.current && !tipeDropdownRef.current.contains(event.target as Node)) {
         setIsTipeOpen(false);
+      }
+      if (modalLocationRef.current && !modalLocationRef.current.contains(event.target as Node)) {
+        setIsModalLocationOpen(false);
+      }
+      if (modalKecamatanRef.current && !modalKecamatanRef.current.contains(event.target as Node)) {
+        setIsModalKecamatanOpen(false);
+      }
+      if (modalTipeRef.current && !modalTipeRef.current.contains(event.target as Node)) {
+        setIsModalTipeOpen(false);
+      }
+      if (modalLandmarkRef.current && !modalLandmarkRef.current.contains(event.target as Node)) {
+        setIsModalLandmarkOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -444,10 +477,191 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
           </div>
         </div>
 
+        {/* Mobile Sticky Search & Filter Bar (div.flex.items-center.gap-2.5 matching /maps) */}
+        <div className="lg:hidden sticky top-[80px] z-30 bg-white/95 backdrop-blur-md py-2.5 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-slate-100 shadow-xs mb-3 space-y-2">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Search Pill Input */}
+            <div className="flex-1 relative flex items-center bg-white rounded-full border border-slate-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_24px_rgba(0,0,0,0.1)] focus-within:shadow-[0_6px_24px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] transition-all px-2 py-1 min-h-[50px] sm:min-h-[54px]">
+              <SearchSuggest
+                className="w-full flex-1 min-w-0"
+                inputClassName="w-full bg-transparent pl-4 pr-2 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 font-medium focus:outline-none"
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onSubmit={() => undefined}
+                onPick={pickSuggestion}
+                kosts={allKosts}
+                placeholder="Cari nama, alamat, daerah..."
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Hapus pencarian"
+                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 mr-1 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+              <div 
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#F97316] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[#F97316]/30 cursor-pointer hover:scale-105 active:scale-95 transition-transform" 
+                role="button" 
+                aria-label="Cari"
+              >
+                <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              </div>
+            </div>
+
+            {/* Filter Icon Button (Triggers Popup Modal) */}
+            <button
+              type="button"
+              onClick={() => setIsFilterModalOpen(true)}
+              aria-label="Buka filter pencarian"
+              title="Filter Pencarian"
+              className={`relative inline-flex items-center justify-center w-[50px] h-[50px] sm:w-[54px] sm:h-[54px] rounded-full sm:rounded-2xl border transition-all active:scale-95 shrink-0 ${
+                activeFilterCount > 0
+                  ? 'bg-[#FFEDD5] border-[#F97316] text-[#C2410C] shadow-md shadow-[#F97316]/20 font-bold'
+                  : 'bg-white border-slate-200/90 text-slate-700 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:border-[#F97316] hover:text-[#C2410C]'
+              }`}
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-[#F97316] text-white text-[10px] font-black flex items-center justify-center shadow-xs">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Active Filter Badges */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+              {selectedLocations.map((loc) => (
+                <span
+                  key={loc}
+                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]"
+                >
+                  <span>{loc}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleLocation(loc)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label={`Hapus filter ${loc}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+
+              {selectedKecamatan.map((kec) => (
+                <span
+                  key={kec}
+                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]"
+                >
+                  <span>{kec}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleKecamatan(kec)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label={`Hapus filter ${kec}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+
+              {selectedTipe !== 'semua' && (
+                <span className="inline-flex items-center gap-1 bg-[#FFEDD5] text-[#0F2A43] font-semibold px-2.5 py-1 rounded-full text-[11px] border border-[#F97316]/30">
+                  <span>{tipeOptions.find(t => t.value === selectedTipe)?.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTipe('semua')}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label="Hapus filter tipe"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {priceActive && (
+                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 font-semibold px-2.5 py-1 rounded-full text-[11px] border border-amber-200">
+                  <span>Rp {priceMin.toLocaleString('id-ID')} - {priceMax < PRICE_MAX ? `Rp ${priceMax.toLocaleString('id-ID')}` : 'Maks'}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPriceMin(PRICE_MIN);
+                      setPriceMax(PRICE_MAX);
+                      setPriceMinInput('');
+                      setPriceMaxInput('');
+                    }}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label="Hapus filter harga"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {landmark && (
+                <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]">
+                  <span>Dekat {landmark.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setLandmarkId(null)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label="Hapus filter landmark"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {userLoc && (
+                <span className="inline-flex items-center gap-1 bg-[#FFEDD5] text-[#0F2A43] font-semibold px-2.5 py-1 rounded-full text-[11px]">
+                  <span>Dekat Saya</span>
+                  <button
+                    type="button"
+                    onClick={() => setUserLoc(null)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label="Hapus filter lokasi saya"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {selectedFacilities.map((fac) => (
+                <span
+                  key={fac}
+                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]"
+                >
+                  <span>{fac}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleFacility(fac)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label={`Hapus filter fasilitas ${fac}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="text-[11px] font-bold text-rose-600 hover:underline pl-1 cursor-pointer inline-flex items-center gap-1"
+              >
+                Reset
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(300px,340px)_minmax(0,1fr)] gap-6 items-start">
         {/* Sidebar filter: di desktop menempel di bawah header saat halaman digulir */}
         <aside
-          className="space-y-4 p-1 sm:p-2 lg:p-3 relative z-40 lg:z-[9991] lg:sticky lg:top-[81px] lg:max-h-[calc(100vh-81px)] lg:overflow-y-auto lg:overscroll-contain overflow-visible"
+          className="hidden lg:block space-y-4 p-1 sm:p-2 lg:p-3 relative z-40 lg:z-[9991] lg:sticky lg:top-[81px] lg:max-h-[calc(100vh-81px)] lg:overflow-y-auto lg:overscroll-contain overflow-visible"
           aria-label="Filter pencarian kost"
           tabIndex={0}
         >
@@ -996,7 +1210,7 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
         {/* Kolom hasil (lebih lebar dari sidebar) */}
         <div className="space-y-6 min-w-0">
         {/* Ringkasan, urutan & tampilan - Sticky sejajar dengan sidebar filter di kiri */}
-        <div className="sticky top-[80px] lg:top-[81px] z-30 p-1 sm:p-2 lg:p-3 mb-2 bg-transparent">
+        <div className="static lg:sticky lg:top-[81px] z-20 p-1 sm:p-2 lg:p-3 mb-2 bg-transparent">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 bg-white p-4 sm:px-6 sm:py-3.5 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
           <p className="font-medium" suppressHydrationWarning>
             {sortedKosts.length > 0
@@ -1159,6 +1373,427 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
         </div>
         </div>
       </div>
+    
+      {/* ========================================================================= */}
+      {/* POPUP FILTER MODAL (Sama persis seperti filter di /maps) */}
+      {/* ========================================================================= */}
+      {isFilterModalOpen && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+          {/* Backdrop Overlay */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity z-0"
+            onClick={() => setIsFilterModalOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Modal Container */}
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Filter Pencarian Kost"
+            className="relative w-full max-w-lg max-h-[88vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200"
+          >
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50/50">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[#FFEDD5] text-[#C2410C] flex items-center justify-center">
+                  <SlidersHorizontal className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">Filter Pencarian</h3>
+                  <p className="text-[11px] text-slate-500 font-medium" suppressHydrationWarning>
+                    {sortedKosts.length} kost cocok dengan kriteria
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFilterModalOpen(false)}
+                className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                aria-label="Tutup filter"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="p-6 overflow-y-auto space-y-5 text-xs">
+              {/* 1. Lokasi Dropdown */}
+              <div ref={modalLocationRef} className="relative">
+                <label className="font-bold text-slate-700 mb-1.5 block">Lokasi / Area</label>
+                <button
+                  type="button"
+                  onClick={() => setIsModalLocationOpen(!isModalLocationOpen)}
+                  className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all ${
+                    selectedLocations.length > 0 
+                      ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900' 
+                      : 'border-slate-300 text-slate-500'
+                  }`}
+                >
+                  <span className="truncate">
+                    {selectedLocations.length > 0 ? selectedLocations.join(', ') : 'Pilih Lokasi Area'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isModalLocationOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isModalLocationOpen && (
+                  <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
+                    {locationOptions.map((loc) => {
+                      const isChecked = selectedLocations.includes(loc);
+                      return (
+                        <label
+                          key={loc}
+                          className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer text-xs transition-colors ${
+                            isChecked ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleToggleLocation(loc)}
+                              className="rounded border-slate-300 text-[#C2410C] focus:ring-[#F97316]"
+                            />
+                            <span>{loc}</span>
+                          </div>
+                          {isChecked && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* 1b. Kecamatan Dropdown */}
+              <div ref={modalKecamatanRef} className="relative">
+                <label className="font-bold text-slate-700 mb-1.5 block">Kecamatan</label>
+                <button
+                  type="button"
+                  disabled={selectedLocations.length === 0}
+                  onClick={() => setIsModalKecamatanOpen(!isModalKecamatanOpen)}
+                  className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all disabled:opacity-50 disabled:bg-slate-50 ${
+                    selectedKecamatan.length > 0
+                      ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900'
+                      : 'border-slate-300 text-slate-500'
+                  }`}
+                >
+                  <span className="truncate">
+                    {selectedLocations.length === 0 
+                      ? 'Pilih area dahulu' 
+                      : selectedKecamatan.length > 0 
+                        ? selectedKecamatan.join(', ') 
+                        : 'Semua Kecamatan'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isModalKecamatanOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isModalKecamatanOpen && selectedLocations.length > 0 && (
+                  <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
+                    {selectedLocations.map((city) => (
+                      <div key={city}>
+                        <p className="px-3 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">{city}</p>
+                        {(JAKARTA_REGIONS[city] ?? []).map((kec) => {
+                          const isChecked = selectedKecamatan.includes(kec);
+                          return (
+                            <label
+                              key={kec}
+                              className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer text-xs transition-colors ${
+                                isChecked ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => handleToggleKecamatan(kec)}
+                                  className="rounded border-slate-300 text-[#C2410C] focus:ring-[#F97316]"
+                                />
+                                <span>{kec}</span>
+                              </div>
+                              {isChecked && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Tipe Kost Dropdown */}
+              <div ref={modalTipeRef} className="relative">
+                <label className="font-bold text-slate-700 mb-1.5 block">Tipe Kost</label>
+                <button
+                  type="button"
+                  onClick={() => setIsModalTipeOpen(!isModalTipeOpen)}
+                  className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all ${
+                    selectedTipe !== 'semua'
+                      ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900'
+                      : 'border-slate-300 text-slate-500'
+                  }`}
+                >
+                  <span className="truncate">
+                    {tipeOptions.find(t => t.value === selectedTipe)?.label || 'Semua Tipe'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isModalTipeOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isModalTipeOpen && (
+                  <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 space-y-1">
+                    {tipeOptions.map((opt) => {
+                      const isSelected = selectedTipe === opt.value;
+                      return (
+                        <div
+                          key={opt.value}
+                          onClick={() => {
+                            setSelectedTipe(opt.value);
+                            setIsModalTipeOpen(false);
+                          }}
+                          className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer text-xs transition-colors ${
+                            isSelected ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                          }`}
+                        >
+                          <span>{opt.label}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Rentang Harga */}
+              <div className="space-y-3">
+                <label className="font-bold text-slate-700 block">Rentang Harga per Bulan</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <span className="text-[11px] text-slate-500 font-medium">Dari</span>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rp</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="0"
+                        value={priceMinInput}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setPriceMinInput(val);
+                          setPriceMin(val === '' ? PRICE_MIN : Math.max(PRICE_MIN, Number(val)));
+                        }}
+                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[11px] text-slate-500 font-medium">Sampai</span>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rp</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Maks"
+                        value={priceMaxInput}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setPriceMaxInput(val);
+                          setPriceMax(val === '' ? PRICE_MAX : Math.min(PRICE_MAX, Number(val)));
+                        }}
+                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                  {pricePresets.map((preset) => {
+                    const isSelected = priceMin === preset.min && priceMax === preset.max;
+                    return (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => {
+                          setPriceMin(preset.min);
+                          setPriceMax(preset.max);
+                          setPriceMinInput(preset.min.toString());
+                          setPriceMaxInput(preset.max >= PRICE_MAX ? '' : preset.max.toString());
+                        }}
+                        className={`py-1.5 px-2.5 rounded-lg border text-[11px] font-bold transition-all ${
+                          isSelected
+                            ? 'bg-[#FFEDD5] border-[#F97316] text-[#C2410C]'
+                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 4. Dekat kampus / stasiun */}
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+                  <div ref={modalLandmarkRef} className="relative">
+                    <label className="font-bold text-slate-700 mb-1.5 block">Dekat kampus / stasiun</label>
+                    <button
+                      type="button"
+                      onClick={() => setIsModalLandmarkOpen(!isModalLandmarkOpen)}
+                      className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all ${
+                        landmark
+                          ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900'
+                          : 'border-slate-300 text-slate-500'
+                      }`}
+                    >
+                      <span className="truncate">{landmark ? landmark.name : 'Semua lokasi'}</span>
+                      <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isModalLandmarkOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isModalLandmarkOpen && (
+                      <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLandmarkId(null);
+                            setIsModalLandmarkOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors text-left ${
+                            !landmarkId ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                          }`}
+                        >
+                          <span>Semua lokasi</span>
+                          {!landmarkId && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                        </button>
+
+                        <div>
+                          <p className="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">Kampus</p>
+                          {LANDMARKS.filter((l) => l.type === 'kampus').map((l) => {
+                            const isSelected = landmarkId === l.id;
+                            return (
+                              <button
+                                key={l.id}
+                                type="button"
+                                onClick={() => {
+                                  setLandmarkId(l.id);
+                                  setIsModalLandmarkOpen(false);
+                                  setSortBy('terdekat');
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors text-left ${
+                                  isSelected ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                                }`}
+                              >
+                                <span className="truncate">{l.name}</span>
+                                {isSelected && <Check className="w-3.5 h-3.5 text-[#C2410C] shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div>
+                          <p className="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">Stasiun & MRT</p>
+                          {LANDMARKS.filter((l) => l.type === 'stasiun').map((l) => {
+                            const isSelected = landmarkId === l.id;
+                            return (
+                              <button
+                                key={l.id}
+                                type="button"
+                                onClick={() => {
+                                  setLandmarkId(l.id);
+                                  setIsModalLandmarkOpen(false);
+                                  setSortBy('terdekat');
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors text-left ${
+                                  isSelected ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                                }`}
+                              >
+                                <span className="truncate">{l.name}</span>
+                                {isSelected && <Check className="w-3.5 h-3.5 text-[#C2410C] shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => (userLoc ? (setUserLoc(null), setSortBy((cur) => (cur === 'terdekat' && !landmark ? 'rekomendasi' : cur))) : locateMe())}
+                    disabled={locating}
+                    aria-pressed={Boolean(userLoc)}
+                    className={`inline-flex items-center justify-center gap-1.5 py-2.5 px-3.5 rounded-xl border font-bold transition-colors shrink-0 ${userLoc ? 'bg-[#F97316] border-[#F97316] text-white' : 'bg-white border-slate-300 text-slate-700 hover:border-slate-400'} disabled:opacity-60`}
+                  >
+                    <LocateFixed className="w-4 h-4" />
+                    <span>{locating ? 'Mencari...' : userLoc ? 'Dekat saya: aktif' : 'Dekat saya'}</span>
+                  </button>
+                </div>
+
+                {hasRadiusRef && (
+                  <div className="space-y-1.5 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div className="flex items-center justify-between font-bold text-slate-700">
+                      <span>Radius pencarian:</span>
+                      <span className="text-[#0F2A43]">{formatDistance(radius)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={RADIUS_MIN}
+                      max={RADIUS_MAX}
+                      step={RADIUS_STEP}
+                      value={radius}
+                      onChange={(e) => setRadius(Number(e.target.value))}
+                      className="w-full accent-[#F97316]"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 5. Fasilitas */}
+              <div>
+                <label className="font-bold text-slate-700 mb-2 block">Fasilitas</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {facilityOptions.map((opt) => {
+                    const isChecked = selectedFacilities.includes(opt.label);
+                    return (
+                      <button
+                        key={opt.label}
+                        type="button"
+                        onClick={() => handleToggleFacility(opt.label)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                          isChecked
+                            ? 'bg-[#FFEDD5] border-[#F97316] text-[#0F2A43]'
+                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {isChecked && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                        <span>{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="px-4 py-2.5 text-xs font-bold text-rose-600 hover:underline cursor-pointer"
+              >
+                Reset Semua
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFilterModalOpen(false)}
+                className="px-6 py-2.5 bg-[#F97316] text-[#0F2A43] text-xs font-bold rounded-xl shadow-md shadow-[#F97316]/30 hover:bg-[#EA580C] active:scale-95 transition-all cursor-pointer"
+              >
+                Terapkan Filter ({sortedKosts.length} Kost)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

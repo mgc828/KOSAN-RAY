@@ -306,13 +306,189 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
             </p>
           </div>
 
-          <Link
-            href="/cari-kost"
-            className="text-xs font-bold text-[#0F2A43] hover:underline flex items-center gap-1"
-          >
-            <span>Tampilan List (Cari Kost)</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
+          
+        </div>
+
+        {/* Mobile Sticky Search Bar (div.flex.items-center.gap-2.5) */}
+        <div className="lg:hidden sticky top-[80px] z-30 bg-white/95 backdrop-blur-md py-2.5 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-slate-100 shadow-xs space-y-2">
+          {/* Search Bar (div.search-input style from /) + Filter Icon Button */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Search Pill Input */}
+            <div className="flex-1 relative flex items-center bg-white rounded-full border border-slate-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_24px_rgba(0,0,0,0.1)] focus-within:shadow-[0_6px_24px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] transition-all px-2 py-1 min-h-[50px] sm:min-h-[54px]">
+              <SearchSuggest
+                className="w-full flex-1 min-w-0"
+                inputClassName="w-full bg-transparent pl-4 pr-2 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 font-medium focus:outline-none"
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onSubmit={() => undefined}
+                onPick={pickSuggestion}
+                kosts={allKosts}
+                placeholder="Cari nama, alamat, daerah..."
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Hapus pencarian"
+                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 mr-1 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+              <div 
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#F97316] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[#F97316]/30 cursor-pointer hover:scale-105 active:scale-95 transition-transform" 
+                role="button" 
+                aria-label="Cari"
+              >
+                <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              </div>
+            </div>
+
+            {/* Filter Icon Button (Triggers Popup Modal) */}
+            <button
+              type="button"
+              onClick={() => setIsFilterModalOpen(true)}
+              aria-label="Buka filter pencarian"
+              title="Filter Pencarian"
+              className={`relative inline-flex items-center justify-center w-[50px] h-[50px] sm:w-[54px] sm:h-[54px] rounded-full sm:rounded-2xl border transition-all active:scale-95 shrink-0 ${
+                activeFilterCount > 0
+                  ? 'bg-[#FFEDD5] border-[#F97316] text-[#C2410C] shadow-md shadow-[#F97316]/20 font-bold'
+                  : 'bg-white border-slate-200/90 text-slate-700 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:border-[#F97316] hover:text-[#C2410C]'
+              }`}
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-[#F97316] text-white text-[10px] font-black flex items-center justify-center shadow-xs">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Active Filter Badges */}
+          {activeFilterCount > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+              {selectedLocations.map((loc) => (
+                <span
+                  key={loc}
+                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]"
+                >
+                  <span>{loc}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleLocation(loc)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label={`Hapus filter ${loc}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+
+              {selectedKecamatan.map((kec) => (
+                <span
+                  key={kec}
+                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]"
+                >
+                  <span>{kec}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleKecamatan(kec)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label={`Hapus filter ${kec}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+
+              {selectedTipe !== 'semua' && (
+                <span className="inline-flex items-center gap-1 bg-[#FFEDD5] text-[#0F2A43] font-semibold px-2.5 py-1 rounded-full text-[11px] border border-[#F97316]/30">
+                  <span>{tipeOptions.find(t => t.value === selectedTipe)?.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTipe('semua')}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label="Hapus filter tipe"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {priceActive && (
+                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 font-semibold px-2.5 py-1 rounded-full text-[11px] border border-amber-200">
+                  <span>Rp {priceMin.toLocaleString('id-ID')} - {priceMax < PRICE_MAX ? `Rp ${priceMax.toLocaleString('id-ID')}` : 'Maks'}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPriceMin(PRICE_MIN);
+                      setPriceMax(PRICE_MAX);
+                      setPriceMinInput('');
+                      setPriceMaxInput('');
+                    }}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label="Hapus filter harga"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {landmark && (
+                <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]">
+                  <span>Dekat {landmark.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setLandmarkId(null)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label="Hapus filter landmark"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {userLoc && (
+                <span className="inline-flex items-center gap-1 bg-[#FFEDD5] text-[#0F2A43] font-semibold px-2.5 py-1 rounded-full text-[11px]">
+                  <span>Dekat Saya</span>
+                  <button
+                    type="button"
+                    onClick={() => setUserLoc(null)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label="Hapus filter lokasi saya"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {selectedFacilities.map((fac) => (
+                <span
+                  key={fac}
+                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]"
+                >
+                  <span>{fac}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleFacility(fac)}
+                    className="hover:text-red-600 rounded-full"
+                    aria-label={`Hapus filter fasilitas ${fac}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="text-[11px] font-bold text-rose-600 hover:underline pl-1 cursor-pointer inline-flex items-center gap-1"
+              >
+                <RotateCcw className="w-3 h-3" /> Reset
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Main 2-Column Layout */}
@@ -322,7 +498,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
           <div className="w-full lg:w-1/2 xl:w-2/5 space-y-4">
             
             {/* Search Bar + Filter Bar (Sticky on Desktop) */}
-            <div className="lg:sticky lg:top-[81px] z-20 bg-white space-y-3 pb-3 lg:pt-3 -mx-1 px-1">
+            <div className="hidden lg:block lg:sticky lg:top-[81px] z-20 bg-white space-y-3 pb-3 lg:pt-3 -mx-1 px-1">
               
               {/* Search Bar (div.search-input style from /) + Filter Icon Button */}
               <div className="flex items-center gap-2.5 sm:gap-3">
