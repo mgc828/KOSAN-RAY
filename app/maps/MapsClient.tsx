@@ -310,7 +310,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
         </div>
 
         {/* Mobile Sticky Search Bar (div.flex.items-center.gap-2.5) */}
-        <div className="lg:hidden sticky top-[80px] z-30 bg-white/95 backdrop-blur-md py-2.5 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-slate-100 shadow-xs space-y-2">
+        <div className="lg:hidden sticky top-[80px] z-[1000] bg-white/95 backdrop-blur-md py-2.5 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-slate-100 shadow-xs space-y-2">
           {/* Search Bar (div.search-input style from /) + Filter Icon Button */}
           <div className="flex items-center gap-2.5 sm:gap-3">
             {/* Search Pill Input */}
@@ -692,6 +692,17 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
 
             </div>
 
+            {/* Mobile Section Title (Lokasi di sekitarmu) */}
+            <div className="flex lg:hidden items-center justify-between text-xs text-slate-700 font-bold px-1 pt-1 pb-2">
+              <div className="flex items-center gap-1.5 text-[#0F2A43]">
+                <Compass className="w-4 h-4 text-[#C2410C]" />
+                <span>Lokasi di sekitarmu</span>
+              </div>
+              <span className="text-slate-400 font-medium" suppressHydrationWarning>
+                {filteredKosts.length} kost ditemukan
+              </span>
+            </div>
+
             {/* Kost Mini Cards Grid */}
             <div className="space-y-4">
               {filteredKosts.length > 0 ? (
@@ -767,7 +778,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
           </div>
 
           {/* Right Column: Sticky Interactive Leaflet Map */}
-          <div className="w-full lg:w-1/2 xl:w-3/5 h-[360px] sm:h-[460px] lg:h-[calc(100vh-140px)] lg:sticky lg:top-24 order-first lg:order-last">
+          <div className="w-full lg:w-1/2 xl:w-3/5 h-[360px] sm:h-[460px] lg:h-[calc(100vh-140px)] lg:sticky lg:top-24 order-first lg:order-last mb-6 lg:mb-0">
             <MapsComponent
               kosts={filteredKosts}
               selectedKost={selectedKost}

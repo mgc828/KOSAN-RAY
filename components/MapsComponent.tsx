@@ -176,7 +176,7 @@ export default function MapsComponent({ kosts, selectedKost, onSelectKost }: Map
   const detailUrl = selectedKost ? `/kost/${(selectedKost.kota || 'jakarta').toLowerCase()}/${selectedKost.area.toLowerCase()}/${selectedKost.slug}` : '';
 
   return (
-    <div className="relative w-full h-full min-h-[480px] lg:min-h-full rounded-2xl overflow-hidden shadow-inner border border-slate-200">
+    <div className="relative w-full h-full min-h-[360px] sm:min-h-[460px] z-0 lg:min-h-full rounded-2xl overflow-hidden shadow-inner border border-slate-200">
       {/* Map DOM Element */}
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 

@@ -31,7 +31,8 @@ import {
   Map as MapIcon,
   LocateFixed,
   Bookmark,
-  BookmarkPlus
+  BookmarkPlus,
+  RotateCcw
 } from 'lucide-react';
 
 const MapsComponent = dynamic(() => import('@/components/MapsComponent'), {
@@ -61,6 +62,12 @@ const RADIUS_STEP = 100;
 
 const PRICE_MIN = 0;
 const PRICE_MAX = 10000000;
+const PRICE_PRESETS = [
+  { label: '< 1 Juta', min: 0, max: 1000000 },
+  { label: '1 - 2 Juta', min: 1000000, max: 2000000 },
+  { label: '2 - 3 Juta', min: 2000000, max: 3000000 },
+  { label: '> 3 Juta', min: 3000000, max: PRICE_MAX },
+];
 const PRICE_STEP = 100000;
 
 /** ?area=... di URL bisa berupa kota ("Jakarta Selatan") atau nama area lama ("Tebet") -> kota + kecamatan. */
@@ -478,7 +485,7 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
         </div>
 
         {/* Mobile Sticky Search & Filter Bar (div.flex.items-center.gap-2.5 matching /maps) */}
-        <div className="lg:hidden sticky top-[80px] z-30 bg-white/95 backdrop-blur-md py-2.5 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-slate-100 shadow-xs mb-3 space-y-2">
+        <div className="lg:hidden sticky top-[80px] z-[1000] bg-white/95 backdrop-blur-md py-2.5 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-slate-100 shadow-xs mb-3 space-y-2">
           <div className="flex items-center gap-2.5 sm:gap-3">
             {/* Search Pill Input */}
             <div className="flex-1 relative flex items-center bg-white rounded-full border border-slate-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_24px_rgba(0,0,0,0.1)] focus-within:shadow-[0_6px_24px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] transition-all px-2 py-1 min-h-[50px] sm:min-h-[54px]">
@@ -1418,158 +1425,160 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
 
             {/* Modal Scrollable Body */}
             <div className="p-6 overflow-y-auto space-y-5 text-xs">
-              {/* 1. Lokasi Dropdown */}
-              <div ref={modalLocationRef} className="relative">
-                <label className="font-bold text-slate-700 mb-1.5 block">Lokasi / Area</label>
-                <button
-                  type="button"
-                  onClick={() => setIsModalLocationOpen(!isModalLocationOpen)}
-                  className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all ${
-                    selectedLocations.length > 0 
-                      ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900' 
-                      : 'border-slate-300 text-slate-500'
-                  }`}
-                >
-                  <span className="truncate">
-                    {selectedLocations.length > 0 ? selectedLocations.join(', ') : 'Pilih Lokasi Area'}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isModalLocationOpen ? 'rotate-180' : ''}`} />
-                </button>
+              
+              {/* 1. Lokasi / Area & Kecamatan */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* 1a. Lokasi Dropdown */}
+                <div ref={modalLocationRef} className="relative">
+                  <label className="font-bold text-slate-700 mb-1.5 block">Lokasi / Area</label>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalLocationOpen(!isModalLocationOpen)}
+                    className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all ${
+                      selectedLocations.length > 0 
+                        ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900' 
+                        : 'border-slate-300 text-slate-500'
+                    }`}
+                  >
+                    <span className="truncate">
+                      {selectedLocations.length > 0 
+                        ? selectedLocations.join(', ') 
+                        : 'Pilih Lokasi Area'}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isModalLocationOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                {isModalLocationOpen && (
-                  <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
-                    {locationOptions.map((loc) => {
-                      const isChecked = selectedLocations.includes(loc);
-                      return (
-                        <label
-                          key={loc}
-                          className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer text-xs transition-colors ${
-                            isChecked ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleToggleLocation(loc)}
-                              className="rounded border-slate-300 text-[#C2410C] focus:ring-[#F97316]"
-                            />
-                            <span>{loc}</span>
-                          </div>
-                          {isChecked && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                  {isModalLocationOpen && (
+                    <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
+                      {locationOptions.map((loc) => {
+                        const isChecked = selectedLocations.includes(loc);
+                        return (
+                          <label
+                            key={loc}
+                            className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer text-xs transition-colors ${
+                              isChecked ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => handleToggleLocation(loc)}
+                                className="rounded border-slate-300 text-[#C2410C] focus:ring-[#F97316]"
+                              />
+                              <span>{loc}</span>
+                            </div>
+                            {isChecked && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
 
-              {/* 1b. Kecamatan Dropdown */}
-              <div ref={modalKecamatanRef} className="relative">
-                <label className="font-bold text-slate-700 mb-1.5 block">Kecamatan</label>
-                <button
-                  type="button"
-                  disabled={selectedLocations.length === 0}
-                  onClick={() => setIsModalKecamatanOpen(!isModalKecamatanOpen)}
-                  className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all disabled:opacity-50 disabled:bg-slate-50 ${
-                    selectedKecamatan.length > 0
-                      ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900'
-                      : 'border-slate-300 text-slate-500'
-                  }`}
-                >
-                  <span className="truncate">
-                    {selectedLocations.length === 0 
-                      ? 'Pilih area dahulu' 
-                      : selectedKecamatan.length > 0 
-                        ? selectedKecamatan.join(', ') 
-                        : 'Semua Kecamatan'}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isModalKecamatanOpen ? 'rotate-180' : ''}`} />
-                </button>
+                {/* 1b. Kecamatan Dropdown */}
+                <div ref={modalKecamatanRef} className="relative">
+                  <label className="font-bold text-slate-700 mb-1.5 block">Kecamatan</label>
+                  <button
+                    type="button"
+                    disabled={selectedLocations.length === 0}
+                    onClick={() => setIsModalKecamatanOpen(!isModalKecamatanOpen)}
+                    className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all disabled:opacity-50 disabled:bg-slate-50 ${
+                      selectedKecamatan.length > 0
+                        ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900'
+                        : 'border-slate-300 text-slate-500'
+                    }`}
+                  >
+                    <span className="truncate">
+                      {selectedLocations.length === 0 
+                        ? 'Pilih area dahulu' 
+                        : selectedKecamatan.length > 0 
+                          ? selectedKecamatan.join(', ') 
+                          : 'Semua Kecamatan'}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isModalKecamatanOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                {isModalKecamatanOpen && selectedLocations.length > 0 && (
-                  <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
-                    {selectedLocations.map((city) => (
-                      <div key={city}>
-                        <p className="px-3 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">{city}</p>
-                        {(JAKARTA_REGIONS[city] ?? []).map((kec) => {
-                          const isChecked = selectedKecamatan.includes(kec);
-                          return (
-                            <label
-                              key={kec}
-                              className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer text-xs transition-colors ${
-                                isChecked ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => handleToggleKecamatan(kec)}
-                                  className="rounded border-slate-300 text-[#C2410C] focus:ring-[#F97316]"
-                                />
-                                <span>{kec}</span>
-                              </div>
-                              {isChecked && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
-                            </label>
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* 2. Tipe Kost Dropdown */}
-              <div ref={modalTipeRef} className="relative">
-                <label className="font-bold text-slate-700 mb-1.5 block">Tipe Kost</label>
-                <button
-                  type="button"
-                  onClick={() => setIsModalTipeOpen(!isModalTipeOpen)}
-                  className={`w-full flex justify-between items-center py-2.5 px-3.5 bg-white rounded-xl border transition-all ${
-                    selectedTipe !== 'semua'
-                      ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900'
-                      : 'border-slate-300 text-slate-500'
-                  }`}
-                >
-                  <span className="truncate">
-                    {tipeOptions.find(t => t.value === selectedTipe)?.label || 'Semua Tipe'}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isModalTipeOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {isModalTipeOpen && (
-                  <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 space-y-1">
-                    {tipeOptions.map((opt) => {
-                      const isSelected = selectedTipe === opt.value;
-                      return (
-                        <div
-                          key={opt.value}
-                          onClick={() => {
-                            setSelectedTipe(opt.value);
-                            setIsModalTipeOpen(false);
-                          }}
-                          className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer text-xs transition-colors ${
-                            isSelected ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
-                          }`}
-                        >
-                          <span>{opt.label}</span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                  {isModalKecamatanOpen && selectedLocations.length > 0 && (
+                    <div className="absolute left-0 right-0 mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-56 overflow-auto p-2 space-y-1">
+                      {selectedLocations.map((city) => (
+                        <div key={city}>
+                          <p className="px-3 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">{city}</p>
+                          {(JAKARTA_REGIONS[city] ?? []).map((kec) => {
+                            const isChecked = selectedKecamatan.includes(kec);
+                            return (
+                              <label
+                                key={kec}
+                                className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer text-xs transition-colors ${
+                                  isChecked ? 'bg-[#FFEDD5] text-[#0F2A43] font-bold' : 'hover:bg-slate-50 text-slate-700'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => handleToggleKecamatan(kec)}
+                                    className="rounded border-slate-300 text-[#C2410C] focus:ring-[#F97316]"
+                                  />
+                                  <span>{kec}</span>
+                                </div>
+                                {isChecked && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                              </label>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 2. Tipe Kost */}
+              <div>
+                <label className="font-bold text-slate-700 mb-1.5 block">Tipe Kost</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {tipeOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setSelectedTipe(opt.value)}
+                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                        selectedTipe === opt.value
+                          ? 'bg-[#FFEDD5] border-[#F97316] text-[#0F2A43] shadow-xs'
+                          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* 3. Rentang Harga */}
-              <div className="space-y-3">
-                <label className="font-bold text-slate-700 block">Rentang Harga per Bulan</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <span className="text-[11px] text-slate-500 font-medium">Dari</span>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rp</span>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-slate-700">Rentang Harga</span>
+                  {priceActive && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPriceMin(PRICE_MIN);
+                        setPriceMax(PRICE_MAX);
+                        setPriceMinInput('');
+                        setPriceMaxInput('');
+                      }}
+                      className="text-[11px] font-semibold text-rose-600 hover:underline cursor-pointer"
+                    >
+                      Reset Harga
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-2.5">
+                  <div>
+                    <span className="block text-[11px] font-bold text-slate-600 mb-1">Dari</span>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3 text-xs font-bold text-slate-400 pointer-events-none">Rp</span>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -1584,10 +1593,10 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
                       />
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <span className="text-[11px] text-slate-500 font-medium">Sampai</span>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rp</span>
+                  <div>
+                    <span className="block text-[11px] font-bold text-slate-600 mb-1">Sampai</span>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3 text-xs font-bold text-slate-400 pointer-events-none">Rp</span>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -1604,23 +1613,30 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
                   </div>
                 </div>
 
-                {/* Quick Presets */}
-                <div className="grid grid-cols-2 gap-1.5 pt-1">
-                  {pricePresets.map((preset) => {
+                {/* Quick presets */}
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  {PRICE_PRESETS.map((preset) => {
                     const isSelected = priceMin === preset.min && priceMax === preset.max;
                     return (
                       <button
                         key={preset.label}
                         type="button"
                         onClick={() => {
-                          setPriceMin(preset.min);
-                          setPriceMax(preset.max);
-                          setPriceMinInput(preset.min.toString());
-                          setPriceMaxInput(preset.max >= PRICE_MAX ? '' : preset.max.toString());
+                          if (isSelected) {
+                            setPriceMin(PRICE_MIN);
+                            setPriceMax(PRICE_MAX);
+                            setPriceMinInput('');
+                            setPriceMaxInput('');
+                          } else {
+                            setPriceMin(preset.min);
+                            setPriceMax(preset.max);
+                            setPriceMinInput(preset.min > 0 ? preset.min.toLocaleString('id-ID') : '');
+                            setPriceMaxInput(preset.max < PRICE_MAX ? preset.max.toLocaleString('id-ID') : '');
+                          }
                         }}
-                        className={`py-1.5 px-2.5 rounded-lg border text-[11px] font-bold transition-all ${
+                        className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
                           isSelected
-                            ? 'bg-[#FFEDD5] border-[#F97316] text-[#C2410C]'
+                            ? 'bg-[#FFEDD5] border-[#F97316] text-[#0F2A43] shadow-xs'
                             : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
                         }`}
                       >
@@ -1752,42 +1768,47 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
                 <label className="font-bold text-slate-700 mb-2 block">Fasilitas</label>
                 <div className="flex flex-wrap gap-1.5">
                   {facilityOptions.map((opt) => {
-                    const isChecked = selectedFacilities.includes(opt.label);
+                    const active = selectedFacilities.includes(opt.label);
                     return (
                       <button
                         key={opt.label}
                         type="button"
                         onClick={() => handleToggleFacility(opt.label)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
-                          isChecked
-                            ? 'bg-[#FFEDD5] border-[#F97316] text-[#0F2A43]'
-                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                        aria-pressed={active}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs transition-all ${
+                          active
+                            ? 'bg-[#F97316] border-[#F97316] text-white font-bold shadow-xs'
+                            : 'bg-white border-slate-300 text-slate-600 hover:border-slate-400 font-medium'
                         }`}
                       >
-                        {isChecked && <Check className="w-3.5 h-3.5 text-[#C2410C]" />}
+                        {active && <Check className="w-3.5 h-3.5" />}
                         <span>{opt.label}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
+
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between gap-3 shrink-0">
+            <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between shrink-0 bg-slate-50/50">
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="px-4 py-2.5 text-xs font-bold text-rose-600 hover:underline cursor-pointer"
+                className="text-xs font-bold text-slate-600 hover:text-rose-600 transition-colors inline-flex items-center gap-1.5"
               >
-                Reset Semua
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset Semua</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setIsFilterModalOpen(false)}
-                className="px-6 py-2.5 bg-[#F97316] text-[#0F2A43] text-xs font-bold rounded-xl shadow-md shadow-[#F97316]/30 hover:bg-[#EA580C] active:scale-95 transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-xs transition-colors"
               >
-                Terapkan Filter ({sortedKosts.length} Kost)
+                <span>Lihat {sortedKosts.length} Kost</span>
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -1797,4 +1818,3 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
     </div>
   );
 }
-
