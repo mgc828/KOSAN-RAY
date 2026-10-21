@@ -406,6 +406,8 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
                 onTouchEnd={onTouchEnd}
                 style={{
                   overflow: 'hidden',
+                  paddingTop: 24,
+                  paddingBottom: 40,
                 }}
               >
                 {kosts.map((k) => (
