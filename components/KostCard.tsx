@@ -192,7 +192,7 @@ export default function KostCard({ kost, priority = false, distanceLabel, layout
 
   return (
     <div className="group relative block w-full rounded-[20px] overflow-visible border border-slate-200 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-[#F97316] hover:shadow-[0_12px_28px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] focus-within:shadow-[0_12px_28px_rgba(249,115,22,0.18)]">
-      <Link href={detailUrl} className="block relative">
+      <Link href={detailUrl} className="block relative rounded-[20px] overflow-hidden">
         {/* Main Image Container - Sekitar Vertical Card Style */}
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 rounded-t-[20px]">
           <Image
