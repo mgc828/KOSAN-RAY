@@ -105,7 +105,7 @@ export default async function KotaKostPage({
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-1.5 pt-2 pb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-3 pt-3 pb-8 overflow-visible" style={{ overflow: 'visible' }}>
         {kostList.map(kost => (
           <KostCard key={kost.id} kost={kost} />
         ))}

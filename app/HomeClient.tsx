@@ -177,6 +177,11 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
   const [perView, setPerView] = useState(4);
+  const [translateX, setTranslateX] = useState(0);
+
+  const touchStartRef = useRef<number | null>(null);
+  const touchDeltaRef = useRef<number>(0);
+  const [dragDelta, setDragDelta] = useState(0);
 
   useEffect(() => {
     const onResize = () => {
@@ -189,41 +194,56 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
   }, []);
 
   const pages = Math.max(1, Math.ceil(kosts.length / perView));
+
+  const getStep = useCallback(() => {
+    const el = carouselRef.current;
+    const card = el?.querySelector('.papi-property-card') as HTMLElement | null;
+    if (!card) return 0;
+    return perView * (card.offsetWidth + 20);
+  }, [perView]);
+
   const goTo = useCallback((p: number) => {
     const clamped = Math.max(0, Math.min(p, pages - 1));
     setPage(clamped);
-    const el = carouselRef.current;
-    if (el) {
-      const card = el.querySelector('.papi-property-card') as HTMLElement | null;
-      if (card) el.scrollTo({ left: clamped * perView * (card.offsetWidth + 20), behavior: 'smooth' });
-    }
-  }, [pages, perView]);
-
-  // Indikator titik ikut bergeser saat carousel digeser manual (trackpad, sentuh, panah keyboard), bukan hanya lewat tombol.
-  const syncPageFromScroll = useCallback(() => {
-    const el = carouselRef.current;
-    const card = el?.querySelector('.papi-property-card') as HTMLElement | null;
-    if (!el || !card) return;
-    const step = perView * (card.offsetWidth + 20);
-    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-    const next = atEnd ? pages - 1 : Math.round(el.scrollLeft / step);
-    setPage(Math.max(0, Math.min(next, pages - 1)));
-  }, [pages, perView]);
+    const step = getStep();
+    setTranslateX(clamped * step);
+  }, [pages, getStep]);
 
   useEffect(() => {
-    const el = carouselRef.current;
-    if (!el) return;
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(syncPageFromScroll);
+    const update = () => {
+      const step = getStep();
+      setTranslateX(page * step);
     };
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      el.removeEventListener('scroll', onScroll);
-    };
-  }, [syncPageFromScroll]);
+    update();
+    const t = setTimeout(update, 60);
+    return () => clearTimeout(t);
+  }, [page, perView, getStep]);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = e.touches[0].clientX;
+    touchDeltaRef.current = 0;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartRef.current === null) return;
+    const delta = e.touches[0].clientX - touchStartRef.current;
+    touchDeltaRef.current = delta;
+    setDragDelta(delta);
+  };
+  const onTouchEnd = () => {
+    if (touchDeltaRef.current > 40) {
+      goTo(page - 1);
+    } else if (touchDeltaRef.current < -40) {
+      goTo(page + 1);
+    }
+    touchStartRef.current = null;
+    touchDeltaRef.current = 0;
+    setDragDelta(0);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') goTo(page - 1);
+    if (e.key === 'ArrowRight') goTo(page + 1);
+  };
 
   const pickSuggestion = (sg: Suggestion) => {
     if (sg.kind === 'kost' && sg.href) router.push(sg.href);
@@ -316,14 +336,29 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
 
       {/* REKOMENDASI */}
       <section className="papi-recommendations">
-        <div className="container">
+        <div className="container" style={{ overflow: 'visible' }}>
           <h2>Rekomendasi Kost Di Jakarta Untukmu</h2>
           <p className="section-description">Cari kost terbaik di Jakarta yang sesuai dengan kebutuhan dan budget kamu</p>
-          <div className="papi-property-carousel-container">
+          <div className="papi-property-carousel-container" style={{ overflow: 'visible' }}>
             <button className="papi-carousel-control papi-prev-btn" onClick={() => goTo(page - 1)} aria-label="Sebelumnya" style={{ display: pages > 1 ? 'flex' : 'none' }}>
               <ChevronLeft size={20} />
             </button>
-            <div className="papi-property-carousel" ref={carouselRef} tabIndex={0} role="region" aria-label="Rekomendasi kost, geser dengan panah keyboard" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
+            <div
+              className="papi-property-carousel"
+              ref={carouselRef}
+              tabIndex={0}
+              role="region"
+              aria-label="Rekomendasi kost"
+              onKeyDown={onKeyDown}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+              style={{
+                overflow: 'visible',
+                transform: `translateX(-${Math.max(0, translateX - dragDelta)}px)`,
+                transition: dragDelta !== 0 ? 'none' : 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+              }}
+            >
               {kosts.map((k) => (
                 <PropertyCard key={k.id} kost={k} />
               ))}
@@ -342,7 +377,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
 
       {/* TIPS */}
       <section className="tips-section" data-header-theme="light">
-        <div className="container">
+        <div className="container" style={{ overflow: 'visible' }}>
           <div className="tips-content">
             <h2>Kenapa Pilih Kost-Kostan ?</h2>
             <div className="tips-grid">
@@ -362,7 +397,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
 
       {/* PANDUAN BOOKING */}
       <section className="booking-guide">
-        <div className="container">
+        <div className="container" style={{ overflow: 'visible' }}>
           <h2>Panduan Booking Kost</h2>
           <p className="guide-subtitle">Ikuti langkah mudah ini untuk booking kost impian kamu</p>
           <div className="guide-steps-container">
@@ -384,7 +419,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
 
       {/* PENCARIAN POPULAR */}
       <section className="explore-cities">
-        <div className="container">
+        <div className="container" style={{ overflow: 'visible' }}>
           <div className="explore-header">
             <h2>Pencarian Popular</h2>
             <div className="explore-navigation popular-desktop-only">
@@ -404,7 +439,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
 
       {/* FAQ */}
       <section className="faq-section">
-        <div className="container">
+        <div className="container" style={{ overflow: 'visible' }}>
           <h2>FAQ</h2>
           <div className="faq-container">
             {FAQS.map((f, i) => (
@@ -422,7 +457,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
 
       {/* TESTIMONIAL / STATS */}
       <section className="testimonial-section" data-header-theme="light">
-        <div className="container">
+        <div className="container" style={{ overflow: 'visible' }}>
           <div className="testimonial-content" style={{ maxWidth: "none" }}>
             <h2>Testimoni</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', maxWidth: 1100, marginLeft: 'auto', marginRight: 'auto', gap: '1.5rem', marginTop: '2.5rem', textAlign: 'left' }}>
@@ -441,7 +476,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
 
       {/* CTA */}
       <section className="cta-download">
-        <div className="container">
+        <div className="container" style={{ overflow: 'visible' }}>
           <div className="cta-row">
             <div className="cta-content">
               <h2 style={{ color: '#ffffff', fontSize: 'clamp(1.6rem, 6vw, 2.25rem)', fontWeight: 700, marginBottom: '1rem' }}>

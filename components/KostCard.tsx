@@ -49,7 +49,7 @@ export default function KostCard({ kost, priority = false, distanceLabel, layout
 
   if (layout === 'list') {
     return (
-      <div className="group relative block w-full rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#F97316] hover:shadow-[0_12px_28px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] focus-within:shadow-[0_12px_28px_rgba(249,115,22,0.18)]">
+      <div className="group relative block w-full rounded-2xl overflow-visible border border-slate-200 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#F97316] hover:shadow-[0_12px_28px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] focus-within:shadow-[0_12px_28px_rgba(249,115,22,0.18)]">
         <Link href={detailUrl} className="block relative sm:flex sm:flex-row sm:items-stretch">
           {/* Main Image Container */}
           <div className="relative aspect-[16/10] sm:aspect-auto sm:w-72 md:w-80 lg:w-96 overflow-hidden bg-slate-100 shrink-0 min-h-[190px]">
@@ -191,7 +191,7 @@ export default function KostCard({ kost, priority = false, distanceLabel, layout
   }
 
   return (
-    <div className="group relative block w-full rounded-xl overflow-hidden border border-slate-200 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-[#F97316] hover:shadow-[0_12px_28px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] focus-within:shadow-[0_12px_28px_rgba(249,115,22,0.18)]">
+    <div className="group relative block w-full rounded-xl overflow-visible border border-slate-200 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-[#F97316] hover:shadow-[0_12px_28px_rgba(249,115,22,0.18)] focus-within:border-[#F97316] focus-within:shadow-[0_12px_28px_rgba(249,115,22,0.18)]">
       <Link href={detailUrl} className="block relative">
         {/* Main Image Container - Sekitar Vertical Card Style */}
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">

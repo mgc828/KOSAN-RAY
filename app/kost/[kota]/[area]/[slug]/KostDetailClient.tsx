@@ -803,7 +803,7 @@ export default function KostDetailClient({ initialKost, slug, similar = [] }: Ko
         {similar.length > 0 && (
           <section className="space-y-4" aria-labelledby="similar-title">
             <h2 id="similar-title" className="text-xl font-extrabold text-[#0F2A43]">Kost Serupa</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-1.5 pt-2 pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-3 pt-3 pb-8 overflow-visible" style={{ overflow: 'visible' }}>
               {similar.map((k) => (
                 <KostCard key={k.id} kost={k} />
               ))}

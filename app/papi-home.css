@@ -512,10 +512,10 @@
 .papi-home .papi-recommendations{background:#F8FAFC;padding:4rem 0 3rem;width:100%;max-width:100%;overflow-x:clip;overflow-y:visible}
 .papi-home .papi-recommendations h2{margin-bottom:2.5rem;font-size:2.75rem;color:var(--text-primary);text-align:center;font-weight:700;position:relative;padding-bottom:1rem}
 .papi-home .papi-recommendations h2::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:70px;height:4px;background:var(--yellow);border-radius:3px}
-.papi-home .papi-recommendations .container{max-width:1200px;margin:0 auto;padding:0 1rem}
-.papi-home .papi-property-carousel-container{position:relative;width:100%;max-width:1300px;margin:0 auto 2rem;padding:0 3rem;overflow:visible}
-.papi-home .papi-property-carousel{display:flex;transition:transform 0.5s ease;gap:1.25rem;padding:1.5rem 1.25rem 2.75rem;margin:-1rem -1.25rem -1.5rem}
-.papi-home .papi-property-card{width:calc(25% - 0.75rem);background:var(--white);border-radius:20px;overflow:hidden;position:relative;flex-shrink:0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);border:1px solid rgba(0,0,0,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.papi-home .papi-recommendations .container{max-width:1200px;margin:0 auto;padding:0 1rem;overflow:visible !important}
+.papi-home .papi-property-carousel-container{position:relative;width:100%;max-width:1300px;margin:0 auto 2rem;padding:0 3rem;overflow:visible !important}
+.papi-home .papi-property-carousel{display:flex;transition:transform 0.5s ease;gap:1.25rem;padding:1.5rem 1.25rem 2.75rem;margin:-1rem -1.25rem -1.5rem;overflow:visible !important}
+.papi-home .papi-property-card{width:calc(25% - 0.75rem);background:var(--white);border-radius:20px;overflow:visible !important;position:relative;flex-shrink:0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);border:1px solid rgba(0,0,0,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
 .papi-home .papi-property-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(249,115,22,0.18);border-color:var(--yellow)}
 .papi-home .property-card-link{display:block;color:inherit;text-decoration:none;position:relative;height:100%;width:100%;z-index:1}
 .papi-home .property-card-link:hover{color:inherit;text-decoration:none}
@@ -570,14 +570,14 @@
 @media (max-width:768px){
 .papi-home .papi-recommendations{padding:3rem 0 2rem}
 .papi-home .papi-recommendations h2{margin-bottom:2rem;font-size:1.5rem}
-.papi-home .papi-property-carousel-container{padding:0 1.5rem}
+.papi-home .papi-property-carousel-container{padding:0 1.5rem;overflow:visible !important}
 .papi-home .papi-property-card{width:100%;max-width:400px;margin:0 auto}
 .papi-home .papi-carousel-control{width:36px;height:36px}
 .papi-home .papi-carousel-indicators{margin:2rem 0 1rem}
 .papi-home .papi-indicator{width:10px;height:10px}
 }
 @media (max-width:576px){
-.papi-home .papi-property-carousel-container{padding:0 1rem}
+.papi-home .papi-property-carousel-container{padding:0 1rem;overflow:visible !important}
 .papi-home .papi-property-card{width:100%;max-width:350px}
 .papi-home .papi-property-info{padding:1rem}
 .papi-home .papi-property-info h3{font-size:1rem;line-height:1.3}

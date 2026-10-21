@@ -1053,13 +1053,13 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
           view === 'grid' || view === 'list' ? (
             <>
               {view === 'grid' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-3 pt-4 sm:pt-6 pb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-3 pt-4 sm:pt-6 pb-8 overflow-visible" style={{ overflow: 'visible' }}>
                   {pageItems.map((kost, i) => (
                     <KostCard key={kost.id} kost={kost} priority={currentPage === 1 && i < 4} distanceLabel={distanceLabelFor(kost)} />
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col gap-4 p-3 pt-4 sm:pt-6 pb-8">
+                <div className="flex flex-col gap-4 p-3 pt-4 sm:pt-6 pb-8 overflow-visible" style={{ overflow: 'visible' }}>
                   {pageItems.map((kost, i) => (
                     <KostCard key={kost.id} kost={kost} layout="list" priority={currentPage === 1 && i < 3} distanceLabel={distanceLabelFor(kost)} />
                   ))}
@@ -1128,7 +1128,8 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
                   <div
                     key={kost.id}
                     onMouseEnter={() => setMapSelected(kost)}
-                    className={`rounded-xl transition-all ${mapSelected?.id === kost.id ? 'ring-2 ring-[#F97316] shadow-md' : ''}`}
+                    className={`rounded-xl transition-all overflow-visible ${mapSelected?.id === kost.id ? 'ring-2 ring-[#F97316] shadow-md' : ''}`}
+                    style={{ overflow: 'visible' }}
                   >
                     <KostCard kost={kost} distanceLabel={distanceLabelFor(kost)} />
                   </div>
