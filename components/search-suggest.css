@@ -5,8 +5,32 @@
   position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 9999;
   margin: 0; padding: 6px; list-style: none; text-align: left;
   background: #fff; color: #0F2A43; border: 1px solid #e2e8f0; border-radius: 16px;
-  box-shadow: 0 18px 40px rgba(15, 42, 67, 0.18); max-height: 340px; overflow-y: auto;
+  box-shadow: 0 18px 40px rgba(15, 42, 67, 0.18); max-height: 340px; overflow-y: auto; overflow-x: hidden;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
 }
+
+/* Custom scrollbar rapi di dalam dropdown menu */
+.sugg .sugg-list::-webkit-scrollbar,
+.papi-home .sugg .sugg-list::-webkit-scrollbar {
+  width: 6px;
+}
+.sugg .sugg-list::-webkit-scrollbar-track,
+.papi-home .sugg .sugg-list::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+.sugg .sugg-list::-webkit-scrollbar-thumb,
+.papi-home .sugg .sugg-list::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+.sugg .sugg-list::-webkit-scrollbar-thumb:hover,
+.papi-home .sugg .sugg-list::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
 .sugg .sugg-item,
 .papi-home .sugg .sugg-item {
   display: flex; align-items: center; gap: 10px; padding: 9px 10px; margin: 0;

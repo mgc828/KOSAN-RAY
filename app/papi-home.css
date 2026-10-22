@@ -924,9 +924,10 @@
 
 .papi-home{--text-primary:#0F2A43;--gray-800:#0F2A43}
 
-.papi-home .search-input{overflow:visible}
-.papi-home .sugg-hero{flex:1;min-width:0}
+.papi-home .search-input{overflow:visible !important;position:relative !important}
+.papi-home .sugg-hero{flex:1;min-width:0;position:static !important}
 .papi-home .sugg-hero .search-input__field{width:100%}
+.papi-home .sugg-hero .sugg-list{left:0 !important;right:0 !important;width:100% !important;top:calc(100% + 8px) !important;border-radius:20px !important;box-sizing:border-box !important}
 
 @media (max-width:576px){
 .papi-home .papi-carousel-control{display:none !important}
