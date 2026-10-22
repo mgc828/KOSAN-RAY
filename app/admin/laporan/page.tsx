@@ -36,8 +36,8 @@ export default function AdminLaporanPage() {
     try {
       const res = await fetch('/api/admin/data?type=reports');
       const resData = await res.json();
-      if (resData.report) {
-        setData(resData.report);
+      if (resData.report || resData.monthlyRevenue) {
+        setData(resData.report || resData);
       }
     } catch {
       addToast('Gagal memuat laporan', 'error');
