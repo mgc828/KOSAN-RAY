@@ -61,19 +61,22 @@ export function generateArchitectureCandidate(stats) {
     components: [
       { id: 'google_auth', type: 'external', label: 'Google OAuth', sublabel: 'Identity Provider', pos: [50, 110], size: [150, 65] },
       { id: 'client_web', type: 'frontend', label: 'Web Client (Next.js)', sublabel: `React 19, Leaflet (${stats.pageCount} Pages)`, pos: [50, 260], size: [160, 70] },
-      { id: 'sentinel_sec', type: 'security', label: 'Sentinel WAF & Audit', sublabel: 'middleware.ts + detector', pos: [260, 260], size: [160, 70], tag: 'Active Defense' },
-      { id: 'auth_service', type: 'security', label: 'Auth & Session', sublabel: 'Encrypted Cookie + Tokens', pos: [480, 110], size: [160, 65] },
-      { id: 'next_app', type: 'backend', label: 'Next.js Core App', sublabel: `App Router (${stats.apiCount} APIs)`, pos: [480, 260], size: [160, 70] },
-      { id: 'db_adapter', type: 'backend', label: 'Database Adapter', sublabel: 'lib/db.ts Dual Strategy', pos: [480, 400], size: [160, 65] },
-      { id: 'payment_engine', type: 'backend', label: 'Payment Engine', sublabel: 'QRIS & Webhook Handler', pos: [480, 540], size: [160, 65] },
-      { id: 'cron_worker', type: 'backend', label: 'Cron Reminders', sublabel: 'Vercel Cron H-3 & H-0', pos: [480, 670], size: [160, 65] },
-      { id: 'supabase_db', type: 'database', label: 'Supabase PostgreSQL', sublabel: 'Table: app_documents', pos: [750, 350], size: [160, 65] },
-      { id: 'local_store', type: 'database', label: 'Local JSON Store', sublabel: 'data/*.json Fallback', pos: [750, 450], size: [160, 65] },
-      { id: 'midtrans', type: 'external', label: 'Midtrans Payment', sublabel: 'QRIS Gateway API', pos: [750, 560], size: [160, 65], tag: 'Payment Gateway' },
-      { id: 'resend_mail', type: 'external', label: 'Resend Email API', sublabel: 'Invoice & Reminders', pos: [750, 670], size: [160, 65], tag: 'Transactional Mail' }
+      
+      { id: 'auth_service', type: 'security', label: 'Auth & Session', sublabel: 'Encrypted Cookie + Tokens', pos: [270, 110], size: [160, 65] },
+      { id: 'sentinel_sec', type: 'security', label: 'Sentinel WAF & Audit', sublabel: 'middleware.ts + detector', pos: [270, 260], size: [160, 70], tag: 'Active Defense' },
+      { id: 'payment_engine', type: 'backend', label: 'Payment Engine', sublabel: 'QRIS & Webhook Handler', pos: [270, 410], size: [160, 65] },
+
+      { id: 'cron_worker', type: 'backend', label: 'Cron Reminders', sublabel: 'Vercel Cron H-3 & H-0', pos: [490, 110], size: [160, 65] },
+      { id: 'next_app', type: 'backend', label: 'Next.js Core App', sublabel: `App Router (${stats.apiCount} APIs)`, pos: [490, 260], size: [160, 70] },
+      { id: 'db_adapter', type: 'backend', label: 'Database Adapter', sublabel: 'lib/db.ts Dual Strategy', pos: [490, 410], size: [160, 65] },
+
+      { id: 'resend_mail', type: 'external', label: 'Resend Email API', sublabel: 'Invoice & Reminders', pos: [740, 110], size: [160, 65], tag: 'Transactional Mail' },
+      { id: 'midtrans', type: 'external', label: 'Midtrans Payment', sublabel: 'QRIS Gateway API', pos: [740, 260], size: [160, 65], tag: 'Payment Gateway' },
+      { id: 'supabase_db', type: 'database', label: 'Supabase PostgreSQL', sublabel: 'Table: app_documents', pos: [740, 390], size: [160, 65] },
+      { id: 'local_store', type: 'database', label: 'Local JSON Store', sublabel: 'data/*.json Fallback', pos: [740, 480], size: [160, 65] }
     ],
     boundaries: [
-      { kind: 'region', label: 'Next.js 15 Application Server', wraps: ['sentinel_sec', 'next_app', 'auth_service', 'db_adapter', 'payment_engine', 'cron_worker'] },
+      { kind: 'region', label: 'Next.js 15 Application Server', wraps: ['auth_service', 'sentinel_sec', 'payment_engine', 'cron_worker', 'next_app', 'db_adapter'] },
       { kind: 'security-group', label: 'Data Persistence Layer', wraps: ['supabase_db', 'local_store'] }
     ],
     connections: [
@@ -197,7 +200,6 @@ export function generateWorkflowCandidate(stats) {
 }
 
 export function runGenerator() {
-  // Ensure directories exist only when explicitly executed
   try {
     fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
     fs.mkdirSync(ARCHIFY_DIR, { recursive: true });
