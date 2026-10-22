@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/lib/admin-client';
 import { AppUser } from '@/lib/payment-store';
+import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 
 export default function AdminPenggunaPage() {
   const { addToast } = useAdmin();
@@ -248,16 +249,18 @@ export default function AdminPenggunaPage() {
           </div>
 
           {/* Status Filter */}
-          <select
+          <SingleSelectDropdown
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/30"
-          >
-            <option value="ALL">Semua Status Langganan</option>
-            <option value="active">Premium Aktif</option>
-            <option value="expired">Kedaluwarsa</option>
-            <option value="free">Free Tier</option>
-          </select>
+            onChange={(val) => setStatusFilter(val)}
+            options={[
+              { value: 'ALL', label: 'Semua Status Langganan' },
+              { value: 'active', label: 'Premium Aktif' },
+              { value: 'expired', label: 'Kedaluwarsa' },
+              { value: 'free', label: 'Free Tier' },
+            ]}
+            placeholder="Semua Status Langganan"
+            buttonClassName="!py-2 !px-3"
+          />
         </div>
       </div>
 

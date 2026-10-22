@@ -85,6 +85,40 @@ export async function POST(req: NextRequest) {
       }
 
       if (!matchedAdmin) {
+        // Log percobaan breach / login gagal ke Security Log
+        const cfIp = req.headers.get('cf-connecting-ip');
+        const forwardedFor = req.headers.get('x-forwarded-for');
+        const realIp = req.headers.get('x-real-ip');
+        const clientIp = cfIp || (forwardedFor ? forwardedFor.split(',')[0].trim() : null) || realIp || '127.0.0.1';
+        const host = req.headers.get('host') || 'localhost:3000';
+        const isProdHost = host.includes('trycloudflare') || host.includes('vercel') || (!host.includes('localhost') && !host.includes('127.0.0.1'));
+
+        try {
+          const logUrl = req.nextUrl.clone();
+          logUrl.pathname = '/api/security/log';
+          logUrl.search = '';
+          fetch(logUrl.toString(), {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              environment: isProdHost ? 'PRODUCTION' : 'LOCAL',
+              host,
+              ip: clientIp,
+              country: req.headers.get('cf-ipcountry') || 'ID',
+              isCloudflare: Boolean(cfIp),
+              method: 'POST',
+              pathname: '/api/admin/auth',
+              search: '',
+              status: 401,
+              threatLevel: 'UNAUTHORIZED',
+              threatType: 'BRUTE_FORCE_LOGIN',
+              description: `Percobaan login admin GAGAL dengan email target: ${emailTrim}`,
+              matchedPayload: `Email: ${emailTrim}`,
+              userAgent: req.headers.get('user-agent') || 'Unknown',
+            }),
+          }).catch(() => {});
+        } catch {}
+
         return NextResponse.json({ error: 'Email atau password salah' }, { status: 401 });
       }
 

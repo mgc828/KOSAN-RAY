@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/lib/admin-client';
 import { UnlockUserItem } from '@/lib/admin-types';
+import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 
 export default function AdminUnlockPage() {
   const { addToast } = useAdmin();
@@ -230,14 +231,16 @@ export default function AdminUnlockPage() {
 
           {/* Status Filter for Active Tab */}
           {activeTab === 'active' && (
-            <select
+            <SingleSelectDropdown
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/30"
-            >
-              <option value="ALL">Semua Member Aktif</option>
-              <option value="EXPIRING_SOON">Segera Berakhir (≤ 7 Hari)</option>
-            </select>
+              onChange={(val) => setStatusFilter(val as any)}
+              options={[
+                { value: 'ALL', label: 'Semua Member Aktif' },
+                { value: 'EXPIRING_SOON', label: 'Segera Berakhir (≤ 7 Hari)' },
+              ]}
+              placeholder="Filter Status"
+              buttonClassName="!py-2 !px-3"
+            />
           )}
         </div>
       </div>

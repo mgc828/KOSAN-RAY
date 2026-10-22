@@ -21,6 +21,7 @@ import {
 import { useAdmin } from '@/lib/admin-client';
 import { Kost, KostType } from '@/lib/types';
 import { AreaItem } from '@/lib/admin-types';
+import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 
 const LocationPickerMap = dynamic(() => import('@/components/LocationPickerMap'), {
   ssr: false,
@@ -381,10 +382,9 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block mb-1.5">
                   Area / Kawasan <span className="text-rose-500">*</span>
                 </label>
-                <select
+                <SingleSelectDropdown
                   value={area}
-                  onChange={(e) => {
-                    const sel = e.target.value;
+                  onChange={(sel) => {
                     setArea(sel);
                     const matched = areas.find((a) => a.nama === sel);
                     if (matched) {
@@ -393,14 +393,14 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                       setLng(matched.lng);
                     }
                   }}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 font-medium"
-                >
-                  {areas.map((a) => (
-                    <option key={a.id} value={a.nama}>
-                      {a.nama} ({a.kota})
-                    </option>
-                  ))}
-                </select>
+                  options={areas.map((a) => ({
+                    value: a.nama,
+                    label: `${a.nama} (${a.kota})`,
+                  }))}
+                  placeholder="Pilih Area..."
+                  highlightSelected={false}
+                  buttonClassName="!py-2.5 !px-4"
+                />
               </div>
 
               <div>

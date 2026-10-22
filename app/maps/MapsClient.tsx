@@ -12,6 +12,7 @@ import { JAKARTA_REGIONS, JAKARTA_CITIES, getKostCity, getKostKecamatan } from '
 import { FACILITY_CATEGORIES } from '@/lib/facilities';
 import { toast } from '@/lib/toast';
 import '@/app/cari-kost/price-slider.css';
+import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 import { 
   Search, 
   MapPin, 
@@ -945,22 +946,12 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               {/* 2. Tipe Kost */}
               <div ref={tipeDropdownRef} className="relative">
                 <label className="font-bold text-slate-700 mb-1.5 block">Tipe Kost</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {tipeOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setSelectedTipe(opt.value)}
-                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center ${
-                        selectedTipe === opt.value
-                          ? 'bg-[#FFEDD5] border-[#F97316] text-[#0F2A43] shadow-xs'
-                          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+                <SingleSelectDropdown
+                  value={selectedTipe}
+                  onChange={(val) => setSelectedTipe(val)}
+                  options={tipeOptions.map((t) => ({ value: t.value, label: t.label }))}
+                  placeholder="Pilih Tipe Kost"
+                />
               </div>
 
               {/* 3. Rentang Harga */}

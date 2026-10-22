@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/lib/admin-client';
 import { PaymentTransaction } from '@/lib/payment-store';
+import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 
 export default function AdminTransaksiPage() {
   const { addToast } = useAdmin();
@@ -354,41 +355,47 @@ export default function AdminTransaksiPage() {
           </div>
 
           {/* Status Filter */}
-          <select
+          <SingleSelectDropdown
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/30"
-          >
-            <option value="ALL">Semua Status</option>
-            <option value="settlement">Sukses (Settlement)</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Gagal / Expired</option>
-          </select>
+            onChange={(val) => setStatusFilter(val)}
+            options={[
+              { value: 'ALL', label: 'Semua Status' },
+              { value: 'settlement', label: 'Sukses (Settlement)' },
+              { value: 'pending', label: 'Pending' },
+              { value: 'failed', label: 'Gagal / Expired' },
+            ]}
+            placeholder="Semua Status"
+            buttonClassName="!py-2 !px-3"
+          />
 
           {/* Method Filter */}
-          <select
+          <SingleSelectDropdown
             value={methodFilter}
-            onChange={(e) => setMethodFilter(e.target.value)}
-            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/30"
-          >
-            <option value="ALL">Semua Metode</option>
-            <option value="qris">QRIS</option>
-            <option value="gopay">GoPay</option>
-            <option value="shopeepay">ShopeePay</option>
-            <option value="bank_transfer">Virtual Account</option>
-          </select>
+            onChange={(val) => setMethodFilter(val)}
+            options={[
+              { value: 'ALL', label: 'Semua Metode' },
+              { value: 'qris', label: 'QRIS' },
+              { value: 'gopay', label: 'GoPay' },
+              { value: 'shopeepay', label: 'ShopeePay' },
+              { value: 'bank_transfer', label: 'Virtual Account' },
+            ]}
+            placeholder="Semua Metode"
+            buttonClassName="!py-2 !px-3"
+          />
 
           {/* Date Filter */}
-          <select
+          <SingleSelectDropdown
             value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/30"
-          >
-            <option value="ALL">Semua Waktu</option>
-            <option value="TODAY">Hari Ini</option>
-            <option value="THIS_WEEK">7 Hari Terakhir</option>
-            <option value="THIS_MONTH">Bulan Ini</option>
-          </select>
+            onChange={(val) => setDateFilter(val)}
+            options={[
+              { value: 'ALL', label: 'Semua Waktu' },
+              { value: 'TODAY', label: 'Hari Ini' },
+              { value: 'THIS_WEEK', label: '7 Hari Terakhir' },
+              { value: 'THIS_MONTH', label: 'Bulan Ini' },
+            ]}
+            placeholder="Semua Waktu"
+            buttonClassName="!py-2 !px-3"
+          />
         </div>
       </div>
 

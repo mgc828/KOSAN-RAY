@@ -14,6 +14,7 @@ import { LANDMARKS, getLandmark, haversine, formatDistance } from '@/lib/geo';
 import { JAKARTA_REGIONS, JAKARTA_CITIES, getKostCity, getKostKecamatan } from '@/lib/jakarta-regions';
 import { useSavedSearches, MAX_SAVED_SEARCHES, SearchState } from '@/lib/saved-searches';
 import { toast } from '@/lib/toast';
+import SingleSelectDropdown, { SingleSelectOption } from '@/components/SingleSelectDropdown';
 import { 
   Search, 
   ChevronDown, 
@@ -988,26 +989,22 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] lg:grid-cols-1 gap-3 items-end text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_9rem] lg:grid-cols-1 gap-3">
               <div>
-                <label htmlFor="landmark" className="font-bold text-slate-700 mb-1.5 block">Dekat kampus / stasiun</label>
-                <select
-                  id="landmark"
+                <label className="font-bold text-slate-700 mb-1.5 block">Dekat kampus / stasiun</label>
+                <SingleSelectDropdown
                   value={landmarkId ?? ''}
-                  onChange={(e) => {
-                    const v = e.target.value || null;
+                  onChange={(val) => {
+                    const v = val || null;
                     setLandmarkId(v);
                     if (v) setSortBy('terdekat');
                     else setSortBy((cur) => (cur === 'terdekat' && !userLoc ? 'rekomendasi' : cur));
                   }}
-                  className={`w-full py-2.5 px-3.5 bg-white rounded-xl border ${landmark ? 'border-[#F97316] ring-2 ring-[#F97316]/20 font-semibold text-slate-900' : 'border-slate-300 text-slate-500'}`}
-                >
-                  <option value="">Semua lokasi</option>
-                  <optgroup label="Kampus">
-                    {LANDMARKS.filter((l) => l.type === 'kampus').map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
-                  </optgroup>
-                  <optgroup label="Stasiun & MRT">
-                    {LANDMARKS.filter((l) => l.type === 'stasiun').map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
-                  </optgroup>
-                </select>
+                  options={[
+                    { value: '', label: 'Semua lokasi' },
+                    ...LANDMARKS.filter((l) => l.type === 'kampus').map((l) => ({ value: l.id, label: l.name, group: 'Kampus' })),
+                    ...LANDMARKS.filter((l) => l.type === 'stasiun').map((l) => ({ value: l.id, label: l.name, group: 'Stasiun & MRT' })),
+                  ]}
+                  placeholder="Semua lokasi"
+                />
               </div>
               <div>
                 <label htmlFor="radius" className="font-bold text-slate-700 mb-1.5 block">Dalam radius</label>
@@ -1226,20 +1223,21 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
           </p>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <label className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full pl-3 pr-1.5 py-1 text-slate-600">
-              <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
-              <span className="font-semibold">Urutkan</span>
-              <select
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-slate-500 text-xs hidden sm:inline">Urutkan:</span>
+              <SingleSelectDropdown
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortKey)}
-                className="bg-transparent font-bold text-[#0F2A43] py-1 pr-1 focus:outline-none cursor-pointer"
-                aria-label="Urutkan hasil"
-              >
-                {SORT_OPTIONS.filter((o) => o.value !== 'terdekat' || landmark || userLoc).map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </label>
+                onChange={(val) => setSortBy(val as SortKey)}
+                options={SORT_OPTIONS.filter((o) => o.value !== 'terdekat' || landmark || userLoc).map((o) => ({
+                  value: o.value,
+                  label: o.label,
+                }))}
+                placeholder="Urutkan"
+                highlightSelected={false}
+                buttonClassName="!py-2 !px-3.5 !rounded-xl !bg-white !border-slate-200 text-slate-700 font-bold hover:border-[#F97316] shadow-xs"
+                menuClassName="!right-0 !left-auto min-w-[190px]"
+              />
+            </div>
 
             <div className="inline-flex bg-white border border-slate-200 rounded-full p-1 shadow-2xs" role="group" aria-label="Pilih tampilan">
               <button
@@ -1536,22 +1534,12 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
               {/* 2. Tipe Kost */}
               <div>
                 <label className="font-bold text-slate-700 mb-1.5 block">Tipe Kost</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {tipeOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setSelectedTipe(opt.value)}
-                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center ${
-                        selectedTipe === opt.value
-                          ? 'bg-[#FFEDD5] border-[#F97316] text-[#0F2A43] shadow-xs'
-                          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+                <SingleSelectDropdown
+                  value={selectedTipe}
+                  onChange={(val) => setSelectedTipe(val)}
+                  options={tipeOptions.map((t) => ({ value: t.value, label: t.label }))}
+                  placeholder="Pilih Tipe Kost"
+                />
               </div>
 
               {/* 3. Rentang Harga */}

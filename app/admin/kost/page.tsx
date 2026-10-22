@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Kost } from '@/lib/types';
 import { toast } from '@/lib/toast';
+import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 
 export default function AdminKostsPage() {
   const [kosts, setKosts] = useState<Kost[]>([]);
@@ -170,48 +171,58 @@ export default function AdminKostsPage() {
         {/* Dropdowns */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Area Filter */}
-          <select
-            value={filterArea}
-            onChange={(e) => {
-              setFilterArea(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#F97316]"
-          >
-            <option value="semua">Semua Area ({areasList.length})</option>
-            {areasList.map(a => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
+          <div className="w-44">
+            <SingleSelectDropdown
+              value={filterArea}
+              onChange={(val) => {
+                setFilterArea(val);
+                setCurrentPage(1);
+              }}
+              options={[
+                { value: 'semua', label: `Semua Area (${areasList.length})` },
+                ...areasList.map((a) => ({ value: a, label: a })),
+              ]}
+              placeholder="Pilih Area"
+              buttonClassName="!py-2 !px-3 !bg-slate-50 !border-slate-200 hover:!bg-white"
+            />
+          </div>
 
           {/* Tipe Filter */}
-          <select
-            value={filterTipe}
-            onChange={(e) => {
-              setFilterTipe(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#F97316]"
-          >
-            <option value="semua">Semua Tipe</option>
-            <option value="putra">Putra</option>
-            <option value="putri">Putri</option>
-            <option value="campur">Campur</option>
-          </select>
+          <div className="w-36">
+            <SingleSelectDropdown
+              value={filterTipe}
+              onChange={(val) => {
+                setFilterTipe(val);
+                setCurrentPage(1);
+              }}
+              options={[
+                { value: 'semua', label: 'Semua Tipe' },
+                { value: 'putra', label: 'Putra' },
+                { value: 'putri', label: 'Putri' },
+                { value: 'campur', label: 'Campur' },
+              ]}
+              placeholder="Semua Tipe"
+              buttonClassName="!py-2 !px-3 !bg-slate-50 !border-slate-200 hover:!bg-white"
+            />
+          </div>
 
           {/* Status Filter */}
-          <select
-            value={filterStatus}
-            onChange={(e) => {
-              setFilterStatus(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#F97316]"
-          >
-            <option value="semua">Semua Status</option>
-            <option value="aktif">Aktif Terverifikasi</option>
-            <option value="draft">Draft / Arsip</option>
-          </select>
+          <div className="w-44">
+            <SingleSelectDropdown
+              value={filterStatus}
+              onChange={(val) => {
+                setFilterStatus(val);
+                setCurrentPage(1);
+              }}
+              options={[
+                { value: 'semua', label: 'Semua Status' },
+                { value: 'aktif', label: 'Aktif Terverifikasi' },
+                { value: 'draft', label: 'Draft / Arsip' },
+              ]}
+              placeholder="Semua Status"
+              buttonClassName="!py-2 !px-3 !bg-slate-50 !border-slate-200 hover:!bg-white"
+            />
+          </div>
         </div>
       </div>
 

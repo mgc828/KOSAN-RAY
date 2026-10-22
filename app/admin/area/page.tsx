@@ -19,6 +19,7 @@ import {
 import { useAdmin } from '@/lib/admin-client';
 import { AreaItem } from '@/lib/admin-types';
 import { Kost } from '@/lib/types';
+import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 
 const LocationPickerMap = dynamic(() => import('@/components/LocationPickerMap'), {
   ssr: false,
@@ -364,17 +365,14 @@ export default function AdminAreaPage() {
                   <label className="text-xs font-bold text-slate-700 block mb-1">
                     Kota Administratif
                   </label>
-                  <select
+                  <SingleSelectDropdown
                     value={formKota}
-                    onChange={(e) => setFormKota(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white"
-                  >
-                    {JAKARTA_CITIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setFormKota(val)}
+                    options={JAKARTA_CITIES.map((c) => ({ value: c, label: c }))}
+                    placeholder="Pilih Kota"
+                    highlightSelected={false}
+                    buttonClassName="!py-2 !px-3"
+                  />
                 </div>
 
                 <div>
