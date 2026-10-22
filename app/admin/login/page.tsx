@@ -176,17 +176,6 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        {/* Quick Demo Credentials Info for Easy Access */}
-        <div className="mt-6 pt-5 border-t border-slate-100 bg-slate-50/80 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 p-4 rounded-b-3xl text-center">
-          <p className="text-[11px] text-slate-500 font-medium">
-            Kredensial Default Admin:
-          </p>
-          <div className="mt-1 flex items-center justify-center gap-2 text-xs">
-            <code className="bg-white border border-slate-200 px-2 py-0.5 rounded text-slate-800 font-mono">admin@kost-kostan.id</code>
-            <span className="text-slate-400">•</span>
-            <code className="bg-white border border-slate-200 px-2 py-0.5 rounded text-slate-800 font-mono">admin123</code>
-          </div>
-        </div>
       </div>
 
       {/* Back to public site */}
