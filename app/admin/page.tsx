@@ -39,11 +39,13 @@ import {
   Cell 
 } from 'recharts';
 import { toast } from '@/lib/toast';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 type PeriodKey = '1m' | '2m' | '3m' | '6m' | '9m' | '1y' | '3y' | '5y' | 'custom';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const [confirmAddKost, setConfirmAddKost] = useState(false);
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('1m');
@@ -314,13 +316,23 @@ export default function AdminDashboardPage() {
             <span>Upload Media</span>
           </Link>
 
-          <Link
-            href="/admin/kost/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#F97316] text-white hover:bg-[#EA580C] shadow-md shadow-[#F97316]/20 transition-all active:scale-[0.98]"
+          <button
+            type="button"
+            onClick={() => setConfirmAddKost(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#F97316] text-white hover:bg-[#EA580C] shadow-md shadow-[#F97316]/20 transition-all active:scale-[0.98] cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah Kost</span>
-          </Link>
+          </button>
+          <ConfirmDialog
+            open={confirmAddKost}
+            title="Tambah Data Kost Baru ?"
+            onCancel={() => setConfirmAddKost(false)}
+            onConfirm={() => {
+              setConfirmAddKost(false);
+              router.push('/admin/kost/new');
+            }}
+          />
         </div>
       </div>
 

@@ -532,8 +532,8 @@ export async function POST(req: NextRequest) {
     // 1. TAMBAH KOST
     if (action === 'kost_create') {
       const { kost } = body;
-      if (!kost || !kost.nama || !kost.area) {
-        return NextResponse.json({ error: 'Nama dan area kost wajib diisi' }, { status: 400 });
+      if (!kost || !kost.nama || (!kost.area && !kost.is_draft)) {
+        return NextResponse.json({ error: kost?.is_draft ? 'Nama kost wajib diisi untuk menyimpan draft' : 'Nama dan area kost wajib diisi' }, { status: 400 });
       }
 
       // Proteksi anti-duplikasi: cegah request ganda untuk kost dengan nama & alamat sama dalam rentang 15 detik

@@ -33,6 +33,8 @@ export interface Kost {
   deskripsi: string;
   peraturan: string[];
   status: KostStatus;
+  /** true bila disimpan sebagai draft (belum dipublikasikan). */
+  is_draft?: boolean;
   owner_whatsapp?: string; // RESTRICTED: Hanya untuk pelanggan aktif lewat endpoint terverifikasi
   created_at: string;
   updated_at: string;

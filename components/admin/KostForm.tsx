@@ -18,10 +18,11 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
-import { useAdmin } from '@/lib/admin-client';
+import { toast as addToast } from '@/lib/toast';
 import { Kost, KostType } from '@/lib/types';
 import { AreaItem } from '@/lib/admin-types';
 import SingleSelectDropdown from '@/components/SingleSelectDropdown';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 const LocationPickerMap = dynamic(() => import('@/components/LocationPickerMap'), {
   ssr: false,
@@ -54,7 +55,6 @@ interface KostFormProps {
 
 export default function KostForm({ initialKost, isEdit = false }: KostFormProps) {
   const router = useRouter();
-  const { addToast } = useAdmin();
 
   const [loading, setLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -64,32 +64,25 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
   // Form states
   const [nama, setNama] = useState(initialKost?.nama || '');
   const [alamat, setAlamat] = useState(initialKost?.alamat || '');
-  const [area, setArea] = useState(initialKost?.area || 'Kuningan');
-  const [kota, setKota] = useState(initialKost?.kota || 'Jakarta Selatan');
-  const [tipe, setTipe] = useState<KostType>(initialKost?.tipe || 'campur');
-  const [harga, setHarga] = useState<number>(initialKost?.harga || 1850000);
+  const [area, setArea] = useState(initialKost?.area || '');
+  const [kota, setKota] = useState(initialKost?.kota || '');
+  const [tipe, setTipe] = useState<KostType | ''>(initialKost?.tipe || '');
+  const [harga, setHarga] = useState<number>(initialKost?.harga || 0);
   const [priceDisplay, setPriceDisplay] = useState<string>(
-    initialKost?.harga
-      ? `Rp ${initialKost.harga.toLocaleString('id-ID')}`
-      : 'Rp 1.850.000'
+    initialKost?.harga ? `Rp ${initialKost.harga.toLocaleString('id-ID')}` : ''
   );
-  const [totalKamar, setTotalKamar] = useState<number>(10);
-  const [kamarTersedia, setKamarTersedia] = useState<number>(3);
-  const [fasilitas, setFasilitas] = useState<string[]>(
-    initialKost?.fasilitas || ['AC Inverter', 'WiFi 100 Mbps', 'Kasur Springbed', 'Kamar Mandi Dalam']
-  );
-  const [deskripsi, setDeskripsi] = useState(
-    initialKost?.deskripsi ||
-      'Kost nyaman, bersih, dan strategis dekat dengan pusat perkantoran dan transportasi umum. Lingkungan aman dan tenang dengan penjagaan 24 jam.'
-  );
-  const [whatsapp, setWhatsapp] = useState(
-    initialKost?.owner_whatsapp || '081234567890'
-  );
+  const [totalKamar, setTotalKamar] = useState<number | ''>('');
+  const [kamarTersedia, setKamarTersedia] = useState<number | ''>('');
+  const [fasilitas, setFasilitas] = useState<string[]>(initialKost?.fasilitas || []);
+  const [deskripsi, setDeskripsi] = useState(initialKost?.deskripsi || '');
+  const [whatsapp, setWhatsapp] = useState(initialKost?.owner_whatsapp || '');
   const [status, setStatus] = useState<'tersedia' | 'penuh'>(
     initialKost?.status === 'penuh' ? 'penuh' : 'tersedia'
   );
   const [lat, setLat] = useState<number>(initialKost?.latitude || -6.211);
   const [lng, setLng] = useState<number>(initialKost?.longitude || 106.828);
+
+  const [confirm, setConfirm] = useState<null | 'draft' | 'publish' | 'back'>(null);
 
   const [whatsappError, setWhatsappError] = useState('');
 
@@ -132,21 +125,71 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
     }
   };
 
-  const handleSubmit = async (submitStatus: 'tersedia' | 'penuh') => {
+  const waValid = (() => {
+    const c = whatsapp.replace(/\s+/g, '');
+    return (c.startsWith('08') || c.startsWith('628')) && c.length >= 10 && c.length <= 14;
+  })();
+
+  // Semua field bertanda * wajib terisi sebelum bisa dipublikasikan
+  const canPublish =
+    nama.trim().length > 0 &&
+    tipe !== '' &&
+    area !== '' &&
+    alamat.trim().length > 0 &&
+    harga > 0 &&
+    waValid &&
+    fasilitas.length > 0;
+
+  const isDirty =
+    nama.trim() !== '' ||
+    alamat.trim() !== '' ||
+    deskripsi.trim() !== '' ||
+    whatsapp.trim() !== '' ||
+    tipe !== '' ||
+    area !== '' ||
+    harga > 0 ||
+    fasilitas.length > 0 ||
+    totalKamar !== '' ||
+    kamarTersedia !== '';
+
+  const goBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) router.back();
+    else router.push('/admin/kost');
+  };
+
+  const handleBackClick = () => {
+    if (!isEdit && isDirty) setConfirm('back');
+    else goBack();
+  };
+
+  const handleDraftClick = () => {
+    if (!nama.trim()) {
+      addToast('Isi Nama Kost terlebih dahulu untuk menyimpan draft', 'error');
+      return;
+    }
+    setConfirm('draft');
+  };
+
+  const handleSubmit = async (mode: 'draft' | 'publish') => {
+    const isDraft = mode === 'draft';
+    const submitStatus: 'tersedia' | 'penuh' = isDraft ? 'penuh' : 'tersedia';
     if (!nama.trim()) {
       addToast('Nama kost wajib diisi!', 'error');
+      setConfirm(null);
       return;
     }
     if (nama.length > 100) {
       addToast('Nama kost melebihi batas 100 karakter!', 'error');
       return;
     }
-    if (!alamat.trim()) {
-      addToast('Alamat lengkap kost wajib diisi!', 'error');
+    if (!isDraft && !canPublish) {
+      addToast('Lengkapi semua field bertanda * sebelum mempublikasikan', 'error');
+      setConfirm(null);
       return;
     }
-    if (whatsappError) {
+    if (whatsapp.trim() && whatsappError) {
       addToast(whatsappError, 'error');
+      setConfirm(null);
       return;
     }
 
@@ -161,7 +204,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
         alamat: alamat.trim(),
         area: area,
         kota: computedKota,
-        tipe,
+        tipe: tipe || 'campur',
         harga,
         fasilitas,
         deskripsi,
@@ -172,6 +215,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
         ],
         owner_whatsapp: whatsapp.trim(),
         status: submitStatus,
+        is_draft: isDraft,
         latitude: lat,
         longitude: lng,
         media: initialKost?.media || [
@@ -238,11 +282,16 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
       const resData = await res.json();
       if (res.ok && resData.success) {
         setIsRedirecting(true);
+        setConfirm(null);
         addToast(
-          isEdit ? 'Kost berhasil diperbarui ✅ Mengalihkan...' : 'Kost berhasil ditambahkan ✅ Mengalihkan...',
+          isDraft
+            ? 'Kost disimpan sebagai Draft ✅'
+            : isEdit
+              ? 'Kost berhasil diperbarui ✅'
+              : 'Kost berhasil dipublikasikan ✅',
           'success'
         );
-        window.location.href = '/admin/kost';
+        goBack();
         return;
       } else {
         addToast(resData.error || resData.message || 'Gagal menyimpan data kost', 'error');
@@ -250,19 +299,45 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
     } catch {
       addToast('Terjadi kesalahan jaringan saat menyimpan kost', 'error');
     } finally {
-      if (!isRedirecting) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
+      <ConfirmDialog
+        open={confirm === 'draft' || confirm === 'back'}
+        title="Simpan sebagai Draft ?"
+        description={
+          confirm === 'back'
+            ? 'Pilih "Tidak" untuk kembali tanpa menyimpan, atau tutup popup untuk tetap mengisi formulir.'
+            : undefined
+        }
+        loading={loading}
+        onCancel={() => setConfirm(null)}
+        onDecline={() => {
+          if (confirm === 'back') {
+            setConfirm(null);
+            goBack();
+          } else {
+            setConfirm(null);
+          }
+        }}
+        onConfirm={() => handleSubmit('draft')}
+      />
+      <ConfirmDialog
+        open={confirm === 'publish'}
+        title="Publikasikan Data Kost ?"
+        loading={loading}
+        onCancel={() => setConfirm(null)}
+        onConfirm={() => handleSubmit('publish')}
+      />
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => router.push('/admin/kost')}
+            onClick={handleBackClick}
+            aria-label="Kembali"
             className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -292,7 +367,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
 
           <button
             type="button"
-            onClick={() => handleSubmit('penuh')}
+            onClick={handleDraftClick}
             disabled={loading || isRedirecting}
             className="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold transition-all disabled:opacity-50 cursor-pointer"
           >
@@ -301,12 +376,13 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
 
           <button
             type="button"
-            onClick={() => handleSubmit('tersedia')}
-            disabled={loading || isRedirecting}
+            onClick={() => setConfirm('publish')}
+            disabled={loading || isRedirecting || !canPublish}
+            title={canPublish ? undefined : 'Lengkapi semua field bertanda * untuk mempublikasikan'}
             className="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold flex items-center gap-2 shadow-sm shadow-orange-500/20 transition-all disabled:opacity-50 cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>{isRedirecting ? 'Mengalihkan ke daftar kost...' : loading ? 'Menyimpan...' : 'Publikasikan'}</span>
+            <span>{isRedirecting ? 'Mengalihkan...' : loading ? 'Menyimpan...' : 'Publikasikan'}</span>
           </button>
         </div>
       </div>
@@ -397,7 +473,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                     value: a.nama,
                     label: `${a.nama} (${a.kota})`,
                   }))}
-                  placeholder="Pilih Area..."
+                  placeholder="Pilih Area / Kawasan"
                   highlightSelected={false}
                   buttonClassName="!py-2.5 !px-4"
                 />
@@ -411,6 +487,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                   type="text"
                   value={kota}
                   readOnly
+                  placeholder="Otomatis sesuai area"
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-medium"
                 />
               </div>
@@ -482,7 +559,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                 rows={5}
                 value={deskripsi}
                 onChange={(e) => setDeskripsi(e.target.value)}
-                placeholder="Jelaskan keunggulan kost, peraturan umum, akses transportasi, dan fasilitas sekitar..."
+                placeholder="Kost nyaman, bersih, dan strategis dekat dengan pusat perkantoran dan transportasi umum. Lingkungan aman dan tenang dengan penjagaan 24 jam."
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 font-medium"
               />
             </div>
@@ -492,7 +569,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
           <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
               <Sparkles className="w-5 h-5 text-orange-500" />
-              Fasilitas Kamar & Bersama
+              Fasilitas Kamar & Bersama <span className="text-rose-500">*</span>
             </h2>
             <p className="text-xs text-slate-500">
               Pilih fasilitas yang tersedia untuk mempermudah pencarian calon penyewa:
@@ -548,9 +625,11 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                 placeholder="Rp 1.850.000"
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 font-bold text-lg focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
               />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Nominal angka: Rp {harga.toLocaleString('id-ID')}
-              </p>
+              {harga > 0 && (
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Nominal angka: Rp {harga.toLocaleString('id-ID')}
+                </p>
+              )}
             </div>
 
             {/* Total Kamar */}
@@ -561,7 +640,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => setTotalKamar(Math.max(1, totalKamar - 1))}
+                  onClick={() => setTotalKamar(Math.max(1, (totalKamar || 0) - 1))}
                   className="w-10 h-10 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-slate-600 font-bold"
                 >
                   <Minus className="w-4 h-4" />
@@ -570,12 +649,15 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                   type="number"
                   min={1}
                   value={totalKamar}
-                  onChange={(e) => setTotalKamar(Math.max(1, Number(e.target.value) || 1))}
+                  placeholder="Contoh: 10"
+                  onChange={(e) =>
+                    setTotalKamar(e.target.value === '' ? '' : Math.max(1, Number(e.target.value) || 1))
+                  }
                   className="w-full text-center px-4 py-2 rounded-xl border border-slate-200 font-bold text-slate-900"
                 />
                 <button
                   type="button"
-                  onClick={() => setTotalKamar(totalKamar + 1)}
+                  onClick={() => setTotalKamar((totalKamar || 0) + 1)}
                   className="w-10 h-10 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-slate-600 font-bold"
                 >
                   <Plus className="w-4 h-4" />
@@ -591,7 +673,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => setKamarTersedia(Math.max(0, kamarTersedia - 1))}
+                  onClick={() => setKamarTersedia(Math.max(0, (kamarTersedia || 0) - 1))}
                   className="w-10 h-10 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-slate-600 font-bold"
                 >
                   <Minus className="w-4 h-4" />
@@ -599,16 +681,21 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                 <input
                   type="number"
                   min={0}
-                  max={totalKamar}
+                  max={totalKamar || undefined}
                   value={kamarTersedia}
+                  placeholder="Contoh: 3"
                   onChange={(e) =>
-                    setKamarTersedia(Math.min(totalKamar, Math.max(0, Number(e.target.value) || 0)))
+                    setKamarTersedia(
+                      e.target.value === ''
+                        ? ''
+                        : Math.min(totalKamar || Infinity, Math.max(0, Number(e.target.value) || 0))
+                    )
                   }
                   className="w-full text-center px-4 py-2 rounded-xl border border-slate-200 font-bold text-slate-900"
                 />
                 <button
                   type="button"
-                  onClick={() => setKamarTersedia(Math.min(totalKamar, kamarTersedia + 1))}
+                  onClick={() => setKamarTersedia(Math.min(totalKamar || Infinity, (kamarTersedia || 0) + 1))}
                   className="w-10 h-10 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-slate-600 font-bold"
                 >
                   <Plus className="w-4 h-4" />
