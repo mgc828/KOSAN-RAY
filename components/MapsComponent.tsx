@@ -176,7 +176,7 @@ export default function MapsComponent({ kosts, selectedKost, onSelectKost }: Map
   const detailUrl = selectedKost ? `/kost/${(selectedKost.kota || 'jakarta').toLowerCase()}/${selectedKost.area.toLowerCase()}/${selectedKost.slug}` : '';
 
   return (
-    <div className="relative w-full h-full min-h-[360px] sm:min-h-[460px] z-0 lg:min-h-full rounded-2xl overflow-hidden shadow-inner border border-slate-200">
+    <div className="relative w-full h-full min-h-0 z-0 lg:min-h-full rounded-2xl overflow-hidden shadow-inner border border-slate-200">
       {/* Map DOM Element */}
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
@@ -245,7 +245,7 @@ export default function MapsComponent({ kosts, selectedKost, onSelectKost }: Map
 
       {/* Floating Kost Preview Card on Map (Sekitar 1:1 format) */}
       {selectedKost && (
-        <div className="absolute bottom-5 left-5 right-5 sm:left-auto sm:right-5 sm:w-96 z-500 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-4 border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="hidden lg:block absolute bottom-5 left-5 right-5 sm:left-auto sm:right-5 sm:w-96 z-500 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-4 border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-200">
           <div className="flex items-start justify-between gap-3 mb-2">
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#0F2A43] bg-[#FFEDD5] px-2.5 py-0.5 rounded-full border border-[#F97316]/40">
               <ShieldCheck className="w-3.5 h-3.5 text-[#C2410C]" />

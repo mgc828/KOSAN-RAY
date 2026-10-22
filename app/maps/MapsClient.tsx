@@ -76,6 +76,40 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
   const kecamatanDropdownRef = useRef<HTMLDivElement>(null);
   const tipeDropdownRef = useRef<HTMLDivElement>(null);
   const landmarkDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileListRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Auto-scroll horizontal card list on mobile when selectedKost changes
+  useEffect(() => {
+    if (selectedKost && cardRefs.current[selectedKost.id]) {
+      cardRefs.current[selectedKost.id]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
+  }, [selectedKost]);
+
+  // Lock body vertical scroll on mobile so /maps fits the screen height
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)');
+    const handleScrollLock = () => {
+      if (mq.matches) {
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+      }
+    };
+    handleScrollLock();
+    mq.addEventListener('change', handleScrollLock);
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      mq.removeEventListener('change', handleScrollLock);
+    };
+  }, []);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -286,8 +320,9 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
   ];
 
   return (
-    <div className="min-h-screen bg-white pb-16 pt-4">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+    <div className="h-[calc(100dvh-80px)] max-h-[calc(100dvh-80px)] overflow-hidden flex flex-col lg:h-auto lg:max-h-none lg:overflow-visible lg:min-h-screen lg:pb-16 lg:pt-4 lg:block bg-white">
+      {/* Desktop Container for Breadcrumb & Title */}
+      <div className="hidden lg:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 mb-4">
         
         {/* Breadcrumb */}
         <nav className="text-xs text-slate-500 flex items-center gap-2" aria-label="Breadcrumb">
@@ -307,11 +342,11 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
             </p>
           </div>
 
-          
         </div>
+      </div>
 
-        {/* Mobile Sticky Search Bar (div.flex.items-center.gap-2.5) */}
-        <div className="lg:hidden sticky top-[80px] z-[1000] bg-white/95 backdrop-blur-md py-2.5 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-slate-100 shadow-xs space-y-2">
+      {/* Mobile Sticky Search Bar (div.flex.items-center.gap-2.5) */}
+      <div className="lg:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md px-4 sm:px-6 pt-3 pb-2 border-b border-slate-100 shadow-xs space-y-2 shrink-0">
           {/* Search Bar (div.search-input style from /) + Filter Icon Button */}
           <div className="flex items-center gap-2.5 sm:gap-3">
             {/* Search Pill Input */}
@@ -368,11 +403,11 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
 
           {/* Active Filter Badges */}
           {activeFilterCount > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+            <div className="flex items-center gap-1.5 pt-0.5 text-xs overflow-x-auto scrollbar-none pb-0.5">
               {selectedLocations.map((loc) => (
                 <span
                   key={loc}
-                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]"
+                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px] shrink-0"
                 >
                   <span>{loc}</span>
                   <button
@@ -389,7 +424,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               {selectedKecamatan.map((kec) => (
                 <span
                   key={kec}
-                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]"
+                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px] shrink-0"
                 >
                   <span>{kec}</span>
                   <button
@@ -404,7 +439,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               ))}
 
               {selectedTipe !== 'semua' && (
-                <span className="inline-flex items-center gap-1 bg-[#FFEDD5] text-[#0F2A43] font-semibold px-2.5 py-1 rounded-full text-[11px] border border-[#F97316]/30">
+                <span className="inline-flex items-center gap-1 bg-[#FFEDD5] text-[#0F2A43] font-semibold px-2.5 py-1 rounded-full text-[11px] border border-[#F97316]/30 shrink-0">
                   <span>{tipeOptions.find(t => t.value === selectedTipe)?.label}</span>
                   <button
                     type="button"
@@ -418,7 +453,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               )}
 
               {priceActive && (
-                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 font-semibold px-2.5 py-1 rounded-full text-[11px] border border-amber-200">
+                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 font-semibold px-2.5 py-1 rounded-full text-[11px] border border-amber-200 shrink-0">
                   <span>Rp {priceMin.toLocaleString('id-ID')} - {priceMax < PRICE_MAX ? `Rp ${priceMax.toLocaleString('id-ID')}` : 'Maks'}</span>
                   <button
                     type="button"
@@ -437,7 +472,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               )}
 
               {landmark && (
-                <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]">
+                <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px] shrink-0">
                   <span>Dekat {landmark.name}</span>
                   <button
                     type="button"
@@ -451,7 +486,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               )}
 
               {userLoc && (
-                <span className="inline-flex items-center gap-1 bg-[#FFEDD5] text-[#0F2A43] font-semibold px-2.5 py-1 rounded-full text-[11px]">
+                <span className="inline-flex items-center gap-1 bg-[#FFEDD5] text-[#0F2A43] font-semibold px-2.5 py-1 rounded-full text-[11px] shrink-0">
                   <span>Dekat Saya</span>
                   <button
                     type="button"
@@ -467,7 +502,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               {selectedFacilities.map((fac) => (
                 <span
                   key={fac}
-                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px]"
+                  className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-full text-[11px] shrink-0"
                 >
                   <span>{fac}</span>
                   <button
@@ -484,7 +519,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="text-[11px] font-bold text-rose-600 hover:underline pl-1 cursor-pointer inline-flex items-center gap-1"
+                className="text-[11px] font-bold text-rose-600 hover:underline pl-1 cursor-pointer inline-flex items-center gap-1 shrink-0"
               >
                 <RotateCcw className="w-3 h-3" /> Reset
               </button>
@@ -492,11 +527,117 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
           )}
         </div>
 
-        {/* Main 2-Column Layout */}
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+        {/* Mobile Section Title (Lokasi di sekitarmu) */}
+        <div className="lg:hidden flex items-center justify-between text-xs text-slate-700 font-bold px-4 pt-2.5 pb-1.5 shrink-0">
+          <div className="flex items-center gap-1.5 text-[#0F2A43]">
+            <Compass className="w-4 h-4 text-[#C2410C]" />
+            <span>Lokasi di sekitarmu</span>
+          </div>
+          <span className="text-slate-400 font-medium" suppressHydrationWarning>
+            {filteredKosts.length} kost ditemukan
+          </span>
+        </div>
+
+        {/* Mobile Horizontal Kost Card List (Scroll geser ke kanan kiri) */}
+        <div className="lg:hidden shrink-0">
+          {filteredKosts.length > 0 ? (
+            <div
+              ref={mobileListRef}
+              className="flex gap-3 overflow-x-auto pb-2.5 pt-0.5 px-4 scrollbar-none snap-x snap-mandatory scroll-smooth"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              {filteredKosts.map((kost) => {
+                const isSelected = selectedKost?.id === kost.id;
+                const thumbMedia = kost.media?.find(m => m.tipe === 'foto_gedung') || kost.media?.[0];
+                const thumbUrl = thumbMedia?.url || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80';
+                const tipeColor = {
+                  putri: 'bg-[#FFF0F5] text-[#D81B60]',
+                  putra: 'bg-[#EBF5FB] text-[#0F2A43]',
+                  campur: 'bg-[#F4ECF7] text-[#6C3483]',
+                }[kost.tipe];
+
+                return (
+                  <div
+                    key={kost.id}
+                    ref={(el) => { cardRefs.current[kost.id] = el; }}
+                    onClick={() => setSelectedKost(kost)}
+                    className={`cursor-pointer group rounded-2xl p-2 border transition-all text-left bg-white shrink-0 w-[270px] sm:w-[290px] snap-start flex items-center gap-2.5 ${
+                      isSelected
+                        ? 'border-[#F97316] ring-2 ring-[#F97316]/50 shadow-md bg-[#FFEDD5]/35'
+                        : 'border-slate-200 hover:border-slate-300 shadow-xs'
+                    }`}
+                  >
+                    {/* Image Thumbnail */}
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                      <Image
+                        src={thumbUrl}
+                        alt={kost.nama}
+                        fill
+                        sizes="80px"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <span className={`absolute top-1 left-1 text-[8px] font-bold px-1.5 py-0.5 rounded-md capitalize shadow-xs backdrop-blur-xs ${tipeColor}`}>
+                        {kost.tipe}
+                      </span>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 pr-1">
+                      <h4 className="font-extrabold text-slate-900 text-xs truncate group-hover:text-[#0F2A43] transition-colors">
+                        {kost.nama}
+                      </h4>
+                      <p className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5 truncate">
+                        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span className="truncate">{kost.area}</span>
+                      </p>
+                      <div className="mt-1.5 pt-1 border-t border-slate-100 flex items-center justify-between">
+                        <div className="flex items-baseline gap-0.5">
+                          <span className="text-xs font-black text-slate-900" suppressHydrationWarning>
+                            Rp {(kost.harga / 1000000).toFixed(1)} Jt
+                          </span>
+                          <span className="text-[10px] text-slate-400">/bln</span>
+                        </div>
+                        <Link
+                          href={`/kost/${(kost.kota || 'jakarta').toLowerCase()}/${kost.area.toLowerCase()}/${kost.slug}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-[10px] font-bold text-[#C2410C] hover:text-[#EA580C] inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md hover:bg-orange-50 transition-colors"
+                        >
+                          <span>Detail</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="px-4 py-2 shrink-0">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-center flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-left">
+                  <Building2 className="w-4 h-4 text-slate-400 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">Tidak ada kost yang cocok</p>
+                    <p className="text-[10px] text-slate-500">Coba ubah kata kunci atau filter.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="text-xs font-bold text-[#F97316] shrink-0 hover:underline cursor-pointer"
+                >
+                  Reset Filter
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Main Layout: Desktop 2-Column or Mobile Full-Height Map */}
+        <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row lg:gap-8 lg:items-start lg:max-w-7xl lg:mx-auto lg:px-4 sm:lg:px-6 lg:px-8 lg:flex-none lg:h-auto">
           
-          {/* Left Column: Search & Kost List */}
-          <div className="w-full lg:w-1/2 xl:w-2/5 space-y-4">
+          {/* Left Column (Desktop Only): Search & Kost List */}
+          <div className="hidden lg:block lg:w-1/2 xl:w-2/5 space-y-4">
             
             {/* Search Bar + Filter Bar (Sticky on Desktop) */}
             <div className="hidden lg:block lg:sticky lg:top-[81px] z-20 bg-white space-y-3 pb-3 lg:pt-3 -mx-1 px-1">
@@ -693,18 +834,7 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
 
             </div>
 
-            {/* Mobile Section Title (Lokasi di sekitarmu) */}
-            <div className="flex lg:hidden items-center justify-between text-xs text-slate-700 font-bold px-1 pt-1 pb-2">
-              <div className="flex items-center gap-1.5 text-[#0F2A43]">
-                <Compass className="w-4 h-4 text-[#C2410C]" />
-                <span>Lokasi di sekitarmu</span>
-              </div>
-              <span className="text-slate-400 font-medium" suppressHydrationWarning>
-                {filteredKosts.length} kost ditemukan
-              </span>
-            </div>
-
-            {/* Kost Mini Cards Grid */}
+            {/* Kost Mini Cards Grid (Desktop Only) */}
             <div className="space-y-4">
               {filteredKosts.length > 0 ? (
                 <div className="grid grid-cols-2 gap-3.5">
@@ -778,8 +908,8 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
             </div>
           </div>
 
-          {/* Right Column: Sticky Interactive Leaflet Map */}
-          <div className="w-full lg:w-1/2 xl:w-3/5 h-[360px] sm:h-[460px] lg:h-[calc(100vh-140px)] lg:sticky lg:top-24 order-first lg:order-last mb-6 lg:mb-0">
+          {/* Right Column / Mobile Map: Interactive Leaflet Map */}
+          <div className="flex-1 min-h-0 w-full px-3 pb-3 sm:px-4 sm:pb-4 lg:p-0 lg:w-1/2 xl:w-3/5 lg:h-[calc(100vh-140px)] lg:sticky lg:top-24 lg:flex-none">
             <MapsComponent
               kosts={filteredKosts}
               selectedKost={selectedKost}
@@ -788,8 +918,6 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
           </div>
 
         </div>
-
-      </div>
 
       {/* ========================================================================= */}
       {/* POPUP FILTER MODAL (Sama persis seperti filter di /cari-kost) */}
