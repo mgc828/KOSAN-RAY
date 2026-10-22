@@ -668,7 +668,7 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(300px,340px)_minmax(0,1fr)] gap-6 items-start">
         {/* Sidebar filter: di desktop menempel di bawah header saat halaman digulir */}
         <aside
-          className="hidden lg:block space-y-4 p-1 sm:p-2 lg:p-3 relative z-40 lg:z-[9991] lg:sticky lg:top-[81px] lg:max-h-[calc(100vh-81px)] lg:overflow-y-auto lg:overscroll-contain overflow-visible"
+          className="hidden lg:block space-y-4 p-1 sm:p-2 lg:p-3 relative z-30 lg:z-30 lg:sticky lg:top-[81px] lg:max-h-[calc(100vh-81px)] lg:overflow-y-auto lg:overscroll-contain overflow-visible"
           aria-label="Filter pencarian kost"
           tabIndex={0}
         >
