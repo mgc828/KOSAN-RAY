@@ -1376,7 +1376,10 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
               </button>
               <button
                 type="button"
-                onClick={() => setIsFilterModalOpen(false)}
+                onClick={() => {
+                  setIsFilterModalOpen(false);
+                  toast(`Menampilkan ${filteredKosts.length} kost`, 'info');
+                }}
                 className="inline-flex items-center gap-2 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-xs transition-colors"
               >
                 <span>Lihat {filteredKosts.length} Kost</span>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
+import { toast } from '@/lib/toast';
 import {
   Sliders,
   AlignLeft,
@@ -114,9 +115,8 @@ export default function AdminLiveCustomizer() {
   // Reference ke elemen DOM yang sedang dipilih
   const selectedDomEl = useRef<HTMLElement | null>(null);
 
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 3000);
+  const showToast = (msg: string, kind: 'success' | 'error' | 'info' = 'info') => {
+    toast(msg, kind);
   };
 
   // 1. Inisialisasi posisi awal dan cek status admin
@@ -715,13 +715,6 @@ export default function AdminLiveCustomizer() {
 
   return (
     <div data-customizer-dock className="select-none font-sans text-xs">
-      {/* Toast Notification */}
-      {toastMsg && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999999] bg-slate-900/95 text-white px-4 py-2.5 rounded-full shadow-2xl border border-slate-700 flex items-center gap-2 backdrop-blur-md animate-in fade-in slide-in-from-top-4">
-          <Sparkles className="w-4 h-4 text-amber-400" />
-          <span className="font-medium text-xs">{toastMsg}</span>
-        </div>
-      )}
 
       {/* Modal Kata Sandi Admin */}
       {showPasswordModal && (

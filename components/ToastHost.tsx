@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
 import type { ToastDetail } from '@/lib/toast';
 
 interface Item extends ToastDetail {
@@ -79,16 +79,32 @@ export default function ToastHost() {
         aria-live="polite"
       >
         {items.map((t) => {
-          const Icon = t.kind === 'success' ? CheckCircle2 : t.kind === 'error' ? AlertCircle : Info;
+          const Icon =
+            t.kind === 'success'
+              ? CheckCircle2
+              : t.kind === 'error'
+                ? AlertCircle
+                : t.kind === 'warning'
+                  ? AlertTriangle
+                  : Info;
+
           const color =
             t.kind === 'success'
               ? 'border-emerald-200 text-emerald-950 bg-white/95 shadow-emerald-500/10'
               : t.kind === 'error'
                 ? 'border-rose-200 text-rose-950 bg-white/95 shadow-rose-500/10'
-                : 'border-slate-200 text-[#0F2A43] bg-white/95 shadow-slate-900/10';
+                : t.kind === 'warning'
+                  ? 'border-amber-200 text-amber-950 bg-white/95 shadow-amber-500/10'
+                  : 'border-slate-200 text-[#0F2A43] bg-white/95 shadow-slate-900/10';
 
           const iconColor =
-            t.kind === 'success' ? 'text-emerald-600' : t.kind === 'error' ? 'text-rose-600' : 'text-[#F97316]';
+            t.kind === 'success'
+              ? 'text-emerald-600'
+              : t.kind === 'error'
+                ? 'text-rose-600'
+                : t.kind === 'warning'
+                  ? 'text-amber-500'
+                  : 'text-[#F97316]';
 
           return (
             <div

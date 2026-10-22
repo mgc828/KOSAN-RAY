@@ -7,6 +7,7 @@ import { Kost } from '@/lib/types';
 import { MapPin, X, ArrowRight, ShieldCheck, Eye, Layers, Compass, ZoomIn, ZoomOut } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { formatKostLocation } from '@/lib/jakarta-regions';
+import { toast } from '@/lib/toast';
 
 interface MapsComponentProps {
   kosts: Kost[];
@@ -131,6 +132,7 @@ export default function MapsComponent({ kosts, selectedKost, onSelectKost }: Map
     }).addTo(map);
 
     currentTileLayerRef.current = newLayer;
+    toast(newType === 'satellite' ? 'Mode Peta: Satelit' : 'Mode Peta: Google Maps', 'info');
   };
 
   // Update markers styling and flyTo when selectedKost changes
@@ -214,10 +216,11 @@ export default function MapsComponent({ kosts, selectedKost, onSelectKost }: Map
           onClick={() => {
             if (mapInstanceRef.current) {
               mapInstanceRef.current.flyTo([-6.2150, 106.8300], 12.5, { duration: 0.8 });
+              toast('Peta dipusatkan ke Jakarta', 'info');
             }
           }}
           title="Pusatkan Peta ke Jakarta"
-          className="bg-white/95 backdrop-blur-md hover:bg-slate-100 text-slate-700 p-2 rounded-xl shadow-md border border-slate-200 transition-colors"
+          className="bg-white/95 backdrop-blur-md hover:bg-slate-100 text-slate-700 p-2 rounded-xl shadow-md border border-slate-200 transition-colors cursor-pointer"
         >
           <Compass className="w-4 h-4 text-[#0F2A43]" />
         </button>
