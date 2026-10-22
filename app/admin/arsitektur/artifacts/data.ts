@@ -8,8 +8,8 @@ export const architectureMetadata = {
   "pageCount": 34,
   "apiCount": 31,
   "totalRoutes": 65,
-  "timestamp": "2026-10-22T12:02:47.020Z",
-  "lastGenerated": "2026-10-22T12:02:50.337Z",
+  "timestamp": "2026-10-22T15:33:36.107Z",
+  "lastGenerated": "2026-10-22T15:33:38.926Z",
   "status": "success",
   "artifacts": {
     "architecture": "available",
