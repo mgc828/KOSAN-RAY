@@ -188,6 +188,24 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
   const dragDistanceRef = useRef(0);
   const isHorizontalDragRef = useRef<boolean | null>(null);
 
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
+  const hasTouchDraggedRef = useRef(false);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+    hasTouchDraggedRef.current = false;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    const dx = Math.abs(e.touches[0].clientX - touchStartXRef.current);
+    const dy = Math.abs(e.touches[0].clientY - touchStartYRef.current);
+    if (dx > 8 || dy > 8) {
+      hasTouchDraggedRef.current = true;
+    }
+  };
+
   useEffect(() => {
     const onResize = () => {
       const w = window.innerWidth;
@@ -389,9 +407,12 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
   };
 
   const handleCardLinkClick = (e: React.MouseEvent) => {
-    if (hasDraggedRef.current) {
+    if (hasDraggedRef.current || hasTouchDraggedRef.current) {
       e.preventDefault();
       e.stopPropagation();
+      setTimeout(() => {
+        hasTouchDraggedRef.current = false;
+      }, 100);
     }
   };
 
@@ -506,6 +527,8 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerCancel}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
               >
                 {displayKosts.map((k) => (
                   <PropertyCard key={k.id} kost={k} onLinkClick={handleCardLinkClick} />
