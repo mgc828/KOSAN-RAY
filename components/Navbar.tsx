@@ -85,8 +85,16 @@ export default function Navbar() {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
+      const hero = document.getElementById('hero-header');
+      if (hero) {
+        hero.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }
       requestAnimationFrame(() => {
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        const h = document.getElementById('hero-header');
+        if (h) {
+          h.scrollIntoView({ behavior: 'instant', block: 'start' });
+        }
       });
     }
   };

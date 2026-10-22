@@ -282,12 +282,27 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
     };
   }, [syncPageFromScroll]);
 
-  // Keep active indicator in view on mobile
+  // Pastikan posisi layar selalu di paling atas (pada header hero) saat pertama kali halaman beranda dibuka
   useEffect(() => {
-    if (!indicatorsRef.current) return;
-    const activeDot = indicatorsRef.current.querySelector('.papi-indicator.active') as HTMLElement | null;
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      const raf = requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, []);
+
+  // Keep active indicator in view on mobile (scrolling container only, NOT the window)
+  useEffect(() => {
+    const container = indicatorsRef.current;
+    if (!container) return;
+    const activeDot = container.querySelector('.papi-indicator.active') as HTMLElement | null;
     if (activeDot) {
-      activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      const targetLeft = activeDot.offsetLeft - container.offsetWidth / 2 + activeDot.offsetWidth / 2;
+      container.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
     }
   }, [page]);
 
@@ -438,6 +453,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
     <div className="papi-home">
       {/* HERO */}
       <header
+        id="hero-header"
         className="hero"
         data-header-theme="dark"
         style={{
