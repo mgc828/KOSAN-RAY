@@ -30,6 +30,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ sl
       id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       user_id: me.id,
       kost_id: kost.id,
+      area: kost.area,
       action: 'view_whatsapp',
       created_at: new Date().toISOString(),
     }).catch(() => undefined);

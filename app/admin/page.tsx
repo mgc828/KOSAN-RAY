@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   DollarSign, 
   Unlock, 
@@ -22,7 +23,8 @@ import {
   ExternalLink, 
   Sparkles, 
   RefreshCw, 
-  Building2 
+  Building2,
+  Eye 
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -41,6 +43,7 @@ import { toast } from '@/lib/toast';
 type PeriodKey = '1m' | '2m' | '3m' | '6m' | '9m' | '1y' | '3y' | '5y' | 'custom';
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('1m');
@@ -262,20 +265,22 @@ export default function AdminDashboardPage() {
   }
 
   const stats = data?.stats || {
-    monthRevenue: 105000,
-    revenueGrowth: '+18.4%',
-    activeUnlocks: 5,
-    unlocksGrowth: '+12.5%',
-    totalKosts: 64,
-    kostsGrowth: '+8.0%',
-    totalUsers: 7,
-    usersGrowth: '+24.1%',
+    monthRevenue: 0,
+    revenueGrowth: '0%',
+    activeUnlocks: 0,
+    unlocksGrowth: '0%',
+    totalKosts: 0,
+    kostsGrowth: '0%',
+    totalUsers: 0,
+    usersGrowth: '0%',
   };
+
 
   const areaDonutData = data?.areaDonutData || [];
   const recentTransactions = data?.recentTransactions || [];
   const draftKosts = data?.actionRequired?.draftKosts || [];
   const pendingTx = data?.actionRequired?.pendingTransactions || [];
+  const txDetailHref = (orderId: string) => `/admin/transaksi?order=${encodeURIComponent(orderId)}`;
 
   return (
     <div className="space-y-8">
@@ -613,14 +618,14 @@ export default function AdminDashboardPage() {
                     const item = payload[0];
                     return (
                       <div className="bg-[#0F2A43] text-white p-3 rounded-2xl shadow-2xl border border-white/20 text-xs pointer-events-none select-none">
-                        <p className="font-semibold text-slate-200 text-[11px] mb-0.5">{label}</p>
+                        <p className="font-semibold text-white text-[11px] mb-0.5">{label}</p>
                         <div className="flex items-baseline gap-1.5">
                           <span className="text-base font-black text-white">{formatRp(item.value)}</span>
-                          <span className="text-[10px] text-[#FB923C] font-bold">
+                          <span className="text-[10px] text-white font-bold">
                             ({item.payload.unlocks || 0} transaksi unlock)
                           </span>
                         </div>
-                        <div className="mt-1 flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
+                        <div className="mt-1 flex items-center gap-1 text-[10px] text-white font-bold">
                           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                           <span className="text-white">Data Real Database</span>
                         </div>
@@ -678,6 +683,8 @@ export default function AdminDashboardPage() {
                     fontWeight: 700,
                     border: '1px solid rgba(255,255,255,0.15)' 
                   }}
+                  itemStyle={{ color: '#fff' }}
+                  labelStyle={{ color: '#fff' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -737,8 +744,21 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
+                {recentTransactions.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-slate-400">Belum ada transaksi</td>
+                  </tr>
+                )}
                 {recentTransactions.map((tx: any) => (
-                  <tr key={tx.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr
+                    key={tx.id}
+                    onClick={() => router.push(txDetailHref(tx.order_id))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') router.push(txDetailHref(tx.order_id)); }}
+                    tabIndex={0}
+                    role="link"
+                    title="Lihat detail transaksi"
+                    className="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                  >
                     <td className="py-3 font-medium">
                       <p className="font-bold text-slate-800">{tx.order_id}</p>
                       <p className="text-[11px] text-slate-400">{tx.user_email}</p>
@@ -785,19 +805,38 @@ export default function AdminDashboardPage() {
               </span>
               {draftKosts.length > 0 ? (
                 draftKosts.map((kost: any) => (
-                  <Link
+                  <div
                     key={kost.id}
-                    href={`/admin/kost/${kost.id}`}
-                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 hover:border-[#F97316] hover:bg-orange-50/30 transition-all text-xs"
+                    className="p-3 rounded-2xl border border-slate-200/80 hover:border-[#F97316] hover:bg-orange-50/30 transition-all text-xs space-y-2"
                   >
-                    <div className="min-w-0 pr-2">
-                      <p className="font-bold text-slate-800 truncate">{kost.nama}</p>
-                      <p className="text-[11px] text-slate-500">{kost.area}, {kost.kota || 'DKI Jakarta'}</p>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-800 truncate">{kost.nama}</p>
+                        <p className="text-[11px] text-slate-500">{kost.area}, {kost.kota || 'DKI Jakarta'}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                          Draft
+                        </span>
+                        <Link
+                          href={`/admin/kost/${kost.id}`}
+                          title="Lihat detail & lengkapi data"
+                          aria-label={`Detail ${kost.nama}`}
+                          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-[#F97316] hover:border-[#F97316] bg-white transition-colors"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
-                      Draft
-                    </span>
-                  </Link>
+                    <ul className="space-y-0.5 text-[11px] text-slate-600">
+                      {(kost.steps || []).map((step: string) => (
+                        <li key={step} className="flex items-start gap-1.5">
+                          <AlertCircle className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
+                          <span>{step}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ))
               ) : (
                 <div className="p-3 rounded-2xl bg-slate-50 text-center text-xs text-slate-400">
@@ -813,13 +852,18 @@ export default function AdminDashboardPage() {
               </span>
               {pendingTx.length > 0 ? (
                 pendingTx.map((tx: any) => (
-                  <div key={tx.id} className="flex items-center justify-between text-xs p-2 rounded-xl bg-slate-50">
+                  <Link
+                    key={tx.id}
+                    href={txDetailHref(tx.order_id)}
+                    title="Lihat detail transaksi"
+                    className="flex items-center justify-between text-xs p-2 rounded-xl bg-slate-50 hover:bg-orange-50/60 transition-colors"
+                  >
                     <div>
                       <p className="font-bold text-slate-700">{tx.order_id}</p>
                       <p className="text-[11px] text-slate-400">{tx.user_email}</p>
                     </div>
                     <span className="font-bold text-amber-600">Pending</span>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <div className="p-3 rounded-2xl bg-slate-50 text-center text-xs text-slate-400">

@@ -20,13 +20,19 @@ import {
   TrendingUp,
   FileText
 } from 'lucide-react';
-import { useAdmin } from '@/lib/admin-client';
-import { PaymentTransaction } from '@/lib/payment-store';
+import { toast as addToast } from '@/lib/toast';
+import type { PaymentTransaction as BaseTx } from '@/lib/payment-store';
+
+// Bentuk data transaksi dari /api/admin/data?type=transactions
+type PaymentTransaction = BaseTx & {
+  user_name?: string;
+  gross_amount?: number;
+  payment_type?: string;
+  raw_response?: unknown;
+};
 import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 
 export default function AdminTransaksiPage() {
-  const { addToast } = useAdmin();
-
   const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +53,22 @@ export default function AdminTransaksiPage() {
       const res = await fetch('/api/admin/data?type=transactions');
       const data = await res.json();
       if (data.transactions) {
-        setTransactions(data.transactions);
+        const rows: PaymentTransaction[] = data.transactions.map((t: any) => ({
+          ...t,
+          transaction_status: t.midtrans_payload?.transaction_status ?? (t.status === 'sukses' ? 'settlement' : t.status === 'pending' ? 'pending' : 'failure'),
+          gross_amount: t.amount ?? Number(t.midtrans_payload?.gross_amount ?? 0),
+          payment_type: t.midtrans_payload?.payment_type ?? t.payment_method,
+          paid_at: t.midtrans_payload?.settlement_time ?? undefined,
+          raw_response: t.midtrans_payload,
+        }));
+        setTransactions(rows);
+        // Buka detail langsung bila datang dari dashboard (?order=<order_id>)
+        const orderId = new URLSearchParams(window.location.search).get('order');
+        if (orderId) {
+          const found = rows.find((r) => r.order_id === orderId);
+          if (found) setSelectedTx(found);
+          else addToast('Transaksi tidak ditemukan', 'error');
+        }
       }
     } catch {
       addToast('Gagal memuat data transaksi', 'error');

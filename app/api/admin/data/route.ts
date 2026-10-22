@@ -89,7 +89,9 @@ export async function GET(req: NextRequest) {
     // 1. DASHBOARD STATS
     if (type === 'dashboard') {
       const allKosts = await getAllKosts();
-      const allTx = await dbList<PaymentTransaction>('transactions', () => []);
+      const allTx = (await dbList<PaymentTransaction>('transactions', () => []))
+        .filter(t => t.id !== '__seeded__')
+        .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
       const allUsers = await dbList<AppUser>('users', () => []);
       const notifications = await dbList<AdminNotification>(NOTIFICATIONS_COLLECTION, () => DEFAULT_NOTIFICATIONS);
 
@@ -135,7 +137,7 @@ export async function GET(req: NextRequest) {
       const revenueGrowth = (revGrowthPct >= 0 ? '+' : '') + revGrowthPct + '%';
 
       // Area Donut Data dari data real access-logs dan listing kost di database
-      const allAccessLogs = await dbList<{ id: string; user_id: string; kost_id: string; action: string; created_at: string }>('access-logs', () => []);
+      const allAccessLogs = await dbList<{ id: string; user_id: string; kost_id: string; action: string; created_at: string; area?: string }>('access-logs', () => []);
       const adminAreas = await dbList<AreaItem>(AREAS_COLLECTION, () => DEFAULT_AREAS);
       const areaToKotaMap = new Map<string, string>();
       adminAreas.forEach(a => {
@@ -144,11 +146,13 @@ export async function GET(req: NextRequest) {
         }
       });
 
-      const resolveWilayah = (k?: Kost | null) => {
-        if (!k) return 'Jakarta Selatan';
-        if (k.area && areaToKotaMap.has(k.area.toLowerCase())) {
-          return areaToKotaMap.get(k.area.toLowerCase())!;
+      const resolveWilayah = (k?: Kost | null, loggedArea?: string) => {
+        // Area tempat user melakukan unlock (dicatat saat unlock) diprioritaskan
+        const areaKey = (loggedArea || k?.area || '').toLowerCase();
+        if (areaKey && areaToKotaMap.has(areaKey)) {
+          return areaToKotaMap.get(areaKey)!;
         }
+        if (!k) return 'Jakarta Selatan';
         const al = (k.alamat || '').toLowerCase();
         if (al.includes('selatan')) return 'Jakarta Selatan';
         if (al.includes('pusat')) return 'Jakarta Pusat';
@@ -171,7 +175,7 @@ export async function GET(req: NextRequest) {
       const validLogs = allAccessLogs.filter(l => l.action === 'view_whatsapp' || l.kost_id);
       validLogs.forEach(l => {
         const k = kostMap.get(l.kost_id);
-        const wil = resolveWilayah(k);
+        const wil = resolveWilayah(k, l.area);
         unlockWilayahCounts[wil] = (unlockWilayahCounts[wil] || 0) + 1;
       });
 
@@ -217,22 +221,44 @@ export async function GET(req: NextRequest) {
         };
       }).sort((a, b) => b.count - a.count || b.kostCount - a.kostCount);
 
-      // Recent 6 transactions
-      const recentTransactions = allTx.slice(0, 8).map((t, idx) => ({
-        id: t.id || `tx-${idx}`,
-        order_id: t.order_id || `KK-${t.id}`,
-        user_name: t.user_email?.split('@')[0] || 'User Pengguna',
-        user_email: t.user_email || 'user@gmail.com',
-        date: new Date(t.created_at || Date.now()).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        rawDate: t.created_at || new Date().toISOString(),
-        amount: t.amount || 15000,
-        payment_method: t.payment_method || 'QRIS (GoPay)',
-        status: t.transaction_status === 'settlement' || (t as any).status === 'sukses' ? 'sukses' : t.transaction_status === 'pending' ? 'pending' : 'gagal',
+      // 6 transaksi terakhir (data apa adanya dari database, terurut terbaru)
+      const toStatus = (t: PaymentTransaction) =>
+        t.transaction_status === 'settlement' || (t as any).status === 'sukses'
+          ? 'sukses'
+          : t.transaction_status === 'pending'
+            ? 'pending'
+            : 'gagal';
+      const recentTransactions = allTx.slice(0, 6).map((t) => ({
+        id: t.id,
+        order_id: t.order_id || t.id,
+        user_email: t.user_email || '-',
+        date: t.created_at
+          ? new Date(t.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+          : '-',
+        rawDate: t.created_at || null,
+        amount: t.amount ?? 0,
+        payment_method: t.payment_method || '-',
+        status: toStatus(t),
       }));
 
-      // Butuh tindakan: Draft kosts + failed tx
-      const draftKosts = allKosts.filter(k => (k as any).is_draft || k.status !== 'tersedia').slice(0, 4);
-      const pendingTx = allTx.filter(t => t.transaction_status === 'pending' || t.transaction_status === 'failure').slice(0, 3);
+      // Butuh tindakan: kost dengan data belum lengkap + transaksi berstatus pending
+      const draftKosts = allKosts
+        .filter(k => k.id !== '__seeded__')
+        .map(k => {
+          const steps: string[] = [];
+          if (!k.owner_whatsapp) steps.push('Isi nomor WhatsApp pemilik');
+          if (!k.media || k.media.length === 0) steps.push('Unggah foto kamar & gedung');
+          if (k.latitude == null || k.longitude == null) steps.push('Tentukan titik lokasi di peta');
+          if (!k.deskripsi || k.deskripsi.trim().length < 30) steps.push('Lengkapi deskripsi kost');
+          if (!k.fasilitas || k.fasilitas.length === 0) steps.push('Isi daftar fasilitas');
+          return { id: k.id, nama: k.nama, area: k.area, kota: k.kota, steps };
+        })
+        .filter(k => k.steps.length > 0)
+        .slice(0, 4);
+      const pendingTx = allTx
+        .filter(t => t.transaction_status === 'pending')
+        .slice(0, 3)
+        .map(t => ({ id: t.id, order_id: t.order_id || t.id, user_email: t.user_email || '-', amount: t.amount ?? 0 }));
 
       return NextResponse.json({
         stats: {
