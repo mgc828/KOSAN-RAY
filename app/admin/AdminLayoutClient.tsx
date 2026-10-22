@@ -165,10 +165,12 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
       >
         <div>
           {/* Brand & Collapse Header */}
-          <div className="h-20 px-5 flex items-center justify-between border-b border-white/10">
+          <div className={`h-20 flex items-center border-b border-white/10 transition-all ${
+            collapsed ? 'px-0 justify-center' : 'px-5 justify-between'
+          }`}>
             {!collapsed && (
               <Link href="/admin" className="flex items-center gap-2.5 overflow-hidden">
-                <div className="w-9 h-9 rounded-xl bg-[#F97316] flex items-center justify-center shrink-0 shadow-md">
+                <div className="w-9 h-9 min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-xl bg-[#F97316] flex items-center justify-center shrink-0 shadow-md">
                   <Compass className="w-5 h-5 text-slate-900" />
                 </div>
                 <div className="truncate">
@@ -179,11 +181,11 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             )}
 
             {collapsed && (
-              <div className="w-full flex justify-center">
-                <div className="w-9 h-9 rounded-xl bg-[#F97316] flex items-center justify-center shadow-md">
+              <Link href="/admin" title="Kost-Kostan Admin" className="flex justify-center items-center">
+                <div className="w-9 h-9 min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-xl bg-[#F97316] flex items-center justify-center shrink-0 shadow-md">
                   <Compass className="w-5 h-5 text-slate-900" />
                 </div>
-              </div>
+              </Link>
             )}
 
             <button
@@ -208,10 +210,10 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                   key={item.href}
                   href={item.href}
                   title={collapsed ? item.name : undefined}
-                  className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                  className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold border transition-all duration-200 ${
                     isActive
-                      ? 'bg-[#F97316] text-white shadow-md shadow-[#F97316]/25'
-                      : 'text-white/80 hover:bg-[#F97316]/20 hover:text-white hover:border hover:border-[#F97316]/30'
+                      ? 'bg-[#F97316] text-white border-[#F97316] shadow-md shadow-[#F97316]/25'
+                      : 'border-transparent text-white/80 hover:border-[#F97316] hover:bg-orange-50/15 hover:text-white'
                   } ${collapsed ? 'justify-center px-2' : ''}`}
                 >
                   <Icon className="w-4.5 h-4.5 shrink-0" />

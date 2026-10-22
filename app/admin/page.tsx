@@ -17,6 +17,8 @@ import {
   AlertCircle, 
   XCircle, 
   ChevronRight, 
+  ChevronDown,
+  Calendar,
   ExternalLink, 
   Sparkles, 
   RefreshCw, 
@@ -36,23 +38,32 @@ import {
 } from 'recharts';
 import { toast } from '@/lib/toast';
 
-type PeriodKey = '1m' | '2m' | '3m' | '6m' | '9m' | '1y' | '3y' | '5y';
-
-const FILTER_PERIODS: { key: PeriodKey; label: string; months: number }[] = [
-  { key: '1m', label: '1 bulan', months: 1 },
-  { key: '2m', label: '2 bulan', months: 2 },
-  { key: '3m', label: '3 bulan', months: 3 },
-  { key: '6m', label: '6 bulan', months: 6 },
-  { key: '9m', label: '9 bulan', months: 9 },
-  { key: '1y', label: '1 tahun', months: 12 },
-  { key: '3y', label: '3 tahun', months: 36 },
-  { key: '5y', label: '5 tahun', months: 60 },
-];
+type PeriodKey = '1m' | '2m' | '3m' | '6m' | '9m' | '1y' | '3y' | '5y' | 'custom';
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('1m');
+
+  const defaultEnd = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const defaultStart = useMemo(() => new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0], []);
+  const [customStartDate, setCustomStartDate] = useState(defaultStart);
+  const [customEndDate, setCustomEndDate] = useState(defaultEnd);
+  const [tempStartDate, setTempStartDate] = useState(defaultStart);
+  const [tempEndDate, setTempEndDate] = useState(defaultEnd);
+  const [isOtherOpen, setIsOtherOpen] = useState(false);
+  const otherDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close other dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (otherDropdownRef.current && !otherDropdownRef.current.contains(e.target as Node)) {
+        setIsOtherOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Mouse hover state for SVG path follower popup
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number; visible: boolean; label?: string; val?: number }>({
@@ -87,73 +98,130 @@ export default function AdminDashboardPage() {
     return 'Rp ' + (num || 0).toLocaleString('id-ID');
   };
 
-  // Generate dynamic chart data based on selected filter and real DB transactions
-  const activePeriodObj = FILTER_PERIODS.find(p => p.key === selectedPeriod) || FILTER_PERIODS[0];
+  // Label periode aktif
+  const currentPeriodLabel = useMemo(() => {
+    if (selectedPeriod === '1m') return '1 Bulan Terakhir';
+    if (selectedPeriod === '2m') return '2 Bulan Terakhir';
+    if (selectedPeriod === '3m') return '3 Bulan Terakhir';
+    if (selectedPeriod === '6m') return '6 Bulan Terakhir';
+    if (selectedPeriod === '9m') return '9 Bulan Terakhir';
+    if (selectedPeriod === '1y') return '1 Tahun Terakhir';
+    if (selectedPeriod === '3y') return '3 Tahun Terakhir';
+    if (selectedPeriod === '5y') return '5 Tahun Terakhir';
+    if (selectedPeriod === 'custom') {
+      const s = new Date(customStartDate + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      const e = new Date(customEndDate + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      return `Kustom (${s} - ${e})`;
+    }
+    return '1 Bulan Terakhir';
+  }, [selectedPeriod, customStartDate, customEndDate]);
 
+  // Generate dynamic chart data based on selected filter and 100% REAL DB transactions (no fabricated/sine data)
   const lineChartData = useMemo(() => {
     const rawTx: { amount: number; date: string }[] = data?.allTransactions || [];
-    const months = activePeriodObj.months;
 
-    // Daily breakdown for 1m, 2m, 3m
-    if (months <= 3) {
-      const totalDays = months * 30;
-      const step = months === 1 ? 1 : months === 2 ? 2 : 3;
+    const now = new Date();
+    let startDate: Date;
+    let endDate: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    if (selectedPeriod === '1m') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29, 0, 0, 0, 0);
+    } else if (selectedPeriod === '2m') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 59, 0, 0, 0, 0);
+    } else if (selectedPeriod === '3m') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 89, 0, 0, 0, 0);
+    } else if (selectedPeriod === '6m') {
+      startDate = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate(), 0, 0, 0, 0);
+    } else if (selectedPeriod === '9m') {
+      startDate = new Date(now.getFullYear(), now.getMonth() - 9, now.getDate(), 0, 0, 0, 0);
+    } else if (selectedPeriod === '1y') {
+      startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    } else if (selectedPeriod === '3y') {
+      startDate = new Date(now.getFullYear() - 3, now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    } else if (selectedPeriod === '5y') {
+      startDate = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    } else if (selectedPeriod === 'custom') {
+      startDate = new Date(customStartDate ? `${customStartDate}T00:00:00` : now.getTime() - 30 * 86400000);
+      endDate = new Date(customEndDate ? `${customEndDate}T23:59:59` : now.getTime());
+      if (startDate > endDate) {
+        const tmp = startDate;
+        startDate = endDate;
+        endDate = tmp;
+      }
+    } else {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29, 0, 0, 0, 0);
+    }
+
+    // Filter transaksi yang valid dan berada dalam rentang tanggal
+    const inRangeTx = rawTx.filter((t) => {
+      const td = new Date(t.date).getTime();
+      return !isNaN(td) && td >= startDate.getTime() && td <= endDate.getTime();
+    });
+
+    const diffDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Jika rentang <= 92 hari: agregasi harian murni dari database
+    if (diffDays <= 92) {
       const points = [];
-      const now = new Date();
+      const cur = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const endDay = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
 
-      for (let i = totalDays - 1; i >= 0; i -= step) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const dayStr = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+      while (cur <= endDay) {
+        const y = cur.getFullYear();
+        const m = cur.getMonth();
+        const d = cur.getDate();
+        const dayStr = cur.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
 
-        // Sum real transactions matching this day
-        const dayTxs = rawTx.filter(t => {
+        const dayTxs = inRangeTx.filter((t) => {
           const td = new Date(t.date);
-          return td.toDateString() === d.toDateString();
+          return td.getFullYear() === y && td.getMonth() === m && td.getDate() === d;
         });
-        const realRevenue = dayTxs.reduce((acc, cur) => acc + (cur.amount || 15000), 0);
 
-        // Consistent base curve with real data overlaid
-        const baseRev = realRevenue > 0 
-          ? realRevenue 
-          : Math.round((15000 + Math.sin(i * 0.7) * 10000 + (i % 7 === 0 ? 30000 : 0)) / 1000) * 1000;
+        const realRevenue = dayTxs.reduce((acc, curTx) => acc + (curTx.amount || 15000), 0);
+        const realUnlocks = dayTxs.length;
 
         points.push({
           date: dayStr,
-          revenue: baseRev,
-          unlocks: Math.max(1, Math.round(baseRev / 15000)),
+          revenue: realRevenue,
+          unlocks: realUnlocks,
         });
+
+        cur.setDate(cur.getDate() + 1);
       }
       return points;
     }
 
-    // Monthly breakdown for 6m, 9m, 1y, 3y, 5y
-    const now = new Date();
+    // Jika rentang > 92 hari: agregasi bulanan murni dari database
     const points = [];
-    const stepMonths = months > 12 ? (months === 36 ? 3 : 6) : 1;
+    const curMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const endMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
 
-    for (let i = months; i >= 0; i -= stepMonths) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthStr = d.toLocaleDateString('id-ID', { month: 'short', year: months > 12 ? '2-digit' : undefined });
-
-      const monthTxs = rawTx.filter(t => {
-        const td = new Date(t.date);
-        return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear();
+    while (curMonth <= endMonth) {
+      const y = curMonth.getFullYear();
+      const m = curMonth.getMonth();
+      const monthStr = curMonth.toLocaleDateString('id-ID', {
+        month: 'short',
+        year: diffDays > 365 ? '2-digit' : undefined,
       });
-      const realRev = monthTxs.reduce((acc, cur) => acc + (cur.amount || 15000), 0);
 
-      const baseRev = realRev > 0
-        ? realRev
-        : Math.round((75000 + Math.sin(i * 0.5) * 30000 + ((i % 3 === 0) ? 45000 : 0)) / 1000) * 1000;
+      const monthTxs = inRangeTx.filter((t) => {
+        const td = new Date(t.date);
+        return td.getFullYear() === y && td.getMonth() === m;
+      });
+
+      const realRevenue = monthTxs.reduce((acc, curTx) => acc + (curTx.amount || 15000), 0);
+      const realUnlocks = monthTxs.length;
 
       points.push({
         date: monthStr,
-        revenue: baseRev,
-        unlocks: Math.max(1, Math.round(baseRev / 15000)),
+        revenue: realRevenue,
+        unlocks: realUnlocks,
       });
+
+      curMonth.setMonth(curMonth.getMonth() + 1);
     }
     return points;
-  }, [data, activePeriodObj]);
+  }, [data, selectedPeriod, customStartDate, customEndDate]);
 
   const totalPeriodRevenue = useMemo(() => {
     return lineChartData.reduce((acc, cur) => acc + cur.revenue, 0);
@@ -378,23 +446,31 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h3 className="text-sm sm:text-base font-black text-[#0F2A43] tracking-tight">
-                Tren Pendapatan ({activePeriodObj.label})
+                Tren Pendapatan ({currentPeriodLabel})
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Total nominal unlock: <span className="font-bold text-slate-700">{formatRp(totalPeriodRevenue)}</span>
+                Total nominal unlock real: <span className="font-bold text-slate-700">{formatRp(totalPeriodRevenue)}</span>
               </p>
             </div>
 
-            {/* Tombol Filter Pilihan: 1 bln, 2 bln, 3 bln, 6 bln, 9 bln, 1 thn, 3 thn, 5 thn */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 max-w-full">
-              {FILTER_PERIODS.map((p) => {
+            {/* Tombol Filter Pilihan: 1 Bulan, 2 Bulan, 3 Bulan, 1 Tahun, Lainnya */}
+            <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap relative">
+              {[
+                { key: '1m', label: '1 Bulan' },
+                { key: '2m', label: '2 Bulan' },
+                { key: '3m', label: '3 Bulan' },
+                { key: '1y', label: '1 Tahun' },
+              ].map((p) => {
                 const isActive = selectedPeriod === p.key;
                 return (
                   <button
                     key={p.key}
                     type="button"
-                    onClick={() => setSelectedPeriod(p.key)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    onClick={() => {
+                      setSelectedPeriod(p.key as PeriodKey);
+                      setIsOtherOpen(false);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                       isActive
                         ? 'bg-[#F97316] text-white shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
@@ -404,6 +480,111 @@ export default function AdminDashboardPage() {
                   </button>
                 );
               })}
+
+              {/* Tombol Lainnya dengan Dropdown Popup */}
+              <div ref={otherDropdownRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsOtherOpen((prev) => !prev)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    ['6m', '9m', '3y', '5y', 'custom'].includes(selectedPeriod)
+                      ? 'bg-[#F97316] text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                  }`}
+                >
+                  <span>
+                    {selectedPeriod === '6m'
+                      ? '6 Bulan'
+                      : selectedPeriod === '9m'
+                      ? '9 Bulan'
+                      : selectedPeriod === '3y'
+                      ? '3 Tahun'
+                      : selectedPeriod === '5y'
+                      ? '5 Tahun'
+                      : selectedPeriod === 'custom'
+                      ? 'Kustom'
+                      : 'Lainnya'}
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOtherOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Popup Pilihan Lainnya */}
+                {isOtherOpen && (
+                  <div className="absolute right-0 mt-2 z-50 w-72 sm:w-80 bg-white border border-slate-200 rounded-2xl shadow-2xl p-4 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                    <div>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                        Pilihan Rentang Cepat
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { key: '6m', label: '6 Bulan' },
+                          { key: '9m', label: '9 Bulan' },
+                          { key: '3y', label: '3 Tahun' },
+                          { key: '5y', label: '5 Tahun' },
+                        ].map((item) => (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => {
+                              setSelectedPeriod(item.key as PeriodKey);
+                              setIsOtherOpen(false);
+                            }}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold text-center border transition-all cursor-pointer ${
+                              selectedPeriod === item.key
+                                ? 'bg-[#F97316] text-white border-[#F97316]'
+                                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-orange-50/50 hover:border-[#F97316]/50'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                        Kustom Tanggal Kalender
+                      </span>
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 block mb-1">Dari Tanggal (Start Date)</label>
+                          <input
+                            type="date"
+                            value={tempStartDate}
+                            onChange={(e) => setTempStartDate(e.target.value)}
+                            className="w-full text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#F97316] text-slate-800 bg-slate-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 block mb-1">Sampai Tanggal (End Date)</label>
+                          <input
+                            type="date"
+                            value={tempEndDate}
+                            onChange={(e) => setTempEndDate(e.target.value)}
+                            className="w-full text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#F97316] text-slate-800 bg-slate-50"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!tempStartDate || !tempEndDate) {
+                              toast('Silakan pilih rentang tanggal lengkap', 'warning');
+                              return;
+                            }
+                            setCustomStartDate(tempStartDate);
+                            setCustomEndDate(tempEndDate);
+                            setSelectedPeriod('custom');
+                            setIsOtherOpen(false);
+                          }}
+                          className="w-full py-2 bg-[#0F2A43] hover:bg-[#F97316] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer mt-1"
+                        >
+                          Terapkan Rentang Tanggal
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -436,12 +617,12 @@ export default function AdminDashboardPage() {
                         <div className="flex items-baseline gap-1.5">
                           <span className="text-base font-black text-white">{formatRp(item.value)}</span>
                           <span className="text-[10px] text-[#FB923C] font-bold">
-                            ({item.payload.unlocks || Math.round(item.value / 15000)} unlock)
+                            ({item.payload.unlocks || 0} transaksi unlock)
                           </span>
                         </div>
                         <div className="mt-1 flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
                           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                          <span className="text-white">Status: Terverifikasi</span>
+                          <span className="text-white">Data Real Database</span>
                         </div>
                       </div>
                     );
@@ -461,11 +642,11 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Grafik Donat: Unlock per Area */}
+        {/* Grafik Donat: Unlock per Wilayah */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
           <div>
             <h3 className="text-sm font-black text-[#0F2A43] tracking-tight">Distribusi Unlock per Wilayah</h3>
-            <p className="text-xs text-slate-400">Pangsa pasar pencarian kost di DKI dari Database</p>
+            <p className="text-xs text-slate-400">Pangsa pasar pencarian & unlock kost di DKI Jakarta dari Database</p>
           </div>
 
           <div className="h-56 w-full my-auto">
@@ -485,7 +666,10 @@ export default function AdminDashboardPage() {
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(val: any) => [`${val}%`, 'Persentase']}
+                  formatter={(val: any, _name: any, item: any) => [
+                    `${item?.payload?.unlockCount ?? item?.payload?.count ?? 0} unlock (${val}%)`,
+                    item?.payload?.name || 'Wilayah'
+                  ]}
                   contentStyle={{ 
                     backgroundColor: '#0F2A43', 
                     borderRadius: '0.75rem', 
@@ -501,14 +685,21 @@ export default function AdminDashboardPage() {
 
           <div className="space-y-1.5 pt-2 border-t border-slate-100">
             {areaDonutData.map((item: any) => (
-              <div key={item.name} className="flex items-center justify-between text-xs font-semibold">
+              <div key={item.name} className="flex items-center justify-between text-xs font-semibold py-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-slate-600">{item.name}</span>
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                  <span className="text-slate-700 font-bold">{item.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-slate-400">{item.count || 0} unit</span>
-                  <span className="font-extrabold text-[#0F2A43]">{item.value}%</span>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    {item.unlockCount ?? item.count ?? 0} unlock
+                  </span>
+                  {item.kostCount !== undefined && (
+                    <span className="text-[10px] text-slate-400">
+                      ({item.kostCount} unit)
+                    </span>
+                  )}
+                  <span className="font-extrabold text-[#0F2A43] min-w-[32px] text-right">{item.value}%</span>
                 </div>
               </div>
             ))}

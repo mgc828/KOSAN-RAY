@@ -134,14 +134,63 @@ export async function GET(req: NextRequest) {
         : 18.4;
       const revenueGrowth = (revGrowthPct >= 0 ? '+' : '') + revGrowthPct + '%';
 
-      // Area Donut Data dari data real kosts di database
-      const kotaCounts: Record<string, number> = {};
+      // Area Donut Data dari data real access-logs dan listing kost di database
+      const allAccessLogs = await dbList<{ id: string; user_id: string; kost_id: string; action: string; created_at: string }>('access-logs', () => []);
+      const adminAreas = await dbList<AreaItem>(AREAS_COLLECTION, () => DEFAULT_AREAS);
+      const areaToKotaMap = new Map<string, string>();
+      adminAreas.forEach(a => {
+        if (a.nama && a.kota) {
+          areaToKotaMap.set(a.nama.toLowerCase(), a.kota);
+        }
+      });
+
+      const resolveWilayah = (k?: Kost | null) => {
+        if (!k) return 'Jakarta Selatan';
+        if (k.area && areaToKotaMap.has(k.area.toLowerCase())) {
+          return areaToKotaMap.get(k.area.toLowerCase())!;
+        }
+        const al = (k.alamat || '').toLowerCase();
+        if (al.includes('selatan')) return 'Jakarta Selatan';
+        if (al.includes('pusat')) return 'Jakarta Pusat';
+        if (al.includes('barat')) return 'Jakarta Barat';
+        if (al.includes('timur')) return 'Jakarta Timur';
+        if (al.includes('utara')) return 'Jakarta Utara';
+        return 'Jakarta Selatan';
+      };
+
+      const kostMap = new Map(allKosts.map(k => [k.id, k]));
+
+      const unlockWilayahCounts: Record<string, number> = {
+        'Jakarta Selatan': 0,
+        'Jakarta Pusat': 0,
+        'Jakarta Barat': 0,
+        'Jakarta Timur': 0,
+        'Jakarta Utara': 0,
+      };
+
+      const validLogs = allAccessLogs.filter(l => l.action === 'view_whatsapp' || l.kost_id);
+      validLogs.forEach(l => {
+        const k = kostMap.get(l.kost_id);
+        const wil = resolveWilayah(k);
+        unlockWilayahCounts[wil] = (unlockWilayahCounts[wil] || 0) + 1;
+      });
+
+      const totalUnlockLogged = Object.values(unlockWilayahCounts).reduce((a, b) => a + b, 0);
+
+      const kostWilayahCounts: Record<string, number> = {
+        'Jakarta Selatan': 0,
+        'Jakarta Pusat': 0,
+        'Jakarta Barat': 0,
+        'Jakarta Timur': 0,
+        'Jakarta Utara': 0,
+      };
+
       allKosts.forEach(k => {
         if (k.id === '__seeded__') return;
-        const kota = k.kota || 'Jakarta Selatan';
-        kotaCounts[kota] = (kotaCounts[kota] || 0) + 1;
+        const wil = resolveWilayah(k);
+        kostWilayahCounts[wil] = (kostWilayahCounts[wil] || 0) + 1;
       });
-      const totalValidKosts = Object.values(kotaCounts).reduce((a, b) => a + b, 0) || 1;
+
       const areaColorMap: Record<string, string> = {
         'Jakarta Selatan': '#0F2A43',
         'Jakarta Pusat': '#F97316',
@@ -149,12 +198,24 @@ export async function GET(req: NextRequest) {
         'Jakarta Timur': '#10B981',
         'Jakarta Utara': '#8B5CF6',
       };
-      const areaDonutData = Object.entries(kotaCounts).map(([name, count]) => ({
-        name,
-        count,
-        value: Math.round((count / totalValidKosts) * 100),
-        color: areaColorMap[name] || '#64748B',
-      })).sort((a, b) => b.value - a.value);
+
+      const wilayahKeys = ['Jakarta Selatan', 'Jakarta Pusat', 'Jakarta Barat', 'Jakarta Timur', 'Jakarta Utara'];
+      const areaDonutData = wilayahKeys.map(name => {
+        const unlockCount = unlockWilayahCounts[name] || 0;
+        const kostCount = kostWilayahCounts[name] || 0;
+        const percentage = totalUnlockLogged > 0
+          ? Math.round((unlockCount / totalUnlockLogged) * 100)
+          : Math.round((kostCount / (totalKostCount || 1)) * 100);
+
+        return {
+          name,
+          count: unlockCount,
+          unlockCount,
+          kostCount,
+          value: percentage,
+          color: areaColorMap[name] || '#64748B',
+        };
+      }).sort((a, b) => b.count - a.count || b.kostCount - a.kostCount);
 
       // Recent 6 transactions
       const recentTransactions = allTx.slice(0, 8).map((t, idx) => ({
