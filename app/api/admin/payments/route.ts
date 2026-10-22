@@ -6,26 +6,34 @@ import {
   revokeUserSubscription 
 } from '@/lib/payment-store';
 import { getAllAccounts } from '@/lib/account-store';
+import { getAdminSessionFromReq } from '@/lib/admin-session';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!getAdminSessionFromReq(req)) {
+    return NextResponse.json({ error: 'Tidak diizinkan. Silakan login sebagai admin.' }, { status: 401 });
+  }
   try {
     const transactions = await getAllTransactions();
     const rawUsers = await getAllUsers();
     const accounts = await getAllAccounts();
 
-    // Map each user with decoded password from account-store or default
+    // Map each user with decoded password from account-store or default (if legacy base64) or masked if hashed
     const users = rawUsers.map(u => {
       const acc = accounts.find(a => a.email.toLowerCase() === u.email.toLowerCase() || a.id === u.id);
       let plainPassword = u.password || '';
       if (!plainPassword && acc?.passwordHash) {
-        try {
-          plainPassword = Buffer.from(acc.passwordHash, 'base64').toString('utf-8');
-        } catch {
-          plainPassword = acc.passwordHash;
+        if (acc.passwordHash.startsWith('$2a$') || acc.passwordHash.startsWith('$2b$')) {
+          plainPassword = '•••••••• (Bcrypt Hash)';
+        } else {
+          try {
+            plainPassword = Buffer.from(acc.passwordHash, 'base64').toString('utf-8');
+          } catch {
+            plainPassword = '••••••••';
+          }
         }
       }
       if (!plainPassword) {
-        plainPassword = 'password123'; // Default testing password for seeded mock users
+        plainPassword = '••••••••';
       }
       return {
         ...u,
@@ -60,6 +68,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!getAdminSessionFromReq(req)) {
+    return NextResponse.json({ error: 'Tidak diizinkan. Silakan login sebagai admin.' }, { status: 401 });
+  }
   try {
     const body = await req.json();
     const { action, userId, days } = body;
@@ -86,4 +97,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Gagal memproses aksi user' }, { status: 500 });
   }
 }
-

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllKosts, addKost, updateKost, deleteKost } from '@/lib/data-store';
 import { dbList, dbPut, dbUpdate, dbRemove } from '@/lib/db';
 import { getAdminSessionFromReq } from '@/lib/admin-session';
-import { PaymentTransaction, AppUser } from '@/lib/payment-store';
+import { PaymentTransaction, AppUser, getAllTransactions } from '@/lib/payment-store';
 import { AreaItem, AdminSettings, AdminNotification } from '@/lib/admin-types';
 import { Kost } from '@/lib/types';
 
@@ -85,6 +85,16 @@ export async function GET(req: NextRequest) {
     const session = getAdminSessionFromReq(req);
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type') || 'dashboard';
+
+    // Publik hanya boleh membaca saklar alat bantu UI (tanpa data sensitif lain)
+    if (!session) {
+      if (type === 'settings') {
+        const list = await dbList<AdminSettings>(SETTINGS_COLLECTION, () => [DEFAULT_SETTINGS]);
+        const tools = (list[0] || DEFAULT_SETTINGS).tools;
+        return NextResponse.json({ settings: { tools } });
+      }
+      return NextResponse.json({ error: 'Tidak diizinkan. Silakan login sebagai admin.' }, { status: 401 });
+    }
 
     // 1. DASHBOARD STATS
     if (type === 'dashboard') {
@@ -526,6 +536,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const session = getAdminSessionFromReq(req);
+    if (!session) {
+      return NextResponse.json({ error: 'Tidak diizinkan. Silakan login sebagai admin.' }, { status: 401 });
+    }
     const body = await req.json();
     const { action } = body;
 
