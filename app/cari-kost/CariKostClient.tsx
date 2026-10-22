@@ -468,7 +468,22 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
         
         {/* Breadcrumb - Exactly as caridisekitar */}
         <nav className="text-xs text-slate-500 flex items-center gap-2" aria-label="Breadcrumb">
-          <Link href="/" className="hover:text-slate-900 transition-colors">Home</Link>
+          <Link 
+            href="/" 
+            scroll={true}
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+              }
+            }}
+            className="hover:text-slate-900 transition-colors"
+          >
+            Beranda
+          </Link>
           <span>/</span>
           <span className="text-slate-900 font-semibold">Cari Kost</span>
         </nav>

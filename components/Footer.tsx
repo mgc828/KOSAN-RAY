@@ -69,9 +69,9 @@ export default function Footer() {
             <div className="footer-nav-column" style={{ flex: '0.8 1 150px', minWidth: 140 }}>
               <h4><span>Halaman</span></h4>
               <ul>
-                <li><Link href="/">Beranda</Link></li>
-                <li><Link href="/cari-kost">Cari Kost</Link></li>
-                <li><Link href="/maps">Maps</Link></li>
+                <li><Link href="/" scroll={true} onClick={() => { if (typeof window !== 'undefined') window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }}>Beranda</Link></li>
+                <li><Link href="/cari-kost" scroll={true} onClick={() => { if (typeof window !== 'undefined') window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }}>Cari Kost</Link></li>
+                <li><Link href="/maps" scroll={true} onClick={() => { if (typeof window !== 'undefined') window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }}>Maps</Link></li>
               </ul>
             </div>
           </div>

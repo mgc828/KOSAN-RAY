@@ -64,7 +64,32 @@ export default function Navbar() {
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    if (typeof window !== 'undefined') {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      const raf = requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      });
+      return () => cancelAnimationFrame(raf);
+    }
   }, [pathname]);
+
+  const handleNavClick = () => {
+    setMobileMenuOpen(false);
+    if (typeof window !== 'undefined') {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      });
+    }
+  };
 
   // Swipe down gesture to close mobile navigation sheet
   const touchStartY = useRef(0);
@@ -329,7 +354,7 @@ export default function Navbar() {
 
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo - Sekitar Style */}
-        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+        <Link href="/" onClick={handleNavClick} scroll={true} className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#F97316] flex items-center justify-center text-slate-900 shadow-sm shadow-[#F97316]/30 group-hover:scale-105 transition-transform">
             <Compass className="w-6 h-6 text-slate-900" />
           </div>
@@ -348,6 +373,8 @@ export default function Navbar() {
           {/* Beranda Bubble */}
           <Link 
             href="/" 
+            onClick={handleNavClick}
+            scroll={true}
             className={`px-5 py-2.5 rounded-lg transition-all duration-300 flex items-center gap-2 ${getBubbleClass(isHomeActive, 'home')}`}
             data-hdr="home"
             style={isHomeActive ? undefined : shadowFor(dk('home'))}
@@ -358,6 +385,8 @@ export default function Navbar() {
           {/* Cari Kost Bubble */}
           <Link 
             href="/cari-kost" 
+            onClick={handleNavClick}
+            scroll={true}
             className={`px-5 py-2.5 rounded-lg transition-all flex items-center gap-2 ${getBubbleClass(isCariActive, 'cari')}`}
             data-hdr="cari"
             style={isCariActive ? undefined : shadowFor(dk('cari'))}
@@ -368,6 +397,8 @@ export default function Navbar() {
           {/* Maps Bubble */}
           <Link 
             href="/maps" 
+            onClick={handleNavClick}
+            scroll={true}
             className={`px-5 py-2.5 rounded-lg transition-all flex items-center gap-2 ${getBubbleClass(isMapsActive, 'maps')}`}
             data-hdr="maps"
             style={isMapsActive ? undefined : shadowFor(dk('maps'))}
@@ -546,21 +577,24 @@ export default function Navbar() {
       <nav aria-label="Navigasi utama mobile" className="space-y-2 py-1 text-base">
         <Link
           href="/"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={handleNavClick}
+          scroll={true}
           className={`flex min-h-12 items-center rounded-xl px-4 transition-colors ${getMobileBubbleClass(isHomeActive)}`}
         >
           Beranda
         </Link>
         <Link
           href="/cari-kost"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={handleNavClick}
+          scroll={true}
           className={`flex min-h-12 items-center rounded-xl px-4 transition-colors ${getMobileBubbleClass(isCariActive)}`}
         >
           Cari Kost
         </Link>
         <Link
           href="/maps"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={handleNavClick}
+          scroll={true}
           className={`flex min-h-12 items-center gap-2.5 rounded-xl px-4 transition-colors ${getMobileBubbleClass(isMapsActive)}`}
         >
           <Compass className={`h-4 w-4 ${isMapsActive ? 'text-white' : 'text-[#F97316]'}`} />
@@ -568,7 +602,8 @@ export default function Navbar() {
         </Link>
         <Link
           href="/dashboard"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={handleNavClick}
+          scroll={true}
           className="flex min-h-12 items-center gap-2.5 rounded-xl px-4 font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-950"
         >
           <User className="h-4 w-4 text-slate-500" />
@@ -576,7 +611,8 @@ export default function Navbar() {
         </Link>
         <Link
           href="/wishlist"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={handleNavClick}
+          scroll={true}
           className="flex min-h-12 items-center justify-between rounded-xl px-4 font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-950"
         >
           <div className="flex items-center gap-2.5">
