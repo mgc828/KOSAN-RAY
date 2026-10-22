@@ -527,112 +527,6 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
           )}
         </div>
 
-        {/* Mobile Section Title (Lokasi di sekitarmu) */}
-        <div className="lg:hidden flex items-center justify-between text-xs text-slate-700 font-bold px-4 pt-2.5 pb-1.5 shrink-0">
-          <div className="flex items-center gap-1.5 text-[#0F2A43]">
-            <Compass className="w-4 h-4 text-[#C2410C]" />
-            <span>Lokasi di sekitarmu</span>
-          </div>
-          <span className="text-slate-400 font-medium" suppressHydrationWarning>
-            {filteredKosts.length} kost ditemukan
-          </span>
-        </div>
-
-        {/* Mobile Horizontal Kost Card List (Scroll geser ke kanan kiri) */}
-        <div className="lg:hidden shrink-0">
-          {filteredKosts.length > 0 ? (
-            <div
-              ref={mobileListRef}
-              className="flex gap-3 overflow-x-auto pb-2.5 pt-0.5 px-4 scrollbar-none snap-x snap-mandatory scroll-smooth"
-              style={{ WebkitOverflowScrolling: 'touch' }}
-            >
-              {filteredKosts.map((kost) => {
-                const isSelected = selectedKost?.id === kost.id;
-                const thumbMedia = kost.media?.find(m => m.tipe === 'foto_gedung') || kost.media?.[0];
-                const thumbUrl = thumbMedia?.url || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80';
-                const tipeColor = {
-                  putri: 'bg-[#FFF0F5] text-[#D81B60]',
-                  putra: 'bg-[#EBF5FB] text-[#0F2A43]',
-                  campur: 'bg-[#F4ECF7] text-[#6C3483]',
-                }[kost.tipe];
-
-                return (
-                  <div
-                    key={kost.id}
-                    ref={(el) => { cardRefs.current[kost.id] = el; }}
-                    onClick={() => setSelectedKost(kost)}
-                    className={`cursor-pointer group rounded-2xl p-2 border transition-all text-left bg-white shrink-0 w-[270px] sm:w-[290px] snap-start flex items-center gap-2.5 ${
-                      isSelected
-                        ? 'border-[#F97316] ring-2 ring-[#F97316]/50 shadow-md bg-[#FFEDD5]/35'
-                        : 'border-slate-200 hover:border-slate-300 shadow-xs'
-                    }`}
-                  >
-                    {/* Image Thumbnail */}
-                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0">
-                      <Image
-                        src={thumbUrl}
-                        alt={kost.nama}
-                        fill
-                        sizes="80px"
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <span className={`absolute top-1 left-1 text-[8px] font-bold px-1.5 py-0.5 rounded-md capitalize shadow-xs backdrop-blur-xs ${tipeColor}`}>
-                        {kost.tipe}
-                      </span>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0 pr-1">
-                      <h4 className="font-extrabold text-slate-900 text-xs truncate group-hover:text-[#0F2A43] transition-colors">
-                        {kost.nama}
-                      </h4>
-                      <p className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5 truncate">
-                        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                        <span className="truncate">{kost.area}</span>
-                      </p>
-                      <div className="mt-1.5 pt-1 border-t border-slate-100 flex items-center justify-between">
-                        <div className="flex items-baseline gap-0.5">
-                          <span className="text-xs font-black text-slate-900" suppressHydrationWarning>
-                            Rp {(kost.harga / 1000000).toFixed(1)} Jt
-                          </span>
-                          <span className="text-[10px] text-slate-400">/bln</span>
-                        </div>
-                        <Link
-                          href={`/kost/${(kost.kota || 'jakarta').toLowerCase()}/${kost.area.toLowerCase()}/${kost.slug}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-[10px] font-bold text-[#C2410C] hover:text-[#EA580C] inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md hover:bg-orange-50 transition-colors"
-                        >
-                          <span>Detail</span>
-                          <ChevronRight className="w-3 h-3" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="px-4 py-2 shrink-0">
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-center flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-left">
-                  <Building2 className="w-4 h-4 text-slate-400 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">Tidak ada kost yang cocok</p>
-                    <p className="text-[10px] text-slate-500">Coba ubah kata kunci atau filter.</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={resetAllFilters}
-                  className="text-xs font-bold text-[#F97316] shrink-0 hover:underline cursor-pointer"
-                >
-                  Reset Filter
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Main Layout: Desktop 2-Column or Mobile Full-Height Map */}
         <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row lg:gap-8 lg:items-start lg:max-w-7xl lg:mx-auto lg:px-4 sm:lg:px-6 lg:px-8 lg:flex-none lg:h-auto">
           
@@ -908,8 +802,8 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
             </div>
           </div>
 
-          {/* Right Column / Mobile Map: Interactive Leaflet Map */}
-          <div className="flex-1 min-h-0 w-full px-3 pb-3 sm:px-4 sm:pb-4 lg:p-0 lg:w-1/2 xl:w-3/5 lg:h-[calc(100vh-140px)] lg:sticky lg:top-24 lg:flex-none">
+          {/* Right Column / Mobile Map: Interactive Leaflet Map (Memenuhi ruang tengah layar) */}
+          <div className="flex-1 min-h-0 w-full px-2.5 pt-2 pb-1 sm:px-4 sm:pt-3 sm:pb-2 lg:p-0 lg:w-1/2 xl:w-3/5 lg:h-[calc(100vh-140px)] lg:sticky lg:top-24 lg:flex-none">
             <MapsComponent
               kosts={filteredKosts}
               selectedKost={selectedKost}
@@ -917,6 +811,113 @@ export default function MapsClient({ kosts: allKosts }: { kosts: Kost[] }) {
             />
           </div>
 
+        </div>
+
+        {/* Mobile Section: Card nya berada dibagian bawah dan dapat digeser ke kanan dan kiri */}
+        <div className="lg:hidden shrink-0 bg-white/95 backdrop-blur-md pt-2 pb-2.5 border-t border-slate-200/80 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] z-20">
+          {/* Mobile Section Title (Lokasi di sekitarmu) */}
+          <div className="flex items-center justify-between text-xs text-slate-700 font-bold px-4 pb-1.5 shrink-0">
+            <div className="flex items-center gap-1.5 text-[#0F2A43]">
+              <Compass className="w-4 h-4 text-[#C2410C]" />
+              <span>Lokasi di sekitarmu</span>
+            </div>
+            <span className="text-slate-400 font-medium text-[11px]" suppressHydrationWarning>
+              {filteredKosts.length} kost ditemukan
+            </span>
+          </div>
+
+          {/* Mobile Horizontal Kost Card List (Scroll geser ke kanan kiri) */}
+          {filteredKosts.length > 0 ? (
+            <div
+              ref={mobileListRef}
+              className="flex gap-3 overflow-x-auto pb-1 pt-0.5 px-4 scrollbar-none snap-x snap-mandatory scroll-smooth"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              {filteredKosts.map((kost) => {
+                const isSelected = selectedKost?.id === kost.id;
+                const thumbMedia = kost.media?.find(m => m.tipe === 'foto_gedung') || kost.media?.[0];
+                const thumbUrl = thumbMedia?.url || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80';
+                const tipeColor = {
+                  putri: 'bg-[#FFF0F5] text-[#D81B60]',
+                  putra: 'bg-[#EBF5FB] text-[#0F2A43]',
+                  campur: 'bg-[#F4ECF7] text-[#6C3483]',
+                }[kost.tipe];
+
+                return (
+                  <div
+                    key={kost.id}
+                    ref={(el) => { cardRefs.current[kost.id] = el; }}
+                    onClick={() => setSelectedKost(kost)}
+                    className={`cursor-pointer group rounded-2xl p-2 border transition-all text-left bg-white shrink-0 w-[260px] sm:w-[280px] snap-start flex items-center gap-2.5 ${
+                      isSelected
+                        ? 'border-[#F97316] ring-2 ring-[#F97316]/50 shadow-md bg-[#FFEDD5]/35'
+                        : 'border-slate-200 hover:border-slate-300 shadow-xs'
+                    }`}
+                  >
+                    {/* Image Thumbnail */}
+                    <div className="relative w-[76px] h-[72px] rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                      <Image
+                        src={thumbUrl}
+                        alt={kost.nama}
+                        fill
+                        sizes="80px"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <span className={`absolute top-1 left-1 text-[8px] font-bold px-1.5 py-0.5 rounded-md capitalize shadow-xs backdrop-blur-xs ${tipeColor}`}>
+                        {kost.tipe}
+                      </span>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 pr-1">
+                      <h4 className="font-extrabold text-slate-900 text-xs truncate group-hover:text-[#0F2A43] transition-colors">
+                        {kost.nama}
+                      </h4>
+                      <p className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5 truncate">
+                        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span className="truncate">{kost.area}</span>
+                      </p>
+                      <div className="mt-1.5 pt-1 border-t border-slate-100 flex items-center justify-between">
+                        <div className="flex items-baseline gap-0.5">
+                          <span className="text-xs font-black text-slate-900" suppressHydrationWarning>
+                            Rp {(kost.harga / 1000000).toFixed(1)} Jt
+                          </span>
+                          <span className="text-[10px] text-slate-400">/bln</span>
+                        </div>
+                        <Link
+                          href={`/kost/${(kost.kota || 'jakarta').toLowerCase()}/${kost.area.toLowerCase()}/${kost.slug}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-[10px] font-bold text-[#C2410C] hover:text-[#EA580C] inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md hover:bg-orange-50 transition-colors"
+                        >
+                          <span>Detail</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="px-4 py-2 shrink-0">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-center flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-left">
+                  <Building2 className="w-4 h-4 text-slate-400 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">Tidak ada kost yang cocok</p>
+                    <p className="text-[10px] text-slate-500">Coba ubah kata kunci atau filter.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="text-xs font-bold text-[#F97316] shrink-0 hover:underline cursor-pointer"
+                >
+                  Reset Filter
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
       {/* ========================================================================= */}
