@@ -13,4 +13,7 @@ logs/
 tsconfig.tsbuildinfo
 .vercel/
 .agents/
+!.agents/skills/
+!.agents/skills/archify/
 skills-lock.json
+.archify/

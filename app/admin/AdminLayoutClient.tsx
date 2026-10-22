@@ -44,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'Transaksi', href: '/admin/transaksi', icon: CreditCard },
   { name: 'Akses Unlock', href: '/admin/unlock', icon: Unlock },
   { name: 'Laporan', href: '/admin/laporan', icon: BarChart3 },
+  { name: 'Arsitektur & Alur', href: '/admin/arsitektur', icon: Compass },
   { name: 'Pengaturan', href: '/admin/pengaturan', icon: Settings },
 ];
 

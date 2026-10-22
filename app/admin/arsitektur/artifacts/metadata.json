@@ -1,0 +1,17 @@
+{
+  "name": "RAY KOSAN",
+  "appId": "ai-studio-applet",
+  "version": "0.1.0",
+  "nextVersion": "^15.4.9",
+  "reactVersion": "^19.2.1",
+  "pageCount": 34,
+  "apiCount": 31,
+  "totalRoutes": 65,
+  "timestamp": "2026-10-22T05:56:23.003Z",
+  "lastGenerated": "2026-10-22T05:56:31.048Z",
+  "status": "success",
+  "artifacts": {
+    "architecture": "available",
+    "userFlow": "available"
+  }
+}
