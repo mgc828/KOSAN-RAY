@@ -17,28 +17,13 @@ export async function GET(req: NextRequest) {
     const rawUsers = await getAllUsers();
     const accounts = await getAllAccounts();
 
-    // Map each user with decoded password from account-store or default (if legacy base64) or masked if hashed
+    // Kata sandi tidak pernah dikirim ke browser
     const users = rawUsers.map(u => {
       const acc = accounts.find(a => a.email.toLowerCase() === u.email.toLowerCase() || a.id === u.id);
-      let plainPassword = u.password || '';
-      if (!plainPassword && acc?.passwordHash) {
-        if (acc.passwordHash.startsWith('$2a$') || acc.passwordHash.startsWith('$2b$')) {
-          plainPassword = '•••••••• (Bcrypt Hash)';
-        } else {
-          try {
-            plainPassword = Buffer.from(acc.passwordHash, 'base64').toString('utf-8');
-          } catch {
-            plainPassword = '••••••••';
-          }
-        }
-      }
-      if (!plainPassword) {
-        plainPassword = '••••••••';
-      }
       return {
         ...u,
         fullName: acc?.fullName || u.fullName,
-        password: plainPassword,
+        password: '••••••••',
       };
     });
 

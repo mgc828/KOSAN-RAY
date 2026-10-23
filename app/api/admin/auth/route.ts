@@ -8,6 +8,38 @@ import {
 } from '@/lib/admin-session';
 import { dbList, dbPut, dbUpdate } from '@/lib/db';
 import { AdminAccount } from '@/lib/admin-types';
+import bcrypt from 'bcryptjs';
+
+// Hash pembanding agar waktu respons tetap sama walau akun tidak ditemukan
+const DUMMY_HASH = bcrypt.hashSync('dummy-password-for-timing', 10);
+
+// Batas percobaan login gagal (best-effort per instance serverless)
+const MAX_FAILED = 5;
+const LOCK_MS = 15 * 60 * 1000;
+const failedAttempts = new Map<string, { count: number; first: number }>();
+
+function lockState(key: string) {
+  const rec = failedAttempts.get(key);
+  if (!rec) return { locked: false };
+  if (Date.now() - rec.first > LOCK_MS) {
+    failedAttempts.delete(key);
+    return { locked: false };
+  }
+  return { locked: rec.count >= MAX_FAILED };
+}
+
+function registerFailure(key: string) {
+  const rec = failedAttempts.get(key);
+  if (!rec || Date.now() - rec.first > LOCK_MS) failedAttempts.set(key, { count: 1, first: Date.now() });
+  else rec.count += 1;
+}
+
+/** Hash bcrypt untuk admin: dari env (admin bawaan) atau dari field passwordHash di database. */
+function envHashFor(email: string): string | undefined {
+  if (email === 'admin@kost-kostan.id') return process.env.ADMIN_PASSWORD_HASH;
+  if (email === 'kurator@kost-kostan.id') return process.env.ADMIN_CURATOR_PASSWORD_HASH;
+  return undefined;
+}
 
 const ADMINS_COLLECTION = 'admin_accounts';
 
@@ -62,26 +94,31 @@ export async function POST(req: NextRequest) {
       const emailTrim = String(email).trim().toLowerCase();
       const passwordTrim = String(password).trim();
 
-      // 1. Cek admin default atau accounts di DB
-      let matchedAdmin: AdminAccount | null = null;
+      const attemptKey = `${req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'ip'}|${emailTrim}`;
+      if (lockState(attemptKey).locked) {
+        return NextResponse.json(
+          { error: 'Terlalu banyak percobaan login. Coba lagi dalam 15 menit.' },
+          { status: 429 }
+        );
+      }
 
-      // Cek default admin
-      if (
-        (emailTrim === 'admin@kost-kostan.id' && (passwordTrim === 'admin123' || passwordTrim === 'kosthunt-admin-secret-2026')) ||
-        (emailTrim === 'kurator@kost-kostan.id' && passwordTrim === 'kurator123')
-      ) {
-        matchedAdmin = DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailTrim) || DEFAULT_ADMINS[0];
+      // Cari akun admin (bawaan atau database), lalu cocokkan kata sandi dengan hash bcrypt
+      let matchedAdmin: AdminAccount | null = null;
+      let admins: AdminAccount[] = DEFAULT_ADMINS;
+      try {
+        admins = await dbList<AdminAccount>(ADMINS_COLLECTION, () => DEFAULT_ADMINS);
+      } catch (e) {
+        console.warn('[admin-auth] Error reading admin accounts:', e);
+      }
+      const candidate = admins.find(a => a.email.toLowerCase() === emailTrim)
+        || DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailTrim);
+      const hash = candidate ? (candidate.passwordHash || envHashFor(emailTrim)) : undefined;
+      const passwordOk = await bcrypt.compare(passwordTrim, hash || DUMMY_HASH).catch(() => false);
+      if (candidate && hash && passwordOk) {
+        matchedAdmin = candidate;
+        failedAttempts.delete(attemptKey);
       } else {
-        // Cek database admin_accounts
-        try {
-          const admins = await dbList<AdminAccount>(ADMINS_COLLECTION, () => DEFAULT_ADMINS);
-          const found = admins.find(a => a.email.toLowerCase() === emailTrim);
-          if (found && (passwordTrim === 'admin123' || passwordTrim === 'kosthunt-admin-secret-2026')) {
-            matchedAdmin = found;
-          }
-        } catch (e) {
-          console.warn('[admin-auth] Error reading admin accounts:', e);
-        }
+        registerFailure(attemptKey);
       }
 
       if (!matchedAdmin) {

@@ -8,6 +8,8 @@ export interface AdminAccount {
   avatar?: string;
   created_at: string;
   last_login?: string;
+  /** Hash bcrypt kata sandi (opsional; admin bawaan memakai env). */
+  passwordHash?: string;
 }
 
 export interface AdminNotification {
