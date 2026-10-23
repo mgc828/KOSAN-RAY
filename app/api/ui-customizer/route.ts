@@ -6,6 +6,7 @@ import {
   resetPageCustomization,
   UICustomizationItem,
 } from '@/lib/ui-customizer-store';
+import { getAdminSessionFromReq } from '@/lib/admin-session';
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,26 +30,21 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Mengubah tampilan seluruh situs: hanya admin yang sudah login
+  if (!getAdminSessionFromReq(req)) {
+    return NextResponse.json({ success: false, error: 'Tidak diizinkan. Silakan login sebagai admin.' }, { status: 401 });
+  }
   try {
     const body = await req.json();
-    const { pagePath, items, passcode } = body as {
+    const { pagePath, items } = body as {
       pagePath: string;
       items: UICustomizationItem[];
-      passcode?: string;
     };
 
     if (!pagePath || !Array.isArray(items)) {
       return NextResponse.json(
         { success: false, error: 'Parameter pagePath dan items wajib diisi' },
         { status: 400 }
-      );
-    }
-
-    // Validasi passcode sederhana jika dikirimkan (bisa admin123 atau kosthunt-admin-secret-2026)
-    if (passcode && passcode !== 'admin123' && passcode !== 'kosthunt-admin-secret-2026') {
-      return NextResponse.json(
-        { success: false, error: 'Kata sandi admin tidak valid' },
-        { status: 401 }
       );
     }
 
@@ -69,6 +65,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!getAdminSessionFromReq(req)) {
+    return NextResponse.json({ success: false, error: 'Tidak diizinkan. Silakan login sebagai admin.' }, { status: 401 });
+  }
   try {
     const { searchParams } = new URL(req.url);
     const pagePath = searchParams.get('pagePath');

@@ -3,10 +3,15 @@ import { getAllKosts } from './data-store';
 import { sanitizeKostForPublic } from './security';
 import { getRatingMap } from './reviews';
 
-/** Daftar kost aman untuk publik (tanpa nomor WhatsApp & media premium) + ringkasan rating. */
+/** Kost yang sudah dipublikasikan (draft tidak tampil ke publik). */
+export function filterPublished<T extends { is_draft?: boolean }>(kosts: T[]): T[] {
+  return kosts.filter((k) => !k.is_draft);
+}
+
+/** Daftar kost aman untuk publik (tanpa nomor WhatsApp & media premium, tanpa draft) + ringkasan rating. */
 export async function getPublicKosts(): Promise<Kost[]> {
   const [kosts, ratings] = await Promise.all([getAllKosts(), getRatingMap()]);
-  return kosts.map((k) => {
+  return filterPublished(kosts).map((k) => {
     const safe = sanitizeKostForPublic(k);
     const r = ratings[k.slug];
     return r ? { ...safe, rating: r } : safe;

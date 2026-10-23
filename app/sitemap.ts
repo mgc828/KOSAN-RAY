@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getAllKosts } from '@/lib/data-store';
+import { filterPublished } from '@/lib/public-kosts';
 import { baseUrl } from '@/lib/config';
 
 // Dibuat saat diminta (bukan saat build) supaya kost yang baru ditambahkan langsung masuk sitemap.
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const site = baseUrl();
   const now = new Date();
-  const kosts = await getAllKosts();
+  const kosts = filterPublished(await getAllKosts());
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: site, lastModified: now, changeFrequency: 'daily', priority: 1 },

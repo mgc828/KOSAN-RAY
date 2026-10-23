@@ -20,7 +20,7 @@ export async function generateMetadata({
   const { kota } = await params;
   if (kota.toLowerCase() !== 'jakarta') {
     const all = await getAllKosts();
-    const hit = all.find((k) => k.slug.toLowerCase() === kota.toLowerCase());
+    const hit = all.find((k) => !k.is_draft && k.slug.toLowerCase() === kota.toLowerCase());
     if (hit) {
       return {
         title: `${hit.nama} - Info Kost & Kontak Pemilik`,

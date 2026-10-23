@@ -9,7 +9,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ sl
     const { slug } = await params;
     const kost = await getKostBySlug(slug);
 
-    if (!kost) {
+    if (!kost || kost.is_draft) {
       return NextResponse.json({ error: 'Kost tidak ditemukan' }, { status: 404 });
     }
 

@@ -85,3 +85,15 @@ describe('filter Cari Kost & Maps memakai data lokasi terstruktur', () => {
     expect(pub.owner_whatsapp).toBeUndefined();
   });
 });
+
+describe('kost draft tidak tampil ke publik', () => {
+  it('filterPublished membuang draft dan mempertahankan kost lain', async () => {
+    const { filterPublished } = await import('@/lib/public-kosts');
+    const list = [
+      { slug: 'a', is_draft: false },
+      { slug: 'b', is_draft: true },
+      { slug: 'c' },
+    ];
+    expect(filterPublished(list).map((k) => k.slug)).toEqual(['a', 'c']);
+  });
+});

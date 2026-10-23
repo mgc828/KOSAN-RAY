@@ -1,6 +1,8 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { getKostBySlug } from '@/lib/data-store';
+import { verifyAdminSessionToken, ADMIN_SESSION_COOKIE } from '@/lib/admin-session';
 import { getPublicKosts } from '@/lib/public-kosts';
 import { getReviews, summarize } from '@/lib/reviews';
 import { sanitizeKostForPublic } from '@/lib/security';
@@ -20,7 +22,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const kost = await getKostBySlug(slug);
 
-  if (!kost) {
+  if (!kost || kost.is_draft) {
     return {
       title: 'Kost Tidak Ditemukan - kost-kostan',
     };
@@ -51,7 +53,9 @@ export default async function KostDetailPage({
   const { slug } = await params;
   const rawKost = await getKostBySlug(slug);
 
-  if (!rawKost) {
+  // Draft belum tayang: 404 untuk publik, tetapi admin yang login boleh melihat pratinjau
+  const isAdmin = Boolean(verifyAdminSessionToken((await cookies()).get(ADMIN_SESSION_COOKIE)?.value));
+  if (!rawKost || (rawKost.is_draft && !isAdmin)) {
     notFound();
   }
 

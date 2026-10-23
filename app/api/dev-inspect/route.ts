@@ -1,8 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getAdminSessionFromReq } from '@/lib/admin-session';
 import fs from 'fs';
 import path from 'path';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  if (!getAdminSessionFromReq(req)) {
+    return NextResponse.json({ success: false, error: 'Tidak diizinkan.' }, { status: 401 });
+  }
   try {
     const data = await req.json();
     const logPath = path.join(process.cwd(), '.element-inspect.json');
@@ -18,7 +22,10 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!getAdminSessionFromReq(req)) {
+    return NextResponse.json({ empty: true }, { status: 401 });
+  }
   try {
     const logPath = path.join(process.cwd(), '.element-inspect.json');
     if (!fs.existsSync(logPath)) {

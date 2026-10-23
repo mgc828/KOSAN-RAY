@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllKosts, addKost } from '@/lib/data-store';
+import { addKost } from '@/lib/data-store';
+import { getPublicKosts } from '@/lib/public-kosts';
+import { getAdminSessionFromReq } from '@/lib/admin-session';
 import { Kost } from '@/lib/types';
 
+/** Daftar kost PUBLIK: tanpa nomor WhatsApp, tanpa media terkunci, tanpa draft. */
 export async function GET() {
   try {
-    const kosts = await getAllKosts();
+    const kosts = await getPublicKosts();
     return NextResponse.json(kosts);
   } catch (error) {
     console.error('Error fetching kosts:', error);
@@ -12,7 +15,11 @@ export async function GET() {
   }
 }
 
+/** Menambah kost lewat API: hanya admin yang sudah login. */
 export async function POST(req: NextRequest) {
+  if (!getAdminSessionFromReq(req)) {
+    return NextResponse.json({ error: 'Tidak diizinkan. Silakan login sebagai admin.' }, { status: 401 });
+  }
   try {
     const body: Kost = await req.json();
 
