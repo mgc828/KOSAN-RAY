@@ -143,7 +143,7 @@ export default function ReviewsSection({ slug, kostName }: { slug: string; kostN
             <div className="bg-white rounded-2xl border border-neutral-200 p-5">
               {!data.canReview.loggedIn ? (
                 <p className="text-sm text-slate-600">
-                  <Link href={`/login?next=${encodeURIComponent(here)}`} className="font-bold text-[#C2410C] hover:underline">Masuk</Link> untuk menulis ulasan.
+                  <Link href={`/masuk?next=${encodeURIComponent(here)}`} className="font-bold text-[#C2410C] hover:underline">Masuk</Link> untuk menulis ulasan.
                 </p>
               ) : !data.canReview.paid ? (
                 <p className="text-sm text-slate-600">

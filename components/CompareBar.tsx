@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Scale, X } from 'lucide-react';
 import { useCompare } from '@/lib/wishlist';
+import { isChromeless } from '@/lib/chrome';
 
 /** Bar kecil di bawah layar saat ada kost yang dipilih untuk dibandingkan. */
 export default function CompareBar() {
@@ -14,7 +15,7 @@ export default function CompareBar() {
   // Di halaman detail kost (HP/tablet) ada bilah aksi di bawah layar: naikkan bar ini supaya tidak menumpuk.
   const onDetail = /^\/kost\/[^/]+\/[^/]+\/[^/]+/.test(pathname);
 
-  if (compare.count === 0 || pathname.startsWith('/bandingkan') || pathname.startsWith('/admin')) return null;
+  if (compare.count === 0 || pathname.startsWith('/bandingkan') || pathname.startsWith('/admin') || isChromeless(pathname)) return null;
 
   return (
     <div className={`fixed left-1/2 -translate-x-1/2 ${onDetail ? 'bottom-[88px] lg:bottom-5' : 'bottom-5'} z-40 flex items-center gap-3 rounded-full bg-[#0F2A43] text-white pl-4 pr-2 py-2 shadow-xl`} suppressHydrationWarning>

@@ -116,7 +116,7 @@ export default function CheckoutPage() {
   const createOrder = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!user) {
-      router.push('/register?next=/checkout');
+      router.push('/daftar?next=/checkout');
       return;
     }
     setLoading(true);
@@ -129,7 +129,7 @@ export default function CheckoutPage() {
         setOrder(data);
         setStep('qris');
       } else if (res.status === 401) {
-        router.push('/login?next=/checkout');
+        router.push('/masuk?next=/checkout');
       } else {
         const msg = data?.error || 'QRIS gagal dibuat. Silakan coba lagi.';
         setErrorMsg(msg);
@@ -243,7 +243,7 @@ export default function CheckoutPage() {
                     <p className="text-slate-500 text-[11px]">Akses langsung aktif untuk akun ini setelah pembayaran terkonfirmasi.</p>
                   </div>
                 </div>
-                <button type="button" onClick={() => router.push('/login?next=/checkout')} className="text-[11px] font-bold text-[#0F2A43] hover:underline shrink-0">
+                <button type="button" onClick={() => router.push('/masuk?next=/checkout')} className="text-[11px] font-bold text-[#0F2A43] hover:underline shrink-0">
                   Ganti Akun
                 </button>
               </div>
@@ -257,8 +257,8 @@ export default function CheckoutPage() {
                   <p className="text-[11px] text-slate-600">Daftar atau masuk dulu agar akses {SUBSCRIPTION_DAYS} hari tersimpan di akun Anda.</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Link href="/register?next=/checkout" className="bg-[#F97316] text-white font-bold text-xs px-4 py-2 rounded-xl hover:bg-[#EA580C] transition-colors">Daftar Baru</Link>
-                  <Link href="/login?next=/checkout" className="bg-white text-slate-800 font-bold text-xs px-3.5 py-2 rounded-xl border border-[#F97316] hover:bg-[#FFEDD5] transition-colors">Masuk</Link>
+                  <Link href="/daftar?next=/checkout" className="bg-[#F97316] text-white font-bold text-xs px-4 py-2 rounded-xl hover:bg-[#EA580C] transition-colors">Daftar Baru</Link>
+                  <Link href="/masuk?next=/checkout" className="bg-white text-slate-800 font-bold text-xs px-3.5 py-2 rounded-xl border border-[#F97316] hover:bg-[#FFEDD5] transition-colors">Masuk</Link>
                 </div>
               </div>
             )}
@@ -284,7 +284,7 @@ export default function CheckoutPage() {
               )}
 
               {ready && !user ? (
-                <Link href="/register?next=/checkout" className="w-full mt-4 flex items-center justify-center gap-2 bg-[#F97316] hover:bg-[#EA580C] text-white font-extrabold py-3.5 px-6 rounded-xl text-sm shadow-md transition-all">
+                <Link href="/daftar?next=/checkout" className="w-full mt-4 flex items-center justify-center gap-2 bg-[#F97316] hover:bg-[#EA580C] text-white font-extrabold py-3.5 px-6 rounded-xl text-sm shadow-md transition-all">
                   <span>Daftar atau Masuk untuk Lanjut Bayar</span>
                   <ArrowRight className="w-5 h-5" />
                 </Link>

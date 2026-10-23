@@ -29,7 +29,7 @@ export default function InvoicePage({ params }: { params: Promise<{ orderId: str
   useEffect(() => {
     if (!ready) return;
     if (!user) {
-      router.replace(`/login?next=${encodeURIComponent(`/invoice/${orderId}`)}`);
+      router.replace(`/masuk?next=${encodeURIComponent(`/invoice/${orderId}`)}`);
       return;
     }
     fetch(`/api/invoices/${encodeURIComponent(orderId)}`, { credentials: 'same-origin', cache: 'no-store' })

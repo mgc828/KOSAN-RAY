@@ -22,7 +22,8 @@ export default function ElementInspector() {
     if (typeof window !== 'undefined') {
       setPosition({
         x: window.innerWidth - 76,
-        y: window.innerHeight - 76,
+        // Di HP/tablet halaman profil punya navigasi bawah (64px): jangan menutupinya
+        y: window.innerHeight - 76 - (window.innerWidth < 1024 && window.location.pathname.startsWith('/profil') ? 72 : 0),
       });
     }
   }, []);

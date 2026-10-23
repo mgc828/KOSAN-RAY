@@ -101,7 +101,7 @@ export default function AdminLiveCustomizer() {
 
       setBtnPos({
         x: 16,
-        y: Math.max(80, window.innerHeight - 150),
+        y: Math.max(80, window.innerHeight - 150 - (window.innerWidth < 1024 && window.location.pathname.startsWith('/profil') ? 72 : 0)),
       });
 
       // Tempatkan panel di sisi kanan layar secara default

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import BrandLogo from '@/components/BrandLogo';
+import { isChromeless } from '@/lib/chrome';
 import { ShieldCheck, User, LogOut, Menu, X, Sparkles, Compass, Heart, Bell } from 'lucide-react';
 import { useWishlist } from '@/lib/wishlist';
 
@@ -352,8 +353,8 @@ export default function Navbar() {
       : 'bg-white/80 text-black font-semibold hover:bg-white';
   };
 
-  // Di halaman admin, sembunyikan header navigasi utama
-  if (pathname?.startsWith('/admin')) {
+  // Admin, halaman akun (masuk/daftar...) dan dashboard profil memakai tata letak sendiri tanpa header situs
+  if (pathname?.startsWith('/admin') || isChromeless(pathname)) {
     return null;
   }
 
@@ -484,7 +485,7 @@ export default function Navbar() {
                 )}
               </Link>
               <Link
-                href="/login"
+                href="/masuk"
                 className={`px-4 py-2.5 text-xs font-bold transition-colors duration-300 ${dk('masuk') ? 'text-white' : 'text-black hover:text-black/70'}`}
                 data-hdr="masuk"
                 style={shadowFor(dk('masuk'))}
@@ -492,7 +493,7 @@ export default function Navbar() {
                 Masuk
               </Link>
               <Link
-                href="/register"
+                href="/daftar"
                 className="inline-flex items-center gap-1.5 bg-[#F97316] hover:bg-[#EA580C] text-white px-5 py-2.5 rounded-lg text-xs font-bold transition-all hover:scale-102"
               >
                 <span>Akses Rp15rb / 30 Hari</span>
@@ -509,7 +510,7 @@ export default function Navbar() {
             </span>
           ) : (
             <Link
-              href={user ? "/checkout" : "/register"}
+              href={user ? "/checkout" : "/daftar"}
               className="bg-[#F97316] text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-xs whitespace-nowrap"
             >
               Rp15rb
@@ -661,14 +662,14 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/login"
+                href="/masuk"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex-1 min-h-12 px-4 inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white text-sm font-bold text-slate-800 shadow-xs transition-colors hover:bg-slate-50 active:scale-[0.98] text-center"
               >
                 Masuk
               </Link>
               <Link
-                href="/register"
+                href="/daftar"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex-1 min-h-12 px-3 inline-flex items-center justify-center gap-2 rounded-xl bg-[#F97316] text-center text-sm font-bold text-white shadow-xs transition-colors hover:bg-[#EA580C] active:scale-[0.98]"
               >

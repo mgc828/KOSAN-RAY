@@ -200,7 +200,7 @@ export default function KostDetailClient({ initialKost, slug, similar = [] }: Ko
   };
 
   // Belum masuk -> daftar/masuk dulu, lalu otomatis lanjut ke pembayaran. Sudah masuk -> langsung ke pembayaran.
-  const buyHref = user ? '/checkout' : '/register?next=/checkout';
+  const buyHref = user ? '/checkout' : '/daftar?next=/checkout';
   const liked = wishlist.has(slug);
   const comparing = compare.has(slug);
 
@@ -393,11 +393,11 @@ export default function KostDetailClient({ initialKost, slug, similar = [] }: Ko
           {user ? (
             <p className="text-[11px] text-orange-800 font-medium text-center">
               Masuk sebagai <b>{user.email}</b>, akun ini belum punya akses aktif.{' '}
-              <Link href={`/login?next=${encodeURIComponent(detailPath)}`} className="underline font-bold">Ganti akun</Link>
+              <Link href={`/masuk?next=${encodeURIComponent(detailPath)}`} className="underline font-bold">Ganti akun</Link>
             </p>
           ) : (
             <p className="text-[11px] text-orange-800 font-medium text-center">
-              Sudah bayar? <Link href={`/login?next=${encodeURIComponent(detailPath)}`} className="underline font-bold">Masuk</Link> dengan akun yang dipakai saat membayar.
+              Sudah bayar? <Link href={`/masuk?next=${encodeURIComponent(detailPath)}`} className="underline font-bold">Masuk</Link> dengan akun yang dipakai saat membayar.
             </p>
           )}
         </div>

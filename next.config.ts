@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       { source: '/admin/media', destination: '/admin/kost', permanent: true },
       // Halaman Dashboard digabung ke Profil
       { source: '/dashboard', destination: '/profil', permanent: true },
+      // Halaman akun berganti alamat
+      { source: '/login', destination: '/masuk', permanent: true },
+      { source: '/register', destination: '/daftar', permanent: true },
     ];
   },
   outputFileTracingRoot: path.resolve(__dirname),

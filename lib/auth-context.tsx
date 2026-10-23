@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       /* diabaikan */
     }
-    window.location.href = reason === 'idle' ? '/login?reason=idle' : '/login';
+    window.location.href = reason === 'idle' ? '/masuk?reason=idle' : '/masuk';
   };
 
   const updateName = async (fullName: string): Promise<Result> => {

@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Shield, QrCode, CheckCircle2 } from 'lucide-react';
 import BrandLogo from '@/components/BrandLogo';
+import { isChromeless } from '@/lib/chrome';
 import '@/app/papi-home.css';
 import { CookieSettingsLink } from '@/components/CookieConsent';
 
 export default function Footer() {
   const pathname = usePathname();
   // Cari Kost, Maps, dan Admin tidak menampilkan footer utama.
-  if (pathname?.startsWith('/cari-kost') || pathname?.startsWith('/maps') || pathname?.startsWith('/admin')) return null;
+  if (pathname?.startsWith('/cari-kost') || pathname?.startsWith('/maps') || pathname?.startsWith('/admin') || isChromeless(pathname)) return null;
   return (
     <div className="papi-home">
       <footer className="site-footer" data-header-theme="dark">

@@ -672,7 +672,7 @@ export default function HomeClient({ kosts }: { kosts: Kost[] }) {
                 Cari di #kost-kostan aja! Daftar dan mulai cari kost Kamu hari ini.
               </p>
               <div>
-                <Link href="/register" className="cta-btn">
+                <Link href="/daftar" className="cta-btn">
                   <Smartphone size={18} /> Daftar Sekarang!
                 </Link>
               </div>
