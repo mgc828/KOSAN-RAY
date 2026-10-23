@@ -17,7 +17,7 @@ export default function Footer() {
       <footer className="site-footer" data-header-theme="dark">
         <div className="container" style={{ overflow: 'visible' }}>
           {/* Logo Kost-Kostan di atas konten footer dan posisinya di kiri */}
-          <div className="footer-top-brand" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '2rem' }}>
+          <div className="footer-top-brand" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
             <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', margin: 0, background: 'transparent', padding: 0 }}>
               <BrandLogo variant="horizontal" light className="h-12" />
             </div>

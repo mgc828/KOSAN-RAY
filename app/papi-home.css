@@ -933,3 +933,6 @@
 .papi-home .papi-carousel-control{display:none !important}
 .papi-home .hero-title{font-size:1.75rem}
 }
+.papi-home .footer-top-brand{margin-bottom:2rem}
+/* Desktop: jarak logo ke konten footer dibuat lebih rapat */
+@media (min-width:992px){.papi-home .footer-top-brand{margin-bottom:0.75rem}}
