@@ -195,10 +195,12 @@ export default function ProfilPage() {
                   type="checkbox"
                   checked={!settings.remindersOff}
                   onChange={async (e) => {
-                    const ok = await setRemindersOff(!e.target.checked);
+                    // Simpan nilainya SEBELUM await (lihat catatan di dashboard)
+                    const enable = e.target.checked;
+                    const ok = await setRemindersOff(!enable);
                     toast(
                       ok 
-                        ? (e.target.checked ? 'Email pengingat diaktifkan.' : 'Email pengingat dinonaktifkan.')
+                        ? (enable ? 'Email pengingat diaktifkan.' : 'Email pengingat dinonaktifkan.')
                         : 'Gagal memperbarui pengaturan.',
                       ok ? 'success' : 'error'
                     );

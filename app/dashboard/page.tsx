@@ -170,8 +170,10 @@ export default function DashboardPage() {
                 type="checkbox"
                 checked={!settings.remindersOff}
                 onChange={async (e) => {
-                  const ok = await setRemindersOff(!e.target.checked);
-                  toast(ok ? (e.target.checked ? 'Email pengingat dinyalakan.' : 'Email pengingat dimatikan.') : 'Gagal menyimpan pengaturan.', ok ? 'success' : 'error');
+                  // Simpan nilainya SEBELUM await: setelah itu input terkontrol sudah dikembalikan React, jadi e.target.checked tidak bisa dipercaya
+                  const enable = e.target.checked;
+                  const ok = await setRemindersOff(!enable);
+                  toast(ok ? (enable ? 'Email pengingat dinyalakan.' : 'Email pengingat dimatikan.') : 'Gagal menyimpan pengaturan.', ok ? 'success' : 'error');
                 }}
                 className="mt-1 w-5 h-5 accent-[#F97316] shrink-0"
                 aria-label="Email pengingat"
