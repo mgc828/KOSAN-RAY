@@ -620,10 +620,6 @@ export default function KostDetailClient({ initialKost, slug, similar = [] }: Ko
           {/* 2. Harga + kontak (kolom kanan di desktop, tepat di bawah judul di HP) */}
           <aside className="lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-[97px] space-y-4" aria-label="Harga dan kontak pemilik">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.06)] p-5 space-y-3">
-              <div className="grid grid-cols-2 bg-slate-100 rounded-xl p-1 text-sm font-semibold text-center" role="tablist" aria-label="Periode sewa">
-                <span role="tab" aria-selected="true" className="py-2 rounded-lg bg-white text-[#0F2A43] shadow-sm">Bulanan</span>
-                <span role="tab" aria-selected="false" aria-disabled="true" className="py-2 text-slate-400" title="Sewa harian belum tersedia">Harian</span>
-              </div>
               <p className="text-2xl font-extrabold text-[#0F2A43]">
                 Rp {kostData.harga.toLocaleString('id-ID')}
                 <span className="text-sm font-medium text-slate-500"> /bulan</span>
