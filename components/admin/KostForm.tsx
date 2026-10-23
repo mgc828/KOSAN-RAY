@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import {
@@ -19,10 +19,12 @@ import {
   Zap,
 } from 'lucide-react';
 import { toast as addToast } from '@/lib/toast';
-import { Kost, KostType } from '@/lib/types';
+import { Kost, KostMedia, KostType } from '@/lib/types';
 import { AreaItem } from '@/lib/admin-types';
 import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
+import MediaManager from '@/components/admin/MediaManager';
+import { deleteStoredMedia } from '@/lib/media-client';
 
 const LocationPickerMap = dynamic(() => import('@/components/LocationPickerMap'), {
   ssr: false,
@@ -83,6 +85,11 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
   const [lng, setLng] = useState<number>(initialKost?.longitude || 106.828);
 
   const [confirm, setConfirm] = useState<null | 'draft' | 'publish' | 'back'>(null);
+
+  // Media kost (foto & video) dikelola di form yang sama
+  const [media, setMedia] = useState<KostMedia[]>(initialKost?.media || []);
+  const initialMediaKeys = useRef<Set<string>>(new Set((initialKost?.media || []).map((m) => m.storage_key)));
+  const removedStoredKeys = useRef<string[]>([]);
 
   const [whatsappError, setWhatsappError] = useState('');
 
@@ -150,16 +157,28 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
     harga > 0 ||
     fasilitas.length > 0 ||
     totalKamar !== '' ||
-    kamarTersedia !== '';
+    kamarTersedia !== '' ||
+    media.length > 0;
 
   const goBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) router.back();
     else router.push('/admin/kost');
   };
 
+  // Buang berkas yang diunggah pada sesi ini bila form ditinggalkan tanpa menyimpan
+  const discardUploads = () => {
+    const orphan = media
+      .map((m) => m.storage_key)
+      .filter((k) => k.startsWith('uploads/') && !initialMediaKeys.current.has(k));
+    void deleteStoredMedia(orphan);
+  };
+
   const handleBackClick = () => {
     if (!isEdit && isDirty) setConfirm('back');
-    else goBack();
+    else {
+      discardUploads();
+      goBack();
+    }
   };
 
   const handleDraftClick = () => {
@@ -218,7 +237,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
         is_draft: isDraft,
         latitude: lat,
         longitude: lng,
-        media: initialKost?.media || [],
+        media,
       };
 
       const res = await fetch('/api/admin/data', {
@@ -240,6 +259,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
 
       const resData = await res.json();
       if (res.ok && resData.success) {
+        void deleteStoredMedia(removedStoredKeys.current);
         setIsRedirecting(true);
         setConfirm(null);
         addToast(
@@ -277,6 +297,7 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
         onDecline={() => {
           if (confirm === 'back') {
             setConfirm(null);
+            discardUploads();
             goBack();
           } else {
             setConfirm(null);
@@ -561,6 +582,14 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
               })}
             </div>
           </div>
+
+          {/* Section 3: Foto & Video */}
+          <MediaManager
+            value={media}
+            onChange={setMedia}
+            kostId={initialKost?.id}
+            onStoredKeyRemoved={(key) => removedStoredKeys.current.push(key)}
+          />
         </div>
 
         {/* Right Column (1 col): Kamar, Harga, Kontak & Paywall */}

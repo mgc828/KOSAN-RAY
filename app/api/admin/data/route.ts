@@ -561,9 +561,11 @@ export async function POST(req: NextRequest) {
       }
 
       const slug = kost.slug || kost.nama.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).substring(2, 6);
+      const newId = 'kost-' + Date.now();
       const newKost: Kost = {
         ...kost,
-        id: 'kost-' + Date.now(),
+        media: Array.isArray(kost.media) ? kost.media.map((m: any) => ({ ...m, kost_id: newId })) : [],
+        id: newId,
         slug,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
