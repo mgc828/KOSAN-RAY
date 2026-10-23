@@ -684,12 +684,12 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(300px,340px)_minmax(0,1fr)] gap-6 items-start">
         {/* Sidebar filter: di desktop menempel di bawah header saat halaman digulir */}
         <aside
-          className="hidden lg:block space-y-4 p-1 sm:p-2 lg:p-3 relative z-30 lg:z-30 lg:sticky lg:top-[81px] lg:max-h-[calc(100vh-81px)] lg:overflow-y-auto lg:overscroll-contain overflow-visible"
+          className="hidden lg:block space-y-4 p-1 sm:p-2 lg:p-3 relative z-30 lg:z-30 lg:sticky lg:top-[81px] lg:max-h-[calc(100vh-81px)] lg:flex lg:flex-col lg:overflow-hidden"
           aria-label="Filter pencarian kost"
           tabIndex={0}
         >
         {/* Sekitar Filter Bar Component */}
-        <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.08)] space-y-4">
+        <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.08)] space-y-4 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain [scrollbar-width:thin] [scrollbar-color:#CBD5E1_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400">
           {/* Top Row: Search Input */}
           <div className="relative">
             <Search className="w-5 h-5 text-slate-500 absolute left-4 top-[1.4rem] -translate-y-1/2 z-10 pointer-events-none" />
@@ -1178,7 +1178,7 @@ export default function CariKostClient({ kosts: allKosts }: { kosts: Kost[] }) {
 
         {/* Pencarian tersimpan */}
         {(hasActiveFilters || saved.list.length > 0) && (
-          <div className="flex flex-wrap items-center gap-2 text-xs px-1" aria-label="Pencarian tersimpan">
+          <div className="flex flex-wrap items-center gap-2 text-xs px-1 lg:shrink-0 lg:max-h-28 lg:overflow-y-auto" aria-label="Pencarian tersimpan">
             {hasActiveFilters && (savingName === null ? (
               <button
                 type="button"
