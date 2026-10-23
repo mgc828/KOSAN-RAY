@@ -12,6 +12,7 @@ import Analytics from '@/components/Analytics';
 import AuditTracker from '@/components/AuditTracker';
 import ErrorReporter from '@/components/ErrorReporter';
 import ElementInspector from '@/components/ElementInspector';
+import SessionGuard from '@/components/SessionGuard';
 import AdminLiveCustomizer from '@/components/AdminLiveCustomizer';
 
 const inter = Inter({
@@ -81,6 +82,7 @@ export default function RootLayout({
           </Suspense>
           <Analytics />
           <ErrorReporter />
+          <SessionGuard />
           <ElementInspector />
           <AdminLiveCustomizer />
         </AuthProvider>

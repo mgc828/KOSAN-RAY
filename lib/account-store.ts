@@ -142,3 +142,9 @@ export async function findOrCreateOAuthAccount(email: string, fullName?: string)
   };
   return dbPut<RegisteredAccount>(ACCOUNTS, account, seed);
 }
+
+/** Ubah nama tampilan akun. */
+export async function updateAccountName(id: string, fullName: string): Promise<boolean> {
+  const updated = await dbUpdate<RegisteredAccount>(ACCOUNTS, id, (a) => ({ ...a, fullName }), seed);
+  return Boolean(updated);
+}

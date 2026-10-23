@@ -27,7 +27,8 @@ function LoginForm() {
   const next = safeNext(params.get('next'));
   const fromCheckout = next === '/checkout';
   const resetDone = params.get('reset') === '1';
-  const destination = next || '/dashboard';
+  const idleOut = params.get('reason') === 'idle';
+  const destination = next || '/profil';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +57,12 @@ function LoginForm() {
           <p className="text-slate-600 leading-relaxed font-medium">
             Silakan masuk menggunakan email dan kata sandi yang telah Anda daftarkan. Setelah berhasil masuk, Anda akan langsung diarahkan ke tahap pembayaran QRIS Rp15.000.
           </p>
+        </div>
+      )}
+
+      {idleOut && (
+        <div className="bg-amber-50 border border-amber-300/60 text-amber-900 rounded-2xl p-3.5 text-xs font-semibold" role="status">
+          Kamu keluar otomatis karena tidak ada aktivitas selama 15 menit. Silakan masuk kembali.
         </div>
       )}
 

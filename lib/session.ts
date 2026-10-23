@@ -6,13 +6,18 @@ import crypto from 'crypto';
  */
 
 export const SESSION_COOKIE = 'kk_session';
-const MAX_AGE_SEC = 30 * 24 * 3600;
+
+/** Sesi berakhir bila pengguna tidak aktif selama ini (diperpanjang tiap ada aktivitas). */
+export const SESSION_IDLE_SEC = 15 * 60;
+/** Batas mutlak sejak login: sesi tidak bisa diperpanjang terus-menerus lebih lama dari ini. */
+export const SESSION_ABSOLUTE_SEC = 12 * 3600;
 
 export interface Session {
   uid: string;
   email: string;
   name?: string;
-  exp: number; // detik sejak epoch
+  exp: number; // batas tidak-aktif (detik sejak epoch), bergeser tiap aktivitas
+  abs: number; // batas mutlak sejak login (detik sejak epoch), tidak pernah bergeser
 }
 
 function secret(): string {
@@ -30,15 +35,21 @@ function sign(data: string): string {
   return crypto.createHmac('sha256', secret()).update(data).digest('base64url');
 }
 
-export function createSessionToken(user: { id: string; email: string; fullName?: string }): string {
-  const payload: Session = {
-    uid: user.id,
-    email: user.email,
-    name: user.fullName,
-    exp: Math.floor(Date.now() / 1000) + MAX_AGE_SEC,
-  };
+function signPayload(payload: Session): string {
   const body = b64(JSON.stringify(payload));
   return `${body}.${sign(body)}`;
+}
+
+export function createSessionToken(user: { id: string; email: string; fullName?: string }): string {
+  const now = Math.floor(Date.now() / 1000);
+  const abs = now + SESSION_ABSOLUTE_SEC;
+  return signPayload({ uid: user.id, email: user.email, name: user.fullName, exp: Math.min(now + SESSION_IDLE_SEC, abs), abs });
+}
+
+/** Perpanjang batas tidak-aktif sebuah sesi yang masih sah (batas mutlak tetap). */
+export function renewSessionToken(session: Session): string {
+  const now = Math.floor(Date.now() / 1000);
+  return signPayload({ ...session, exp: Math.min(now + SESSION_IDLE_SEC, session.abs) });
 }
 
 export function verifySessionToken(token: string | undefined | null): Session | null {
@@ -51,7 +62,9 @@ export function verifySessionToken(token: string | undefined | null): Session | 
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
   try {
     const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf-8')) as Session;
-    if (!payload.uid || !payload.exp || payload.exp * 1000 < Date.now()) return null;
+    // Token lama (tanpa batas mutlak) tidak lagi diterima: pengguna cukup masuk ulang sekali.
+    if (!payload.uid || !payload.exp || !payload.abs) return null;
+    if (payload.exp * 1000 < Date.now() || payload.abs * 1000 < Date.now()) return null;
     return payload;
   } catch {
     return null;
@@ -78,13 +91,13 @@ function isHttps(req: Request): boolean {
   return new URL(req.url).protocol === 'https:';
 }
 
+/** Cookie sesi (tanpa Max-Age/Expires): otomatis hilang saat browser ditutup. */
 export function sessionCookie(req: Request, token: string): string {
   return [
     `${SESSION_COOKIE}=${token}`,
     'Path=/',
     'HttpOnly',
     'SameSite=Lax',
-    `Max-Age=${MAX_AGE_SEC}`,
     isHttps(req) ? 'Secure' : '',
   ]
     .filter(Boolean)

@@ -45,7 +45,7 @@ export default function InvoicePage({ params }: { params: Promise<{ orderId: str
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-3">
         <h1 className="text-2xl font-black text-[#0F2A43]">Invoice tidak ditemukan</h1>
         <p className="text-sm text-slate-500">Invoice hanya tersedia untuk pembayaran yang sudah lunas dan milik akun yang sedang masuk.</p>
-        <Link href="/dashboard" className="inline-block text-sm font-bold text-[#C2410C] hover:underline">Kembali ke Dashboard</Link>
+        <Link href="/profil" className="inline-block text-sm font-bold text-[#C2410C] hover:underline">Kembali ke Dashboard</Link>
       </div>
     );
   }
@@ -54,7 +54,7 @@ export default function InvoicePage({ params }: { params: Promise<{ orderId: str
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 space-y-5">
       <div className="flex items-center justify-between print:hidden">
-        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900">
+        <Link href="/profil" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900">
           <ArrowLeft className="w-4 h-4" /> Dashboard
         </Link>
         <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors">

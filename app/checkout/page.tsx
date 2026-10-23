@@ -201,7 +201,7 @@ export default function CheckoutPage() {
               <p className="text-emerald-700">Pembayaran baru otomatis memperpanjang masa aktif (+{SUBSCRIPTION_DAYS} hari dari tanggal berakhir lama).</p>
             </div>
           </div>
-          <Link href="/dashboard" className="font-bold text-emerald-900 underline whitespace-nowrap">Lihat Dashboard</Link>
+          <Link href="/profil" className="font-bold text-emerald-900 underline whitespace-nowrap">Lihat Profil</Link>
         </div>
       )}
 
@@ -427,7 +427,7 @@ export default function CheckoutPage() {
                 <span>Lihat Invoice</span>
               </Link>
             )}
-            <Link href="/dashboard" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-semibold py-3 px-6 rounded-xl text-xs sm:text-sm transition-colors">
+            <Link href="/profil" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-semibold py-3 px-6 rounded-xl text-xs sm:text-sm transition-colors">
               <span>Buka Dashboard</span>
             </Link>
           </div>

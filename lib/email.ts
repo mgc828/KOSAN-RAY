@@ -137,7 +137,7 @@ export function reminderEmail(opts: { daysLeft: number; expiresAt: string; renew
         expired
           ? `Masa aktif akses kamu berakhir pada ${esc(until)}. Foto, video, dan nomor WhatsApp pemilik kembali terkunci.`
           : `Masa aktif akses kamu berakhir pada <b>${esc(until)}</b>. Perpanjang sekarang supaya tidak terputus. Perpanjangan otomatis ditambahkan di belakang tanggal berakhir.`
-      }</p>${button(opts.renewUrl, 'Perpanjang akses')}<p style="font-size:12px;color:#64748B">Tidak mau menerima pengingat? Matikan di halaman Dashboard.</p>`
+      }</p>${button(opts.renewUrl, 'Perpanjang akses')}<p style="font-size:12px;color:#64748B">Tidak mau menerima pengingat? Matikan di halaman Profil.</p>`
     ),
     text: `${expired ? 'Akses sudah berakhir' : `Akses berakhir ${opts.daysLeft} hari lagi`} (${until}). Perpanjang: ${opts.renewUrl}`,
   };

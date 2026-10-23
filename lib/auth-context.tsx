@@ -14,6 +14,11 @@ export interface AuthUser {
   fullName?: string;
 }
 
+export interface UserProfile {
+  createdAt: string | null;
+  totalPaid: number;
+}
+
 type Result = { success: boolean; error?: string };
 
 interface AuthContextType {
@@ -23,11 +28,16 @@ interface AuthContextType {
   ready: boolean;
   isLoading: boolean;
   settings: { remindersOff: boolean };
+  /** Data akun dari database (tanggal bergabung, total pembayaran). */
+  profile: UserProfile;
   unreadNotifications: number;
   login: (email: string, password?: string) => Promise<Result>;
   register: (email: string, password?: string, fullName?: string) => Promise<Result>;
   loginWithGoogle: (credential: string) => Promise<Result>;
-  logout: () => Promise<void>;
+  /** reason 'idle' = keluar otomatis karena tidak aktif (halaman masuk menampilkan pemberitahuan). */
+  logout: (reason?: 'idle') => Promise<void>;
+  /** Ubah nama tampilan akun. */
+  updateName: (fullName: string) => Promise<Result>;
   /** Muat ulang status login & langganan dari server (mis. setelah membayar). */
   refresh: () => Promise<void>;
   setRemindersOff: (off: boolean) => Promise<boolean>;
@@ -54,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [subscription, setSubscription] = useState<UserSubscription>(NONE);
   const [settings, setSettings] = useState({ remindersOff: false });
+  const [profile, setProfile] = useState<UserProfile>({ createdAt: null, totalPaid: 0 });
   const [unreadNotifications, setUnread] = useState(0);
   const [ready, setReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(d.user ?? null);
         setSubscription(d.subscription ?? NONE);
         setSettings(d.settings ?? { remindersOff: false });
+        setProfile(d.profile ?? { createdAt: null, totalPaid: 0 });
         setUnread(d.unreadNotifications ?? 0);
       } else if (res.status === 401) {
         setUser(null);
@@ -138,17 +150,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = async () => {
+  const logout = async (reason?: 'idle') => {
     await postAuth({ action: 'logout' });
     setUser(null);
     setSubscription(NONE);
     setUnread(0);
     try {
       sessionStorage.clear();
+      // Beri tahu tab lain agar ikut keluar
+      localStorage.setItem('kk_logout_at', String(Date.now()));
     } catch {
       /* diabaikan */
     }
-    window.location.href = '/login';
+    window.location.href = reason === 'idle' ? '/login?reason=idle' : '/login';
+  };
+
+  const updateName = async (fullName: string): Promise<Result> => {
+    try {
+      const res = await fetch('/api/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ fullName }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (res.ok) {
+        await refresh();
+        return { success: true };
+      }
+      return { success: false, error: d.error || 'Gagal menyimpan nama.' };
+    } catch {
+      return { success: false, error: 'Tidak bisa terhubung ke server.' };
+    }
   };
 
   const setRemindersOff = async (off: boolean) => {
@@ -177,11 +210,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ready,
         isLoading,
         settings,
+        profile,
         unreadNotifications,
         login,
         register,
         loginWithGoogle,
         logout,
+        updateName,
         refresh,
         setRemindersOff,
       }}

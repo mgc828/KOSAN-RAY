@@ -420,7 +420,9 @@ export default function Navbar() {
                 </div>
               )}
               <Link
-                href="/dashboard#notifikasi"
+                href="/profil#notifikasi"
+                // Klik lonceng saat sudah di /profil: router Next tidak memicu hashchange, jadi beri tahu halaman profil
+                onClick={() => setTimeout(() => window.dispatchEvent(new Event('kk-profil-hash')), 50)}
                 aria-label={`Notifikasi${unreadNotifications ? `, ${unreadNotifications} belum dibaca` : ''}`}
                 title="Notifikasi"
                 className="relative p-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
@@ -446,7 +448,7 @@ export default function Navbar() {
                 )}
               </Link>
               <Link
-                href="/dashboard"
+                href="/profil"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 rounded-full transition-all"
               >
                 <User className="w-3.5 h-3.5 text-slate-600" />
@@ -602,13 +604,13 @@ export default function Navbar() {
           Maps
         </Link>
         <Link
-          href="/dashboard"
+          href="/profil"
           onClick={handleNavClick}
           scroll={true}
           className="flex min-h-12 items-center gap-2.5 rounded-xl px-4 font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-950"
         >
           <User className="h-4 w-4 text-slate-500" />
-          Dashboard Akun
+          Profil & Transaksi
         </Link>
         <Link
           href="/wishlist"
