@@ -20,10 +20,11 @@ import {
   MousePointerClick
 } from 'lucide-react';
 import { useAdmin } from '@/lib/admin-client';
+import { toast as addToast } from '@/lib/toast';
 import { AdminSettings, AdminAccount } from '@/lib/admin-types';
 
 export default function AdminPengaturanPage() {
-  const { admin, addToast } = useAdmin();
+  const { admin } = useAdmin();
 
   const [activeTab, setActiveTab] = useState<'umum' | 'pembayaran' | 'admin' | 'branding' | 'tools'>('umum');
   const [loading, setLoading] = useState(true);
@@ -95,16 +96,6 @@ export default function AdminPengaturanPage() {
           ...data.settings,
           tools: loadedTools,
         });
-
-        // Sync local storage
-        if (typeof window !== 'undefined') {
-          if (localStorage.getItem('kk_show_ui_customizer') === null) {
-            localStorage.setItem('kk_show_ui_customizer', String(loadedTools.enableUiCustomizer));
-          }
-          if (localStorage.getItem('kk_show_element_inspector') === null) {
-            localStorage.setItem('kk_show_element_inspector', String(loadedTools.enableElementInspector));
-          }
-        }
       }
     } catch {
       addToast('Gagal memuat pengaturan', 'error');
@@ -117,9 +108,11 @@ export default function AdminPengaturanPage() {
     fetchSettings();
   }, []);
 
-  const handleToggleTool = (tool: 'enableUiCustomizer' | 'enableElementInspector') => {
+  // Saklar alat bantu berlaku GLOBAL: langsung disimpan ke server sehingga semua pengunjung ikut berubah
+  const handleToggleTool = async (tool: 'enableUiCustomizer' | 'enableElementInspector') => {
     const curVal = Boolean(settings.tools?.[tool]);
     const newVal = !curVal;
+    const label = tool === 'enableUiCustomizer' ? 'UI' : 'Inspect';
 
     const updatedSettings = {
       ...settings,
@@ -131,34 +124,25 @@ export default function AdminPengaturanPage() {
     };
 
     setSettings(updatedSettings);
-
-    if (typeof window !== 'undefined') {
-      if (tool === 'enableUiCustomizer') {
-        localStorage.setItem('kk_show_ui_customizer', String(newVal));
-      } else {
-        localStorage.setItem('kk_show_element_inspector', String(newVal));
-      }
+    try {
+      const res = await fetch('/api/admin/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'settings_save', settings: updatedSettings }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error) throw new Error(data.error || 'gagal');
       window.dispatchEvent(new Event('kk-tools-settings-changed'));
+      addToast(`Tombol floating ${label} ${newVal ? 'diaktifkan (ON) 🟢' : 'dinonaktifkan (OFF) ⚪'} untuk semua pengguna`, 'info');
+    } catch {
+      setSettings(settings); // kembalikan tampilan saklar bila gagal disimpan
+      addToast(`Gagal menyimpan saklar ${label}. Coba lagi.`, 'error');
     }
-
-    addToast(
-      tool === 'enableUiCustomizer'
-        ? `Tombol floating UI ${newVal ? 'diaktifkan (ON) 🟢' : 'dinonaktifkan (OFF) ⚪'}`
-        : `Tombol floating Inspect ${newVal ? 'diaktifkan (ON) 🟢' : 'dinonaktifkan (OFF) ⚪'}`,
-      'info'
-    );
   };
 
   const handleSaveSettings = async () => {
     setSaving(true);
     try {
-      // Sync local storage on save
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('kk_show_ui_customizer', String(settings.tools?.enableUiCustomizer ?? false));
-        localStorage.setItem('kk_show_element_inspector', String(settings.tools?.enableElementInspector ?? false));
-        window.dispatchEvent(new Event('kk-tools-settings-changed'));
-      }
-
       const res = await fetch('/api/admin/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

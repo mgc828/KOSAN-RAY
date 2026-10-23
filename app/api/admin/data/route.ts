@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
       if (type === 'settings') {
         const list = await dbList<AdminSettings>(SETTINGS_COLLECTION, () => [DEFAULT_SETTINGS]);
         const tools = (list[0] || DEFAULT_SETTINGS).tools;
-        return NextResponse.json({ settings: { tools } });
+        return NextResponse.json({ settings: { tools } }, { headers: { 'Cache-Control': 'no-store' } });
       }
       return NextResponse.json({ error: 'Tidak diizinkan. Silakan login sebagai admin.' }, { status: 401 });
     }

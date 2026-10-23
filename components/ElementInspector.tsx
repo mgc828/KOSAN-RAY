@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { MousePointerClick, Check, Copy, X } from 'lucide-react';
+import { useToolFlag } from '@/lib/tool-flags';
 
 export default function ElementInspector() {
-  const [isVisible, setIsVisible] = useState(false);
+  // Tampil/tidaknya tombol ditentukan saklar GLOBAL di Pengaturan Admin (bukan cache browser)
+  const isVisible = useToolFlag('enableElementInspector');
   const [isActive, setIsActive] = useState(false);
   const [lastSelected, setLastSelected] = useState<any>(null);
   const [copied, setCopied] = useState(false);
@@ -14,38 +16,6 @@ export default function ElementInspector() {
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number }>({ mouseX: 0, mouseY: 0, startX: 0, startY: 0 });
   const hasMovedRef = useRef(false);
-
-  // Cek apakah fitur Inspect diaktifkan di Pengaturan Admin atau berada di halaman /admin
-  useEffect(() => {
-    const checkVisibility = () => {
-      if (typeof window === 'undefined') return;
-      const local = localStorage.getItem('kk_show_element_inspector');
-      if (local !== null) {
-        setIsVisible(local === 'true');
-        return;
-      }
-      // Khusus halaman /admin, tombol Inspect aktif secara default agar admin dapat menginspeksi elemen
-      if (window.location.pathname.startsWith('/admin')) {
-        setIsVisible(true);
-        return;
-      }
-      fetch('/api/admin/data?type=settings')
-        .then((r) => r.json())
-        .then((d) => {
-          const enabled = Boolean(d?.settings?.tools?.enableElementInspector);
-          setIsVisible(enabled);
-        })
-        .catch(() => {});
-    };
-
-    checkVisibility();
-    window.addEventListener('kk-tools-settings-changed', checkVisibility);
-    window.addEventListener('storage', checkVisibility);
-    return () => {
-      window.removeEventListener('kk-tools-settings-changed', checkVisibility);
-      window.removeEventListener('storage', checkVisibility);
-    };
-  }, []);
 
   // Inisialisasi posisi default di pojok kanan bawah
   useEffect(() => {

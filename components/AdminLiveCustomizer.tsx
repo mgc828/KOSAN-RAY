@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { toast } from '@/lib/toast';
+import { useToolFlag } from '@/lib/tool-flags';
 import {
   Sliders,
   AlignLeft,
@@ -44,38 +45,9 @@ const PRESET_COLORS = [
 export default function AdminLiveCustomizer() {
   const pathname = usePathname() || '/';
 
-  // Toggle Visibility dari Pengaturan Admin
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const checkVisibility = () => {
-      if (typeof window === 'undefined') return;
-      if (window.location.pathname.startsWith('/admin')) {
-        setIsVisible(false);
-        return;
-      }
-      const local = localStorage.getItem('kk_show_ui_customizer');
-      if (local !== null) {
-        setIsVisible(local === 'true');
-        return;
-      }
-      fetch('/api/admin/data?type=settings')
-        .then((r) => r.json())
-        .then((d) => {
-          const enabled = Boolean(d?.settings?.tools?.enableUiCustomizer);
-          setIsVisible(enabled);
-        })
-        .catch(() => {});
-    };
-
-    checkVisibility();
-    window.addEventListener('kk-tools-settings-changed', checkVisibility);
-    window.addEventListener('storage', checkVisibility);
-    return () => {
-      window.removeEventListener('kk-tools-settings-changed', checkVisibility);
-      window.removeEventListener('storage', checkVisibility);
-    };
-  }, []);
+  // Tampil/tidaknya tombol ditentukan saklar GLOBAL di Pengaturan Admin (bukan cache browser)
+  const toolEnabled = useToolFlag('enableUiCustomizer');
+  const isVisible = toolEnabled && !pathname.startsWith('/admin');
 
   // Status State
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
