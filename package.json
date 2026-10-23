@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/generate-architecture.mjs",
+    "prebuild": "node scripts/generate-architecture.mjs && node scripts/generate-route-manifest.mjs",
     "build": "next build",
     "archify": "node scripts/generate-architecture.mjs",
     "start": "next start",

@@ -1,0 +1,395 @@
+{
+  "generatedAt": "2026-10-23T21:26:05.722Z",
+  "routes": [
+    {
+      "path": "/",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/page.tsx"
+    },
+    {
+      "path": "/admin",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/page.tsx"
+    },
+    {
+      "path": "/admin/area",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/area/page.tsx"
+    },
+    {
+      "path": "/admin/arsitektur",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/arsitektur/page.tsx"
+    },
+    {
+      "path": "/admin/kost",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/kost/page.tsx"
+    },
+    {
+      "path": "/admin/kost/[id]",
+      "dynamic": true,
+      "type": "page",
+      "file": "app/admin/kost/[id]/page.tsx"
+    },
+    {
+      "path": "/admin/kost/new",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/kost/new/page.tsx"
+    },
+    {
+      "path": "/admin/laporan",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/laporan/page.tsx"
+    },
+    {
+      "path": "/admin/login",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/login/page.tsx"
+    },
+    {
+      "path": "/admin/pengaturan",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/pengaturan/page.tsx"
+    },
+    {
+      "path": "/admin/pengguna",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/pengguna/page.tsx"
+    },
+    {
+      "path": "/admin/transaksi",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/transaksi/page.tsx"
+    },
+    {
+      "path": "/admin/unlock",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/admin/unlock/page.tsx"
+    },
+    {
+      "path": "/api/admin/architecture",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/admin/architecture/route.ts"
+    },
+    {
+      "path": "/api/admin/auth",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/admin/auth/route.ts"
+    },
+    {
+      "path": "/api/admin/data",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/admin/data/route.ts"
+    },
+    {
+      "path": "/api/admin/media/delete",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/admin/media/delete/route.ts"
+    },
+    {
+      "path": "/api/admin/media/upload",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/admin/media/upload/route.ts"
+    },
+    {
+      "path": "/api/admin/payments",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/admin/payments/route.ts"
+    },
+    {
+      "path": "/api/audit",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/audit/route.ts"
+    },
+    {
+      "path": "/api/auth",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/auth/route.ts"
+    },
+    {
+      "path": "/api/auth/forgot",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/auth/forgot/route.ts"
+    },
+    {
+      "path": "/api/auth/google",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/auth/google/route.ts"
+    },
+    {
+      "path": "/api/auth/reset",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/auth/reset/route.ts"
+    },
+    {
+      "path": "/api/contact",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/contact/route.ts"
+    },
+    {
+      "path": "/api/cron/reminders",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/cron/reminders/route.ts"
+    },
+    {
+      "path": "/api/dev-inspect",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/dev-inspect/route.ts"
+    },
+    {
+      "path": "/api/errors",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/errors/route.ts"
+    },
+    {
+      "path": "/api/invoices/[orderId]",
+      "dynamic": true,
+      "type": "api",
+      "file": "app/api/invoices/[orderId]/route.ts"
+    },
+    {
+      "path": "/api/kost/[slug]",
+      "dynamic": true,
+      "type": "api",
+      "file": "app/api/kost/[slug]/route.ts"
+    },
+    {
+      "path": "/api/kost/[slug]/whatsapp",
+      "dynamic": true,
+      "type": "api",
+      "file": "app/api/kost/[slug]/whatsapp/route.ts"
+    },
+    {
+      "path": "/api/kosts",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/kosts/route.ts"
+    },
+    {
+      "path": "/api/kosts/[id]",
+      "dynamic": true,
+      "type": "api",
+      "file": "app/api/kosts/[id]/route.ts"
+    },
+    {
+      "path": "/api/me",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/me/route.ts"
+    },
+    {
+      "path": "/api/me/transactions",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/me/transactions/route.ts"
+    },
+    {
+      "path": "/api/media/signed-url",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/media/signed-url/route.ts"
+    },
+    {
+      "path": "/api/notifications",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/notifications/route.ts"
+    },
+    {
+      "path": "/api/payment/create-qris",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/payment/create-qris/route.ts"
+    },
+    {
+      "path": "/api/payment/simulate",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/payment/simulate/route.ts"
+    },
+    {
+      "path": "/api/payment/status",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/payment/status/route.ts"
+    },
+    {
+      "path": "/api/payment/webhook",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/payment/webhook/route.ts"
+    },
+    {
+      "path": "/api/report",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/report/route.ts"
+    },
+    {
+      "path": "/api/reviews",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/reviews/route.ts"
+    },
+    {
+      "path": "/api/security/log",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/security/log/route.ts"
+    },
+    {
+      "path": "/api/ui-customizer",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/api/ui-customizer/route.ts"
+    },
+    {
+      "path": "/bandingkan",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/bandingkan/page.tsx"
+    },
+    {
+      "path": "/cari-kost",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/cari-kost/page.tsx"
+    },
+    {
+      "path": "/checkout",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/checkout/page.tsx"
+    },
+    {
+      "path": "/daftar",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/daftar/page.tsx"
+    },
+    {
+      "path": "/invoice/[orderId]",
+      "dynamic": true,
+      "type": "page",
+      "file": "app/invoice/[orderId]/page.tsx"
+    },
+    {
+      "path": "/kebijakan-privasi",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/kebijakan-privasi/page.tsx"
+    },
+    {
+      "path": "/kontak",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/kontak/page.tsx"
+    },
+    {
+      "path": "/kost/[kota]",
+      "dynamic": true,
+      "type": "page",
+      "file": "app/kost/[kota]/page.tsx"
+    },
+    {
+      "path": "/kost/[kota]/[area]",
+      "dynamic": true,
+      "type": "page",
+      "file": "app/kost/[kota]/[area]/page.tsx"
+    },
+    {
+      "path": "/kost/[kota]/[area]/[slug]",
+      "dynamic": true,
+      "type": "page",
+      "file": "app/kost/[kota]/[area]/[slug]/page.tsx"
+    },
+    {
+      "path": "/llms.txt",
+      "dynamic": false,
+      "type": "api",
+      "file": "app/llms.txt/route.ts"
+    },
+    {
+      "path": "/lupa-sandi",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/lupa-sandi/page.tsx"
+    },
+    {
+      "path": "/maps",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/maps/page.tsx"
+    },
+    {
+      "path": "/masuk",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/masuk/page.tsx"
+    },
+    {
+      "path": "/notifikasi",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/notifikasi/page.tsx"
+    },
+    {
+      "path": "/profil",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/profil/page.tsx"
+    },
+    {
+      "path": "/reset-sandi",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/reset-sandi/page.tsx"
+    },
+    {
+      "path": "/syarat-ketentuan",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/syarat-ketentuan/page.tsx"
+    },
+    {
+      "path": "/tentang",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/tentang/page.tsx"
+    },
+    {
+      "path": "/wishlist",
+      "dynamic": false,
+      "type": "page",
+      "file": "app/wishlist/page.tsx"
+    }
+  ]
+}

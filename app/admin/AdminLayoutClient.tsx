@@ -21,6 +21,7 @@ import {
   LogOut, 
   ExternalLink,
   Compass,
+  Network,
   CheckCircle2,
   Clock,
   AlertTriangle,
@@ -45,6 +46,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'Akses Unlock', href: '/admin/unlock', icon: Unlock },
   { name: 'Laporan', href: '/admin/laporan', icon: BarChart3 },
   { name: 'Arsitektur & Alur', href: '/admin/arsitektur', icon: Compass },
+  { name: 'Peta Situs', href: '/admin/peta-situs', icon: Network },
   { name: 'Pengaturan', href: '/admin/pengaturan', icon: Settings },
 ];
 
