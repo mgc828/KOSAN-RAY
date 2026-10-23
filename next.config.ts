@@ -3,6 +3,10 @@ import path from 'path';
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  // Halaman Media sudah digabung ke Data Kost (form tambah/edit kost)
+  async redirects() {
+    return [{ source: '/admin/media', destination: '/admin/kost', permanent: true }];
+  },
   outputFileTracingRoot: path.resolve(__dirname),
   eslint: {
     ignoreDuringBuilds: true,

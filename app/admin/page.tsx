@@ -11,7 +11,6 @@ import {
   TrendingUp, 
   TrendingDown, 
   Plus, 
-  UploadCloud, 
   ArrowUpRight, 
   Clock, 
   CheckCircle2, 
@@ -307,14 +306,6 @@ export default function AdminDashboardPage() {
           >
             <RefreshCw className="w-4 h-4" />
           </button>
-
-          <Link
-            href="/admin/media"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 shadow-xs transition-all active:scale-[0.98]"
-          >
-            <UploadCloud className="w-4 h-4 text-[#0F2A43]" />
-            <span>Upload Media</span>
-          </Link>
 
           <button
             type="button"

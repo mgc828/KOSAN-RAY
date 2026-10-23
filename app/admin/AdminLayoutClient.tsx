@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Home, 
-  Image as ImageIcon, 
   MapPin, 
   Users, 
   CreditCard, 
@@ -38,7 +37,6 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Data Kost', href: '/admin/kost', icon: Home },
-  { name: 'Media', href: '/admin/media', icon: ImageIcon },
   { name: 'Area & Zona', href: '/admin/area', icon: MapPin },
   { name: 'Pengguna', href: '/admin/pengguna', icon: Users },
   { name: 'Transaksi', href: '/admin/transaksi', icon: CreditCard },
