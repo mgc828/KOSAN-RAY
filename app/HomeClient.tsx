@@ -23,7 +23,6 @@ import {
   Tv,
   Archive,
   Check,
-  Plus,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -143,7 +142,7 @@ function PropertyCard({ kost, onLinkClick }: { kost: Kost; onLinkClick?: (e: Rea
               );
             })}
             {more > 0 && (
-              <span className="papi-facility-more" title={`Lihat ${more} fasilitas lainnya`}><Plus /> +{more}</span>
+              <span className="papi-facility-more" title={`Lihat ${more} fasilitas lainnya`}>+{more}</span>
             )}
           </div>
           <div className="papi-price">
