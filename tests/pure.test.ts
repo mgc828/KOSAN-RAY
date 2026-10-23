@@ -7,6 +7,13 @@ import { mapStatus, verifyMidtransSignature } from '@/lib/midtrans';
 import { createSessionToken, verifySessionToken } from '@/lib/session';
 import crypto from 'crypto';
 import { INITIAL_KOSTS } from '@/lib/mock-data';
+import { 
+  createAccount, 
+  verifyAccountPassword, 
+  updateAccountPassword, 
+  findAccountByEmail 
+} from '@/lib/account-store';
+import { dbPut } from '@/lib/db';
 
 describe('geo', () => {
   it('menghitung jarak haversine dengan benar', () => {
@@ -142,5 +149,77 @@ describe('sesi login', () => {
     const body = Buffer.from(JSON.stringify({ uid: 'u', email: 'e', exp: 1 })).toString('base64url');
     const sig = crypto.createHmac('sha256', process.env.SESSION_SECRET as string).update(body).digest('base64url');
     expect(verifySessionToken(`${body}.${sig}`)).toBeNull();
+  });
+});
+
+// Email unik per eksekusi agar tes bisa diulang tanpa bentrok dengan data lokal sebelumnya
+const uniq = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+describe('keamanan password akun (bcryptjs)', () => {
+  it('membuat akun baru dengan hash bcrypt satu arah ($2a$ atau $2b$)', async () => {
+    const res = await createAccount(`test-bcrypt-${uniq}@example.com`, 'SuperRahasia123', 'Bcrypt User');
+    expect(res.success).toBe(true);
+    expect(res.account).toBeDefined();
+    expect(res.account?.passwordHash).toMatch(/^\$2[ab]\$/);
+    expect(res.account?.passwordHash).not.toBe('SuperRahasia123');
+    expect(res.account?.passwordHash).not.toBe(Buffer.from('SuperRahasia123').toString('base64'));
+  });
+
+  it('memverifikasi password dengan benar dan menolak password yang salah', async () => {
+    const email = `test-verify-${uniq}@example.com`;
+    await createAccount(email, 'SandiAman456');
+
+    const valid = await verifyAccountPassword(email, 'SandiAman456');
+    expect(valid.success).toBe(true);
+    expect(valid.account?.email).toBe(email);
+
+    const invalid = await verifyAccountPassword(email, 'SandiSalah');
+    expect(invalid.success).toBe(false);
+    expect(invalid.error).toContain('salah');
+  });
+
+  it('mendukung backward compatibility akun lama (Base64) dan otomatis upgrade ke bcrypt saat login', async () => {
+    const email = `legacy-base64-${uniq}@example.com`;
+    const legacyPassword = 'OldPassword123';
+    const base64Hash = Buffer.from(legacyPassword).toString('base64');
+
+    // Simpan akun dengan format Base64 lama langsung ke DB
+    await dbPut('accounts', {
+      id: `usr-legacy-${uniq}`,
+      email,
+      passwordHash: base64Hash,
+      fullName: 'Legacy User',
+      created_at: new Date().toISOString(),
+    });
+
+    // Verifikasi password lama menggunakan login normal
+    const loginRes = await verifyAccountPassword(email, legacyPassword);
+    expect(loginRes.success).toBe(true);
+
+    // Akun seharusnya sudah ter-upgrade ke format bcrypt ($2a$ atau $2b$)
+    const updatedAccount = await findAccountByEmail(email);
+    expect(updatedAccount?.passwordHash).toMatch(/^\$2[ab]\$/);
+    expect(updatedAccount?.passwordHash).not.toBe(base64Hash);
+
+    // Login kedua kali tetap berhasil menggunakan hash bcrypt yang baru
+    const loginAgain = await verifyAccountPassword(email, legacyPassword);
+    expect(loginAgain.success).toBe(true);
+  });
+
+  it('updateAccountPassword menghasilkan hash bcrypt yang baru', async () => {
+    const email = `test-update-${uniq}@example.com`;
+    await createAccount(email, 'PasswordLama1');
+
+    const updated = await updateAccountPassword(email, 'PasswordBaru99');
+    expect(updated).toBe(true);
+
+    // Password lama tidak bisa login lagi
+    const oldLogin = await verifyAccountPassword(email, 'PasswordLama1');
+    expect(oldLogin.success).toBe(false);
+
+    // Password baru berhasil dan berupa hash bcrypt
+    const newLogin = await verifyAccountPassword(email, 'PasswordBaru99');
+    expect(newLogin.success).toBe(true);
+    expect(newLogin.account?.passwordHash).toMatch(/^\$2[ab]\$/);
   });
 });
