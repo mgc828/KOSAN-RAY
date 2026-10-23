@@ -72,7 +72,7 @@ export function organizationLd(site: string) {
       '@id': `${site}/#organization`,
       name: SITE_NAME,
       url: site,
-      logo: `${site}/icon.svg`,
+      logo: `${site}/logo-kost-kostan.png`,
       areaServed: { '@type': 'AdministrativeArea', name: 'DKI Jakarta' },
     },
     {

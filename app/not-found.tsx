@@ -1,14 +1,13 @@
 import React from 'react';
 import Link from 'next/link';
-import { Compass, Home, Search } from 'lucide-react';
+import { Home, Search } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function NotFound() {
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-slate-50/50">
       <div className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 text-center border border-slate-200/80 shadow-sm space-y-5">
-        <div className="w-16 h-16 bg-[#FFEDD5] border border-[#F97316]/50 rounded-2xl flex items-center justify-center mx-auto text-[#0F2A43]">
-          <Compass className="w-8 h-8 text-[#C2410C]" />
-        </div>
+        <BrandLogo variant="mark" className="h-20 mx-auto" />
         <div className="space-y-1.5">
           <h2 className="text-2xl font-black text-slate-900">Halaman Tidak Ditemukan</h2>
           <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">

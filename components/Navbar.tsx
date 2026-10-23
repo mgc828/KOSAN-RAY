@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import BrandLogo from '@/components/BrandLogo';
 import { ShieldCheck, User, LogOut, Menu, X, Sparkles, Compass, Heart, Bell } from 'lucide-react';
 import { useWishlist } from '@/lib/wishlist';
 
@@ -363,16 +364,8 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo - Sekitar Style */}
         <Link href="/" onClick={handleNavClick} scroll={true} className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#F97316] flex items-center justify-center text-slate-900 shadow-sm shadow-[#F97316]/30 group-hover:scale-105 transition-transform">
-            <Compass className="w-6 h-6 text-slate-900" />
-          </div>
           <div data-hdr="brand">
-            <div className="flex items-center gap-1.5">
-              <span className={`text-xl sm:text-2xl whitespace-nowrap font-black tracking-tight font-sans transition-colors duration-300 ${dk('brand') ? 'text-white' : 'text-slate-900'}`} style={shadowFor(dk('brand'))}>
-                Kost-Kostan
-              </span>
-            </div>
-            <p className={`text-[11px] hidden min-[400px]:block whitespace-nowrap font-medium tracking-tight transition-colors duration-300 ${dk('brand') ? 'text-white/80' : 'text-slate-800'}`} style={shadowFor(dk('brand'))}>Cari kost terasa lebih mudah</p>
+            <BrandLogo variant="horizontal" light={dk('brand')} className="h-9 sm:h-11 transition-opacity group-hover:opacity-90" />
           </div>
         </Link>
 

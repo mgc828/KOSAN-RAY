@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Compass, Shield, QrCode, CheckCircle2 } from 'lucide-react';
+import { Shield, QrCode, CheckCircle2 } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 import '@/app/papi-home.css';
 import { CookieSettingsLink } from '@/components/CookieConsent';
 
@@ -17,11 +18,8 @@ export default function Footer() {
         <div className="container" style={{ overflow: 'visible' }}>
           {/* Logo Kost-Kostan di atas konten footer dan posisinya di kiri */}
           <div className="footer-top-brand" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '2rem' }}>
-            <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 10, margin: 0 }}>
-              <Compass size={26} color="#0F2A43" />
-              <span style={{ fontSize: 26, fontWeight: 900, color: '#0F2A43', letterSpacing: '-0.02em' }}>
-                Kost-Kostan
-              </span>
+            <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', margin: 0, background: 'transparent', padding: 0 }}>
+              <BrandLogo variant="horizontal" light className="h-12" />
             </div>
           </div>
 

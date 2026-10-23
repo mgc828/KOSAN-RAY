@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Compass, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
+import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 export default function LupaSandiPage() {
   const [email, setEmail] = useState('');
@@ -33,9 +34,7 @@ export default function LupaSandiPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-12 sm:py-16 space-y-6">
       <div className="text-center space-y-1.5">
-        <div className="w-12 h-12 bg-[#F97316] text-[#0F2A43] rounded-2xl flex items-center justify-center mx-auto shadow-sm">
-          <Compass className="w-6 h-6" />
-        </div>
+        <BrandLogo variant="mark" className="h-16 mx-auto mb-2" />
         <h1 className="text-2xl font-black text-[#0F2A43] tracking-tight">Lupa Kata Sandi</h1>
         <p className="text-xs text-slate-500">Masukkan email akun Anda. Kami kirim tautan untuk mengatur ulang kata sandi.</p>
       </div>

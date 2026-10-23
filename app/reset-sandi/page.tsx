@@ -3,7 +3,7 @@
 import React, { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Compass } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 import PasswordInput from '@/components/PasswordInput';
 
 function ResetForm() {
@@ -40,9 +40,7 @@ function ResetForm() {
   return (
     <div className="max-w-md mx-auto px-4 py-12 sm:py-16 space-y-6">
       <div className="text-center space-y-1.5">
-        <div className="w-12 h-12 bg-[#F97316] text-[#0F2A43] rounded-2xl flex items-center justify-center mx-auto shadow-sm">
-          <Compass className="w-6 h-6" />
-        </div>
+        <BrandLogo variant="mark" className="h-16 mx-auto mb-2" />
         <h1 className="text-2xl font-black text-[#0F2A43] tracking-tight">Atur Ulang Kata Sandi</h1>
         <p className="text-xs text-slate-500">Buat kata sandi baru untuk akun Anda.</p>
       </div>

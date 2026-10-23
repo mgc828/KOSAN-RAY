@@ -4,7 +4,8 @@ import React, { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { Compass, Mail, User, ArrowRight, Sparkles } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
+import { Mail, User, ArrowRight, Sparkles } from 'lucide-react';
 import PasswordInput from '@/components/PasswordInput';
 import GoogleButton from '@/components/GoogleButton';
 
@@ -61,9 +62,7 @@ function RegisterForm() {
       </div>
 
       <div className="text-center space-y-1.5">
-        <div className="w-12 h-12 bg-[#F97316] text-[#0F2A43] rounded-2xl flex items-center justify-center mx-auto shadow-sm">
-          <Compass className="w-6 h-6" />
-        </div>
+        <BrandLogo variant="mark" className="h-16 mx-auto mb-2" />
         <h1 className="text-2xl font-black text-[#0F2A43] tracking-tight">Daftar Akun Baru</h1>
         <p className="text-xs text-slate-500">
           Isi formulir di bawah untuk melanjutkan ke pembayaran QRIS Rp15.000.

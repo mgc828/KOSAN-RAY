@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Compass, Eye, EyeOff, Lock, Mail, ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
+import { Eye, EyeOff, Lock, Mail, ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
 import { useAdmin } from '@/lib/admin-client';
 import { toast } from '@/lib/toast';
 
@@ -52,18 +53,11 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center items-center p-4 sm:p-6">
       {/* Brand & Logo Header */}
       <div className="w-full max-w-md text-center mb-8">
-        <Link href="/" className="inline-flex items-center gap-3 group">
-          <div className="w-12 h-12 rounded-2xl bg-[#0F2A43] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-            <Compass className="w-7 h-7 text-[#F97316]" />
-          </div>
-          <div className="text-left">
-            <span className="font-black text-2xl tracking-tight text-[#0F2A43] block">
-              Kost-Kostan
-            </span>
-            <span className="text-xs font-bold text-[#F97316] uppercase tracking-wider">
-              Admin & Curator Portal
-            </span>
-          </div>
+        <Link href="/" className="inline-flex flex-col items-center gap-1.5 group">
+          <BrandLogo variant="horizontal" className="h-12 group-hover:scale-105 transition-transform" />
+          <span className="text-xs font-bold text-[#F97316] uppercase tracking-wider">
+            Admin & Curator Portal
+          </span>
         </Link>
         <p className="text-xs text-slate-500 mt-2 font-medium">
           Masuk untuk mengelola data kost, transaksi, media, dan pengguna DKI Jakarta.

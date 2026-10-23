@@ -1,5 +1,7 @@
 'use client';
 
+import BrandLogo from '@/components/BrandLogo';
+
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -169,21 +171,16 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           }`}>
             {!collapsed && (
               <Link href="/admin" className="flex items-center gap-2.5 overflow-hidden">
-                <div className="w-9 h-9 min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-xl bg-[#F97316] flex items-center justify-center shrink-0 shadow-md">
-                  <Compass className="w-5 h-5 text-slate-900" />
-                </div>
                 <div className="truncate">
-                  <span className="font-black text-2xl tracking-tight block leading-tight text-white">Kost-Kostan</span>
-                  <span className="text-[10px] text-[#F97316] font-extrabold uppercase tracking-widest">Admin Portal</span>
+                  <BrandLogo variant="horizontal" light className="h-9" />
+                  <span className="text-[10px] text-[#F97316] font-extrabold uppercase tracking-widest block mt-0.5">Admin Portal</span>
                 </div>
               </Link>
             )}
 
             {collapsed && (
               <Link href="/admin" title="Kost-Kostan Admin" className="flex justify-center items-center">
-                <div className="w-9 h-9 min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-xl bg-[#F97316] flex items-center justify-center shrink-0 shadow-md">
-                  <Compass className="w-5 h-5 text-slate-900" />
-                </div>
+                <BrandLogo variant="mark" light className="h-9" />
               </Link>
             )}
 
@@ -449,10 +446,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             <div>
               <div className="flex items-center justify-between pb-4 border-b border-white/10">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#F97316] flex items-center justify-center">
-                    <Compass className="w-5 h-5 text-slate-900" />
-                  </div>
-                  <span className="font-black text-white">Kost-Kostan</span>
+                  <BrandLogo variant="horizontal" light className="h-8" />
                 </div>
                 <button
                   type="button"

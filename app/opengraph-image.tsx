@@ -1,10 +1,14 @@
 import { ImageResponse } from 'next/og';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
 export const alt = 'kost-kostan - Cari kost? Lihat dulu semuanya.';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const logo = await readFile(join(process.cwd(), 'public', 'logo-horizontal-light.png'));
+  const logoSrc = `data:image/png;base64,${logo.toString('base64')}`;
   return new ImageResponse(
     (
       <div
@@ -20,24 +24,9 @@ export default function OpengraphImage() {
           fontFamily: 'sans-serif',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <div
-            style={{
-              width: 96,
-              height: 96,
-              borderRadius: 24,
-              background: '#F97316',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 56,
-              color: '#0F2A43',
-              fontWeight: 800,
-            }}
-          >
-            K
-          </div>
-          <div style={{ fontSize: 64, fontWeight: 800 }}>kost-kostan</div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoSrc} width={600} height={116} alt="kost-kostan" />
         </div>
         <div style={{ marginTop: 56, fontSize: 76, fontWeight: 800, lineHeight: 1.1 }}>
           Cari kost? Lihat dulu semuanya.
