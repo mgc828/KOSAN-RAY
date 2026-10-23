@@ -541,7 +541,7 @@
 .papi-home .papi-location{font-size:0.875rem;margin-bottom:0.5rem;color:#64748B;font-weight:400;display:-webkit-box;-webkit-line-clamp:1;line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .papi-home .papi-location .location-pin{color:#FF385C;margin-right:4px;flex-shrink:0}
 .papi-home .papi-facilities{display:flex;gap:0.375rem;margin:0.75rem 0 1rem;align-items:center;flex-wrap:nowrap;overflow:hidden;width:100%;max-width:100%}
-.papi-home .papi-facility-icon{display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(0,0,0,0.05);border-radius:6px;border:1px solid rgba(0,0,0,0.08);transition:all 0.2s ease;flex-shrink:0}
+.papi-home .papi-facility-icon{display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(0,0,0,0.05);border-radius:6px;border:1px solid rgba(0,0,0,0.08);transition:all 0.2s ease;flex-shrink:1;min-width:18px}
 .papi-home .papi-facility-icon:hover{background:rgba(0,0,0,0.08);transform:translateY(-1px)}
 .papi-home .papi-facility-icon svg{width:16px;height:16px;color:#666}
 .papi-home .papi-facility-more{display:flex;align-items:center;justify-content:center;gap:0.2rem;min-width:42px;height:28px;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.08);border-radius:6px;padding:0 6px;font-size:0.7rem;font-weight:500;color:#666;white-space:nowrap;flex-shrink:0;cursor:pointer;transition:all 0.2s ease}
