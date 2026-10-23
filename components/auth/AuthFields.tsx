@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useId, useState } from 'react';
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Info, Loader2 } from 'lucide-react';
+import { AlertCircle, Check, CheckCircle2, Circle, Eye, EyeOff, Info, Loader2 } from 'lucide-react';
 
 const INPUT =
   'w-full h-12 rounded-xl border bg-white px-3.5 text-base text-slate-900 placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316]';
@@ -146,5 +146,26 @@ export function OrDivider() {
     <div className="flex items-center gap-3 text-xs text-slate-400" role="separator">
       <span className="h-px flex-1 bg-slate-200" />atau<span className="h-px flex-1 bg-slate-200" />
     </div>
+  );
+}
+
+/** Syarat kata sandi yang berubah langsung saat mengetik (✓ terpenuhi, ○ belum). */
+export function PasswordChecklist({ password, confirm }: { password: string; confirm: string }) {
+  const rules: { ok: boolean; text: string; strong?: boolean }[] = [
+    { ok: password.length >= 6, text: 'Minimal 6 karakter' },
+    { ok: /[A-Za-z]/.test(password), text: 'Mengandung huruf' },
+    { ok: /\d/.test(password), text: 'Mengandung angka' },
+    { ok: password.length > 0 && !/\s/.test(password), text: 'Tanpa spasi' },
+    { ok: password.length > 0 && confirm === password, text: 'Konfirmasi sama dengan kata sandi' },
+  ];
+  return (
+    <ul className="grid gap-1.5 text-sm" aria-label="Syarat kata sandi">
+      {rules.map((r) => (
+        <li key={r.text} className={`flex items-center gap-2 ${r.ok ? 'text-green-700' : 'text-slate-500'}`}>
+          {r.ok ? <Check className="w-4 h-4 shrink-0" aria-label="Terpenuhi" /> : <Circle className="w-4 h-4 shrink-0 text-slate-300" aria-label="Belum" />}
+          {r.text}
+        </li>
+      ))}
+    </ul>
   );
 }

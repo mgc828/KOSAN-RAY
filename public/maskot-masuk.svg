@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 412 350" role="img" aria-labelledby="t">
+  <title id="t">Maskot kost-kostan melambai dan menyambut: Selamat datang</title>
+  <!-- gelembung sapaan -->
+  <g>
+    <rect x="8" y="6" width="186" height="52" rx="26" fill="#FFFFFF"/>
+    <path d="M118 56 L140 56 L132 76 Z" fill="#FFFFFF"/>
+    <text x="101" y="39" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="800" fill="#0F2A43">Selamat datang!</text>
+  </g>
+  <g transform="translate(36 30)">
+    <ellipse cx="160" cy="296" rx="96" ry="12" fill="#0F2A43" opacity="0.18"/>
+    <!-- badan rumah -->
+    <rect x="58" y="128" width="204" height="160" rx="26" fill="#FFFFFF"/>
+    <!-- atap -->
+    <path d="M34 142 L160 40 L286 142 Q290 150 280 152 L40 152 Q30 150 34 142 Z" fill="#0F2A43"/>
+    <path d="M160 40 L286 142 Q290 150 280 152 L160 152 Z" fill="#16385A"/>
+    <rect x="224" y="52" width="28" height="52" rx="6" fill="#0F2A43"/>
+    <circle cx="160" cy="104" r="17" fill="#FDBA74"/>
+    <circle cx="160" cy="104" r="17" fill="none" stroke="#FFFFFF" stroke-width="5"/>
+    <!-- mata -->
+    <ellipse cx="124" cy="196" rx="13" ry="16" fill="#0F2A43"/>
+    <ellipse cx="196" cy="196" rx="13" ry="16" fill="#0F2A43"/>
+    <circle cx="128" cy="190" r="5" fill="#FFFFFF"/>
+    <circle cx="200" cy="190" r="5" fill="#FFFFFF"/>
+    <!-- pipi -->
+    <circle cx="98" cy="226" r="12" fill="#FDBA74" opacity="0.85"/>
+    <circle cx="222" cy="226" r="12" fill="#FDBA74" opacity="0.85"/>
+    <!-- senyum lebar -->
+    <path d="M130 222 Q160 258 190 222 Z" fill="#0F2A43"/>
+    <path d="M144 238 Q160 250 176 238" fill="none" stroke="#F97316" stroke-width="6" stroke-linecap="round"/>
+    <!-- lengan kanan melambai -->
+    <path d="M262 226 Q304 216 308 160" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="308" cy="148" r="15" fill="#FFFFFF"/>
+    <path d="M330 130 Q344 148 330 168" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+    <path d="M344 118 Q366 148 344 180" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+    <!-- lengan kiri mempersilakan -->
+    <path d="M58 232 Q24 244 8 222" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="6" cy="218" r="12" fill="#FFFFFF"/>
+    <!-- kaki -->
+    <rect x="106" y="278" width="40" height="18" rx="9" fill="#0F2A43"/>
+    <rect x="174" y="278" width="40" height="18" rx="9" fill="#0F2A43"/>
+  </g>
+</svg>

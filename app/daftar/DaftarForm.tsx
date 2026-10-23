@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import GoogleButton from '@/components/GoogleButton';
-import { Notice, OrDivider, PasswordField, SubmitButton, TextField } from '@/components/auth/AuthFields';
+import { Notice, OrDivider, PasswordChecklist, PasswordField, SubmitButton, TextField } from '@/components/auth/AuthFields';
 
 export default function DaftarForm() {
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function DaftarForm() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1.5">
+      <div className="hidden lg:block space-y-1.5">
         <h1 className="text-3xl font-bold tracking-tight text-[#0F2A43]">Buat akun</h1>
         <p className="text-slate-600">
           {toCheckout ? 'Satu langkah lagi sebelum pembayaran. Akun menyimpan masa aktifmu di semua perangkat.' : 'Gratis. Kamu baru membayar kalau ingin membuka nomor pemilik.'}
@@ -51,7 +51,8 @@ export default function DaftarForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <TextField id="daftar-nama" label="Nama lengkap" autoComplete="name" value={fullName} onChange={setFullName} placeholder="Nama kamu" />
         <TextField id="daftar-email" label="Email" type="email" inputMode="email" autoComplete="email" value={email} onChange={setEmail} placeholder="nama@email.com" hint="Dipakai untuk masuk dan menerima invoice." />
-        <PasswordField id="daftar-sandi" label="Kata sandi" autoComplete="new-password" value={password} onChange={setPassword} placeholder="Minimal 6 karakter" showStrength hint="Lebih aman dengan 10+ karakter, huruf besar, dan angka." />
+        <PasswordField id="daftar-sandi" label="Kata sandi" autoComplete="new-password" value={password} onChange={setPassword} placeholder="Minimal 6 karakter" showStrength />
+        <PasswordChecklist password={password} confirm={confirm} />
         <PasswordField id="daftar-ulang" label="Ulangi kata sandi" autoComplete="new-password" value={confirm} onChange={setConfirm} placeholder="Ketik ulang kata sandi" error={mismatch ? 'Belum sama dengan kata sandi di atas.' : undefined} />
         {error && <Notice tone="error">{error}</Notice>}
         <SubmitButton loading={loading} loadingText="Membuat akun…">{toCheckout ? 'Buat akun & lanjut bayar' : 'Buat akun'}</SubmitButton>
@@ -68,7 +69,7 @@ export default function DaftarForm() {
         </>
       )}
 
-      <p className="text-center text-sm text-slate-600">
+      <p className="hidden lg:block text-center text-sm text-slate-600">
         Sudah punya akun?{' '}
         <Link href={next ? `/masuk?next=${encodeURIComponent(next)}` : '/masuk'} className="font-semibold text-[#0F2A43] hover:underline">
           Masuk

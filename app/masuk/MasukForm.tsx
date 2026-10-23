@@ -42,7 +42,7 @@ export default function MasukForm() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1.5">
+      <div className="hidden lg:block space-y-1.5">
         <h1 className="text-3xl font-bold tracking-tight text-[#0F2A43]">{fromCheckout ? 'Masuk untuk lanjut bayar' : 'Masuk'}</h1>
         <p className="text-slate-600">
           {fromCheckout
@@ -51,10 +51,15 @@ export default function MasukForm() {
         </p>
       </div>
 
+      {fromCheckout && (
+        <div className="lg:hidden">
+          <Notice tone="info">Setelah masuk, kamu langsung ke pembayaran QRIS Rp {SUBSCRIPTION_PRICE.toLocaleString('id-ID')}.</Notice>
+        </div>
+      )}
       {idleOut && <Notice tone="info">Kamu keluar otomatis karena tidak ada aktivitas selama 15 menit. Silakan masuk lagi.</Notice>}
       {resetDone && <Notice tone="success">Kata sandi berhasil diubah. Masuk dengan kata sandi barumu.</Notice>}
 
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate={false}>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <TextField id="masuk-email" label="Email" type="email" inputMode="email" autoComplete="email" value={email} onChange={setEmail} placeholder="nama@email.com" />
         <PasswordField
           id="masuk-sandi"
@@ -76,7 +81,7 @@ export default function MasukForm() {
         </>
       )}
 
-      <p className="text-center text-sm text-slate-600">
+      <p className="hidden lg:block text-center text-sm text-slate-600">
         Belum punya akun?{' '}
         <Link href={next ? `/daftar?next=${encodeURIComponent(next)}` : '/daftar'} className="font-semibold text-[#0F2A43] hover:underline">
           Daftar gratis
