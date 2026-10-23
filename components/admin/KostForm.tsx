@@ -24,6 +24,9 @@ import { AreaItem } from '@/lib/admin-types';
 import SingleSelectDropdown from '@/components/SingleSelectDropdown';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import MediaManager from '@/components/admin/MediaManager';
+import type { DetectedLocation } from '@/components/LocationPickerMap';
+import { composeAddress, pickAreaForRegion } from '@/lib/location-mapping';
+import { JAKARTA_CITIES, JAKARTA_REGIONS, areaToKecamatan, canonicalCity, cityOfKecamatan } from '@/lib/jakarta-regions';
 import { deleteStoredMedia } from '@/lib/media-client';
 
 const LocationPickerMap = dynamic(() => import('@/components/LocationPickerMap'), {
@@ -68,6 +71,13 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
   const [alamat, setAlamat] = useState(initialKost?.alamat || '');
   const [area, setArea] = useState(initialKost?.area || '');
   const [kota, setKota] = useState(initialKost?.kota || '');
+  const [kecamatan, setKecamatan] = useState(initialKost?.kecamatan || '');
+  const [kelurahan, setKelurahan] = useState(initialKost?.kelurahan || '');
+  const [kodepos, setKodepos] = useState(initialKost?.kodepos || '');
+  const [provinsi, setProvinsi] = useState(initialKost?.provinsi || '');
+  const [alamatJalan, setAlamatJalan] = useState(initialKost?.alamat_jalan || '');
+  // Area dari peta yang belum ada di daftar Area admin (memakai nama kecamatan/kelurahan)
+  const [extraAreas, setExtraAreas] = useState<{ nama: string; kota: string }[]>([]);
   const [tipe, setTipe] = useState<KostType | ''>(initialKost?.tipe || '');
   const [harga, setHarga] = useState<number>(initialKost?.harga || 0);
   const [priceDisplay, setPriceDisplay] = useState<string>(
@@ -104,6 +114,50 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
       })
       .catch(() => {});
   }, []);
+
+  const areaOptions = (() => {
+    const list = areas.map((a) => ({ nama: a.nama, kota: a.kota }));
+    for (const e of extraAreas) if (!list.some((a) => a.nama === e.nama)) list.push(e);
+    if (area && !list.some((a) => a.nama === area)) list.push({ nama: area, kota: kota });
+    return list;
+  })();
+
+  const kecamatanOptions = (() => {
+    const city = canonicalCity(kota);
+    const names = city ? JAKARTA_REGIONS[city] : JAKARTA_CITIES.flatMap((c) => JAKARTA_REGIONS[c]);
+    return names.map((n) => ({ value: n, label: n }));
+  })();
+
+  // "Salin ke Detail Jalan": isi Area, Kota, Kecamatan, Kelurahan, Kode Pos, dan alamat dari pin peta
+  const applyDetectedLocation = (d: DetectedLocation) => {
+    const region = d.region;
+    const pick = pickAreaForRegion(areas.map((a) => ({ nama: a.nama, kota: a.kota })), region);
+
+    if (pick) {
+      setArea(pick.nama);
+      if (!pick.existing) {
+        setExtraAreas((prev) => (prev.some((a) => a.nama === pick.nama) ? prev : [...prev, { nama: pick.nama, kota: pick.kota || '' }]));
+      }
+    }
+    const city = region.kota || pick?.kota || '';
+    setKota(city);
+    setKecamatan(region.kecamatan || '');
+    setKelurahan(region.kelurahan || '');
+    setKodepos(region.kodepos || '');
+    setProvinsi(region.provinsi || '');
+    setAlamatJalan(d.road);
+    setAlamat(composeAddress(d.road, region));
+    setLat(d.lat);
+    setLng(d.lng);
+
+    if (!canonicalCity(city)) {
+      addToast('Lokasi pin berada di luar DKI Jakarta: filter lokasi di Cari Kost & Maps belum mendukung wilayah ini.', 'warning');
+    } else if (!pick) {
+      addToast('Alamat disalin, tetapi area tidak dikenali. Pilih Area / Kawasan secara manual.', 'warning');
+    } else {
+      addToast(`Lokasi disalin: ${pick.nama}, ${city}`, 'success');
+    }
+  };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, '');
@@ -216,11 +270,16 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
 
     try {
       const selectedArea = areas.find((a) => a.nama === area);
-      const computedKota = selectedArea?.kota || kota || 'Jakarta';
+      const computedKota = canonicalCity(kota) || selectedArea?.kota || kota || 'Jakarta';
 
       const payload: Partial<Kost> = {
         nama: nama.trim(),
         alamat: alamat.trim(),
+        alamat_jalan: alamatJalan.trim() || undefined,
+        kecamatan: kecamatan || undefined,
+        kelurahan: kelurahan.trim() || undefined,
+        kodepos: kodepos || undefined,
+        provinsi: provinsi || undefined,
         area: area,
         kota: computedKota,
         tipe: tipe || 'campur',
@@ -443,13 +502,18 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                   onChange={(sel) => {
                     setArea(sel);
                     const matched = areas.find((a) => a.nama === sel);
+                    const extra = extraAreas.find((a) => a.nama === sel);
                     if (matched) {
                       setKota(matched.kota);
                       setLat(matched.lat);
                       setLng(matched.lng);
+                    } else if (extra?.kota) {
+                      setKota(extra.kota);
                     }
+                    // Kecamatan mengikuti area yang dipilih (bila dikenali) agar filter pencarian akurat
+                    setKecamatan(areaToKecamatan(sel) || '');
                   }}
-                  options={areas.map((a) => ({
+                  options={areaOptions.map((a) => ({
                     value: a.nama,
                     label: `${a.nama} (${a.kota})`,
                   }))}
@@ -469,6 +533,49 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                   readOnly
                   placeholder="Otomatis sesuai area"
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Kecamatan, Kelurahan, Kode Pos (terisi otomatis dari pin peta) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block mb-1.5">Kecamatan</label>
+                <SingleSelectDropdown
+                  value={kecamatan}
+                  onChange={(sel) => {
+                    setKecamatan(sel);
+                    if (!canonicalCity(kota)) {
+                      const c = cityOfKecamatan(sel);
+                      if (c) setKota(c);
+                    }
+                  }}
+                  options={kecamatanOptions}
+                  placeholder="Pilih Kecamatan"
+                  highlightSelected={false}
+                  buttonClassName="!py-2.5 !px-4"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block mb-1.5">Kelurahan</label>
+                <input
+                  type="text"
+                  value={kelurahan}
+                  onChange={(e) => setKelurahan(e.target.value)}
+                  placeholder="Contoh: Karet Kuningan"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 font-medium transition-all"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block mb-1.5">Kode Pos</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={5}
+                  value={kodepos}
+                  onChange={(e) => setKodepos(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Contoh: 12940"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 font-medium transition-all"
                 />
               </div>
             </div>
@@ -516,13 +623,11 @@ export default function KostForm({ initialKost, isEdit = false }: KostFormProps)
                     <LocationPickerMap
                       initialLat={lat}
                       initialLng={lng}
-                      onLocationChange={(newLat, newLng, newAddr) => {
+                      onLocationChange={(newLat, newLng) => {
                         setLat(newLat);
                         setLng(newLng);
-                        if (newAddr && !alamat) {
-                          setAlamat(newAddr);
-                        }
                       }}
+                      onApplyAddress={applyDetectedLocation}
                       searchAddress={alamat}
                     />
                   </div>

@@ -5,11 +5,24 @@ import { MapPin, Search, Compass, Layers, Check, Loader2, Navigation } from 'luc
 import 'leaflet/dist/leaflet.css';
 
 import { matchRegionFromGeocode, MatchedRegionResult } from '@/lib/indonesia-regions';
+import { normalizeRegion } from '@/lib/location-mapping';
+
+/** Hasil deteksi alamat dari pin peta, siap disalin ke form. */
+export interface DetectedLocation {
+  lat: number;
+  lng: number;
+  /** Nama jalan (+ nomor), mis. "Jalan Masjid Al Bayinah No. 5". */
+  road: string;
+  /** Wilayah administratif yang sudah dibakukan (kota, kecamatan, kelurahan, kode pos). */
+  region: MatchedRegionResult;
+}
 
 interface LocationPickerMapProps {
   initialLat: number;
   initialLng: number;
   onLocationChange: (lat: number, lng: number, addressSuggestion?: string, regionDetails?: MatchedRegionResult) => void;
+  /** Dipanggil saat tombol "Salin ke Detail Jalan" ditekan. Bila tidak diberikan, tombol memakai onLocationChange. */
+  onApplyAddress?: (detected: DetectedLocation) => void;
   searchAddress?: string;
 }
 
@@ -17,6 +30,7 @@ export default function LocationPickerMap({
   initialLat,
   initialLng,
   onLocationChange,
+  onApplyAddress,
   searchAddress,
 }: LocationPickerMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -31,6 +45,7 @@ export default function LocationPickerMap({
     lng: initialLng || 106.8280,
   });
   const [detectedAddress, setDetectedAddress] = useState<string>('');
+  const [detected, setDetected] = useState<DetectedLocation | null>(null);
   const [isGeocoding, setIsGeocoding] = useState<boolean>(false);
 
   // Google Maps Tile URLs
@@ -59,23 +74,32 @@ export default function LocationPickerMap({
           roadSuggestion += `, ${hamlet}`;
         }
 
-        const matchedRegion = matchRegionFromGeocode(data.address);
+        const matchedRegion = normalizeRegion(matchRegionFromGeocode(data.address), lat, lng);
 
         if (roadSuggestion) {
           setDetectedAddress(roadSuggestion);
+          // Nama jalan murni (tanpa kelurahan/dusun) untuk dicatat sebagai "detail jalan"
+          setDetected({ lat, lng, road: `${road}${houseNumber}`.trim(), region: matchedRegion });
           onLocationChange(lat, lng, roadSuggestion, matchedRegion);
         } else if (data.display_name) {
           const firstPart = data.display_name.split(',')[0];
           setDetectedAddress(firstPart);
+          setDetected({ lat, lng, road: firstPart, region: matchedRegion });
           onLocationChange(lat, lng, firstPart, matchedRegion);
         } else {
+          setDetectedAddress('');
+          setDetected({ lat, lng, road: '', region: matchedRegion });
           onLocationChange(lat, lng, undefined, matchedRegion);
         }
       } else {
+        setDetectedAddress('');
+        setDetected(null);
         onLocationChange(lat, lng);
       }
     } catch (e) {
       console.error('Reverse geocode error:', e);
+      setDetectedAddress('');
+      setDetected(null);
       onLocationChange(lat, lng);
     } finally {
       setIsGeocoding(false);
@@ -320,10 +344,13 @@ export default function LocationPickerMap({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {detectedAddress && (
+            {(detectedAddress || detected?.region.kecamatan) && (
               <button
                 type="button"
-                onClick={() => onLocationChange(currentCoords.lat, currentCoords.lng, detectedAddress)}
+                onClick={() => {
+                  if (onApplyAddress && detected) onApplyAddress(detected);
+                  else onLocationChange(currentCoords.lat, currentCoords.lng, detectedAddress);
+                }}
                 className="bg-[#0F2A43] hover:bg-[#152a65] text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 shadow-xs"
               >
                 <Check className="w-3 h-3" />

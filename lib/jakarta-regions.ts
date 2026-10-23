@@ -59,12 +59,53 @@ const AREA_ALIAS: Record<string, string> = {
 interface KostLoc {
   alamat?: string;
   area?: string;
+  /** Data lokasi terstruktur (diisi dari pin peta di form kost); diprioritaskan di atas tebakan dari teks. */
+  kota?: string;
+  kecamatan?: string;
 }
 
 const lower = (s: string) => s.toLowerCase();
+const norm = (s: string) => lower(s).replace(/[^a-z0-9]/g, '');
+
+/** Nama kota administrasi baku ("Jakarta Selatan") dari teks bebas, atau undefined. */
+export function canonicalCity(name?: string): string | undefined {
+  if (!name) return undefined;
+  const n = norm(name);
+  return JAKARTA_CITIES.find((c) => norm(c) === n);
+}
+
+/** Nama kecamatan baku dari teks bebas (mis. "Kecamatan Setiabudi", "Tamansari"), atau undefined. */
+export function canonicalKecamatan(name?: string): string | undefined {
+  if (!name) return undefined;
+  const n = norm(name.replace(/^\s*(kecamatan|kec\.?)\s+/i, ''));
+  return JAKARTA_CITIES.flatMap((c) => JAKARTA_REGIONS[c]).find((k) => norm(k) === n);
+}
+
+/** Kota administrasi tempat sebuah kecamatan berada. */
+export function cityOfKecamatan(kecamatan?: string): string | undefined {
+  const kec = canonicalKecamatan(kecamatan);
+  return kec ? JAKARTA_CITIES.find((c) => JAKARTA_REGIONS[c].includes(kec)) : undefined;
+}
+
+/** Kecamatan dari nama area populer ("Kuningan" -> "Setiabudi", "Pluit & PIK" -> "Penjaringan"). */
+export function areaToKecamatan(areaName?: string): string | undefined {
+  if (!areaName) return undefined;
+  const direct = canonicalKecamatan(areaName);
+  if (direct) return direct;
+  const whole = AREA_ALIAS[lower(areaName).trim()];
+  if (whole) return whole;
+  for (const token of lower(areaName).split(/[&/,]/).map((t) => t.trim()).filter(Boolean)) {
+    if (AREA_ALIAS[token]) return AREA_ALIAS[token];
+  }
+  return undefined;
+}
 
 /** Kota administrasi (mis. "Jakarta Selatan") dari sebuah kost, atau undefined bila tidak dikenali. */
 export function getKostCity(k: KostLoc): string | undefined {
+  // 0. Data terstruktur dari form kost (pin peta) lebih akurat daripada tebakan teks
+  const explicit = canonicalCity(k.kota) ?? cityOfKecamatan(k.kecamatan);
+  if (explicit) return explicit;
+
   const alamat = lower(k.alamat ?? '');
   const area = lower(k.area ?? '');
 
@@ -138,6 +179,9 @@ export function formatKostLocation(k: { area?: string; kota?: string; alamat?: s
 
 /** Kecamatan dari sebuah kost (dicocokkan dari alamat, lalu nama area), atau undefined. */
 export function getKostKecamatan(k: KostLoc): string | undefined {
+  const explicit = canonicalKecamatan(k.kecamatan);
+  if (explicit) return explicit;
+
   const alamat = lower(k.alamat ?? '');
   const area = lower(k.area ?? '');
   const all = JAKARTA_CITIES.flatMap((c) => JAKARTA_REGIONS[c]);

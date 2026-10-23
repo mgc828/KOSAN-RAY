@@ -24,6 +24,11 @@ export function sanitizeKostForPublic(kost: Kost): Kost {
     alamat: kost.alamat,
     area: kost.area,
     kota: kost.kota,
+    // Lokasi administratif (publik; dipakai filter Cari Kost & Maps)
+    kecamatan: kost.kecamatan,
+    kelurahan: kost.kelurahan,
+    kodepos: kost.kodepos,
+    provinsi: kost.provinsi,
     // Lokasi (peta) bersifat publik: alamat kost sudah tampil di halaman
     latitude: kost.latitude,
     longitude: kost.longitude,
