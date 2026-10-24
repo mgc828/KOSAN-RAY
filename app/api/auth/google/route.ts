@@ -12,7 +12,7 @@ interface TokenInfo {
 }
 
 export async function POST(req: NextRequest) {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim();
   if (!clientId) {
     return NextResponse.json({ error: 'Login Google belum dikonfigurasi di server.' }, { status: 501 });
   }

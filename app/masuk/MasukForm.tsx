@@ -77,7 +77,7 @@ export default function MasukForm() {
       {googleOn && (
         <>
           <OrDivider />
-          <GoogleButton onSuccess={() => router.push(destination)} onError={setError} />
+          <GoogleButton text="signin_with" onSuccess={() => router.push(destination)} onError={setError} />
         </>
       )}
 

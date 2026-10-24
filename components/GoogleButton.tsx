@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth-context';
 interface GoogleButtonProps {
   onSuccess: () => void;
   onError: (message: string) => void;
+  text?: 'continue_with' | 'signin_with' | 'signup_with';
 }
 
 interface GoogleId {
@@ -18,13 +19,13 @@ declare global {
   }
 }
 
-const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim();
 
 /**
  * Tombol "Lanjutkan dengan Google" (Google Identity Services).
- * Hanya tampil kalau NEXT_PUBLIC_GOOGLE_CLIENT_ID sudah diisi di .env.local.
+ * Tampil jika NEXT_PUBLIC_GOOGLE_CLIENT_ID sudah dikonfigurasi.
  */
-export default function GoogleButton({ onSuccess, onError }: GoogleButtonProps) {
+export default function GoogleButton({ onSuccess, onError, text = 'continue_with' }: GoogleButtonProps) {
   const { loginWithGoogle } = useAuth();
   const holder = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
@@ -41,12 +42,16 @@ export default function GoogleButton({ onSuccess, onError }: GoogleButtonProps) 
           else onError(res.error || 'Login Google gagal');
         },
       });
+
+      const clientWidth = holder.current.clientWidth || 320;
+      const validWidth = Math.min(Math.max(Math.floor(clientWidth), 200), 400);
+
       window.google.accounts.id.renderButton(holder.current, {
         theme: 'outline',
         size: 'large',
-        text: 'continue_with',
+        text,
         shape: 'pill',
-        width: holder.current.clientWidth || 320,
+        width: validWidth,
       });
       setReady(true);
     };
@@ -68,18 +73,13 @@ export default function GoogleButton({ onSuccess, onError }: GoogleButtonProps) 
     script.onerror = () => onError('Gagal memuat Google. Periksa koneksi internet Anda.');
     document.head.appendChild(script);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [text]);
 
   if (!CLIENT_ID) return null;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3 text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
-        <span className="h-px flex-1 bg-slate-200" />
-        <span>atau</span>
-        <span className="h-px flex-1 bg-slate-200" />
-      </div>
-      <div ref={holder} className="flex justify-center min-h-[44px]" aria-busy={!ready} />
+    <div className="w-full flex justify-center min-h-[44px]" aria-busy={!ready}>
+      <div ref={holder} className="w-full flex justify-center" />
     </div>
   );
 }

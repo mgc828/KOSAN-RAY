@@ -65,7 +65,7 @@ export default function DaftarForm() {
       {googleOn && (
         <>
           <OrDivider />
-          <GoogleButton onSuccess={() => router.push(destination)} onError={setError} />
+          <GoogleButton text="signup_with" onSuccess={() => router.push(destination)} onError={setError} />
         </>
       )}
 

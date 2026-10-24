@@ -17,3 +17,6 @@ tsconfig.tsbuildinfo
 !.agents/skills/archify/
 skills-lock.json
 .archify/
+
+.vercel
+.env*
